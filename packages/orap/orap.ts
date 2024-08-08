@@ -1,9 +1,9 @@
-import type { ethers } from 'ethers'
 import { EventSignal } from './signal/event'
+import type { Providers } from './types'
 
 export interface ListenOptions {
-  wsProvider: ethers.WebSocketProvider
-  httpProvider?: ethers.JsonRpcProvider
+  wsProvider: Providers
+  httpProvider?: Providers
 }
 
 export class Orap {
@@ -23,7 +23,7 @@ export class Orap {
     return es
   }
 
-  _listenChain(wsProvider: ethers.WebSocketProvider, httpProvider?: ethers.JsonRpcProvider) {
+  _listenChain(wsProvider: Providers, httpProvider?: Providers) {
     this.routes.event.forEach(es => es.listen(wsProvider, httpProvider))
   }
 

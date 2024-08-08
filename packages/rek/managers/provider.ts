@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events'
-import type { Interface, InterfaceAbi } from 'ethers'
-import { WebSocketProvider, ethers } from 'ethers'
+import type { InterfaceAbi } from 'ethers'
+import { Interface, WebSocketProvider, ethers } from 'ethers'
 import type { ErrorEvent, WebSocket } from 'ws'
 import { ContractManager } from './contract'
 
@@ -48,13 +48,11 @@ export class ProviderManager {
     return this._contracts
   }
 
-  async addContract(address: ethers.Contract): Promise<ContractManager | undefined>
-
-  async addContract(address: string, abi: Interface | InterfaceAbi): Promise<ContractManager | undefined>
-
-  async addContract(address: string | ethers.Contract, abi?: Interface | InterfaceAbi): Promise<ContractManager | undefined> {
+  addContract(address: string, contract: ethers.Contract): ContractManager | undefined
+  addContract(address: string, abi: Interface | InterfaceAbi): ContractManager | undefined
+  addContract(address: string, abi: Interface | InterfaceAbi | ethers.Contract): ContractManager | undefined {
     if (this._provider) {
-      if (typeof address === 'string') {
+      if (abi instanceof Interface || Array.isArray(abi)) {
         if (!abi)
           throw new Error('ABI must be provided when address is a string')
 
@@ -62,10 +60,9 @@ export class ProviderManager {
         this._contracts.set(address, contract)
         return contract
       }
-      else if (address instanceof ethers.Contract) {
-        const contractAddress = await address.getAddress()
-        const contract = new ContractManager(contractAddress, address.interface, this._provider)
-        this._contracts.set(contractAddress, contract)
+      else if (abi instanceof ethers.Contract) {
+        const contract = new ContractManager(address, abi.interface, this._provider)
+        this._contracts.set(address, contract)
         return contract
       }
       else {

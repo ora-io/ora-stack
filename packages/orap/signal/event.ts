@@ -1,7 +1,8 @@
 import type { EventFragment, Log } from 'ethers'
 import { ethers } from 'ethers'
-import { AutoCrossChecker, ONE_MINUTE_MS } from '@ora-io/rek'
+import { AutoCrossChecker, ONE_MINUTE_MS, ProviderManager } from '@ora-io/rek'
 import type { AutoCrossCheckParam } from '@ora-io/rek'
+import type { Providers } from '../types'
 import type { Signal } from './type'
 
 export interface EventSignalRegisterParams {
@@ -14,7 +15,7 @@ export interface EventSignalRegisterParams {
 export type EventSignalCallback = ethers.Listener
 
 export class EventSignal implements Signal {
-  provider?: ethers.JsonRpcProvider | ethers.WebSocketProvider
+  provider?: Providers
   contract: ethers.Contract
   esig: string
   eventFragment: EventFragment
@@ -57,28 +58,36 @@ export class EventSignal implements Signal {
 
   // TODO: how to integrate crosschecker
   // TODO: should be wsProvider only?
-  listen(provider: ethers.WebSocketProvider, crosscheckProvider?: ethers.JsonRpcProvider) {
+  listen(provider: Providers, crosscheckProvider?: Providers) {
     this.provider = provider
 
     // start event listener
-    const listener = this.contract.connect(provider)
-    listener?.on(
-      this.params.eventName,
-      // TODO: calling this seems to be async, should we make it to sequential?
-      this.subscribeCallback,
-    )
+    if (provider instanceof ProviderManager) {
+      provider.addContract(this.params.address, this.contract)
+      provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
+    }
+    else {
+      const listener = this.contract.connect(provider)
+      listener?.on(
+        this.params.eventName,
+        // TODO: calling this seems to be async, should we make it to sequential?
+        this.subscribeCallback,
+      )
+    }
 
     // start cross-checker if ever set
     if (this.crosscheckerOptions) {
       if (!crosscheckProvider)
         throw new Error('crosschecker set, please provide crosscheckProvider to listen function')
-      this.startCrossChecker(crosscheckProvider)
+      const _crosscheckProvider = crosscheckProvider instanceof ProviderManager ? crosscheckProvider.provider : crosscheckProvider
+      if (_crosscheckProvider)
+        this.startCrossChecker(_crosscheckProvider)
     }
 
     return this
   }
 
-  async startCrossChecker(provider: ethers.JsonRpcProvider) {
+  async startCrossChecker(provider: ethers.WebSocketProvider | ethers.JsonRpcProvider) {
     if (!this.crosscheckerOptions)
       throw new Error('no crosscheck set, can\'t start crosschecker')
     this.crosschecker = new AutoCrossChecker(provider, this.crosscheckerOptions)
