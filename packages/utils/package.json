@@ -1,0 +1,52 @@
+{
+  "name": "@ora-io/utils",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@8.10.5",
+  "description": "",
+  "author": "Norman (nom4dv3), MuRong",
+  "license": "MIT",
+  "homepage": "https://github.com/ora-io/ora-stack#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ora-io/ora-stack.git",
+    "directory": "packages/utils"
+  },
+  "bugs": {
+    "url": "https://github.com/ora-io/ora-stack/issues"
+  },
+  "keywords": [],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub"
+  },
+  "dependencies": {
+    "@murongg/utils": "^0.1.27",
+    "cache-manager": "^5.7.6",
+    "cache-manager-ioredis-yet": "^2.1.1",
+    "ioredis": "^5.4.1",
+    "picocolors": "^1.0.1"
+  }
+}
