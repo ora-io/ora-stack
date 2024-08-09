@@ -1,4 +1,4 @@
-# pkg-placeholder
+# ORA STACK
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
@@ -19,6 +19,17 @@
 [jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=6e70d4
 [jsdocs-href]: https://www.jsdocs.io/package/pkg-placeholder
 
+## What is ORA STACK
+ORA Stack is a comprehensive framework designed for quickly setting up a web3 Oracle Service.
+
+It includes:
+- [Orap](./packages/orap/): the declarative signal-based backend framework;
+- [REK](./packages/rek/): the reliable ethereum toolkit;
+- [Utils](./packages/utils/): the common swiss-knife package.
+
+Comming soon:
+- UAO: the async oracle framework
+
 ## Template License
 
-[MIT](./LICENSE) License © 2022 [Anthony Fu](https://github.com/antfu)
+[MIT](./LICENSE) License © 2022 [ORA Protocol](https://ora.io)
