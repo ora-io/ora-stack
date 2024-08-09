@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 
 export class ContractManager {
   private _contract?: ethers.Contract
-  private _listenters: Map<ethers.ContractEventName, Fn> = new Map()
+  private _listeners: Map<ethers.ContractEventName, Fn> = new Map()
 
   constructor(public address: string, public abi: Interface | InterfaceAbi, public provider: ethers.JsonRpcProvider | ethers.WebSocketProvider) {
     this._contract = new ethers.Contract(address, abi, provider)
@@ -15,38 +15,38 @@ export class ContractManager {
   }
 
   get listeners() {
-    return this._listenters
+    return this._listeners
   }
 
   addListener(event: ethers.ContractEventName, listener: ethers.Listener) {
-    if (!this._listenters.has(event)) {
-      this._listenters.set(event, listener)
+    if (!this._listeners.has(event)) {
+      this._listeners.set(event, listener)
       this._contract?.on(event, listener)
     }
   }
 
   removeListener(event: ethers.ContractEventName, listener: ethers.Listener) {
     this._contract?.removeListener(event, listener)
-    this._listenters.delete(event)
+    this._listeners.delete(event)
   }
 
-  removeAllListener() {
+  removeAllListeners() {
     this._contract?.removeAllListeners()
-    this._listenters.clear()
+    this._listeners.clear()
   }
 
-  retryAllListener() {
-    this._listenters.forEach((value, key) => {
-      this._contract?.off(key, value)
-      this._contract?.on(key, value)
+  retryAllListeners() {
+    this._listeners.forEach((listener, event) => {
+      this._contract?.off(event, listener)
+      this._contract?.on(event, listener)
     })
   }
 
   retryListener(event: ethers.ContractEventName) {
-    const listenter = this._listenters.get(event)
-    if (listenter) {
-      this._contract?.off(event, listenter)
-      this._contract?.on(event, listenter)
+    const listener = this._listeners.get(event)
+    if (listener) {
+      this._contract?.off(event, listener)
+      this._contract?.on(event, listener)
     }
   }
 }

@@ -69,6 +69,7 @@ export class RekProviderManager {
         throw new TypeError('Invalid contract')
       }
     }
+    return undefined
   }
 
   addListener(contractAddress: string, event: ethers.ContractEventName, listener: ethers.Listener) {
@@ -82,20 +83,20 @@ export class RekProviderManager {
   removeAllListeners() {
     this._provider?.removeAllListeners()
     this._contracts.forEach((contract) => {
-      contract.removeAllListener()
+      contract.removeAllListeners()
     })
   }
 
   removeAllContract() {
     this._contracts.forEach((contract) => {
-      contract.removeAllListener()
+      contract.removeAllListeners()
     })
     this._contracts.clear()
   }
 
   retryAllListeners() {
     this._contracts.forEach((contract) => {
-      contract.retryAllListener()
+      contract.retryAllListeners()
     })
   }
 
@@ -129,7 +130,7 @@ export class RekProviderManager {
     // remove all contract listeners
     this._provider?.removeAllListeners()
     this._contracts.forEach((contract) => {
-      contract.contract?.removeAllListener()
+      contract.contract?.removeAllListeners()
     })
 
     // remove all listeners, just only for websocket provider
@@ -157,7 +158,7 @@ export class RekProviderManager {
       })
       this._contracts.clear()
       this._contracts = contracts
-      // resent heartbeat
+      // resend heartbeat
       this._sendHeartbeat()
     }, 100)
   }
@@ -202,11 +203,10 @@ export class RekProviderManager {
     this._provider?.destroy()
     this._provider = undefined
     this._contracts.forEach((contract) => {
-      contract.removeAllListener()
+      contract.removeAllListeners()
     })
     this._contracts.clear()
     this._event?.removeAllListeners()
     this._event = undefined
   }
 }
-
