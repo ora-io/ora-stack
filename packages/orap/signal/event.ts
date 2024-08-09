@@ -1,8 +1,7 @@
 import type { EventFragment, Log } from 'ethers'
 import { ethers } from 'ethers'
-import { AutoCrossChecker, ONE_MINUTE_MS, ProviderManager } from '@ora-io/rek'
-import type { AutoCrossCheckParam } from '@ora-io/rek'
-import type { Providers } from '../types'
+import { AutoCrossChecker, ONE_MINUTE_MS, RekProviderManager } from '@ora-io/rek'
+import type { AutoCrossCheckParam, Providers } from '@ora-io/rek'
 import type { Signal } from './type'
 
 export interface EventSignalRegisterParams {
@@ -62,7 +61,7 @@ export class EventSignal implements Signal {
     this.provider = provider
 
     // start event listener
-    if (provider instanceof ProviderManager) {
+    if (provider instanceof RekProviderManager) {
       provider.addContract(this.params.address, this.contract)
       provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
     }
@@ -79,15 +78,13 @@ export class EventSignal implements Signal {
     if (this.crosscheckerOptions) {
       if (!crosscheckProvider)
         throw new Error('crosschecker set, please provide crosscheckProvider to listen function')
-      const _crosscheckProvider = crosscheckProvider instanceof ProviderManager ? crosscheckProvider.provider : crosscheckProvider
-      if (_crosscheckProvider)
-        this.startCrossChecker(_crosscheckProvider)
+      this.startCrossChecker(crosscheckProvider)
     }
 
     return this
   }
 
-  async startCrossChecker(provider: ethers.WebSocketProvider | ethers.JsonRpcProvider) {
+  async startCrossChecker(provider: Providers) {
     if (!this.crosscheckerOptions)
       throw new Error('no crosscheck set, can\'t start crosschecker')
     this.crosschecker = new AutoCrossChecker(provider, this.crosscheckerOptions)

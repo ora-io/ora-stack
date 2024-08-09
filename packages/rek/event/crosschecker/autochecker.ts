@@ -1,6 +1,7 @@
 import type { ethers } from 'ethers'
 import { logger, polling, retryOnNull, sleep } from '@ora-io/utils'
 import { ETH_BLOCK_INTERVAL_MS } from '../../constants'
+import type { Providers } from '../../types/w3'
 import { CrossCheckerCacheManager } from './cache/manager'
 import type { AutoCrossCheckParam, CrossCheckRangeParam } from './interface'
 import { BaseCrossChecker } from './basechecker'
@@ -11,7 +12,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
   checkpointBlockNumber = 0
 
   constructor(
-    provider: ethers.Provider,
+    provider: Providers,
     options?: AutoCrossCheckParam,
   ) {
     super(provider)
@@ -51,7 +52,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
   async start(options: AutoCrossCheckParam) {
     this.validate(options)
     // TODO: use blockNumber for performance
-    const latestblocknum = await retryOnNull(async () => await this.provider.getBlockNumber())
+    const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
     const {
       fromBlock = latestblocknum,
       batchBlocksCount = 10,
@@ -90,7 +91,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
       // TODO: use blockNumber for performance
-      const latestblocknum = (await retryOnNull(async () => await this.provider.getBlock('latest'))).number
+      const latestblocknum = (await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))).number
       logger.info(`[*] ccrOptions: fromBlock ${ccrOptions.fromBlock}, toBlock ${ccrOptions.toBlock}, latestblocknum ${latestblocknum}`)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock

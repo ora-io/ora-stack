@@ -1,11 +1,12 @@
 import type { ethers } from 'ethers'
 import { logger, retryOnNull } from '@ora-io/utils'
 import { ETH_BLOCK_COUNT_ONE_HOUR } from '../../constants'
+import type { Providers } from '../../types/w3'
 import type { CrossCheckFromParam, CrossCheckRangeParam, CrossCheckRetroParam, SimpleLog } from './interface'
 
 export class BaseCrossChecker {
-  provider: ethers.Provider
-  constructor(provider: ethers.Provider) {
+  provider: Providers
+  constructor(provider: Providers) {
     this.provider = provider
   }
 
@@ -33,7 +34,7 @@ export class BaseCrossChecker {
 
     // define from, to
     // TODO: use blockNumber for performance
-    const block = await retryOnNull(async () => await this.provider.getBlock('latest'))
+    const block = await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))
     const options: CrossCheckRangeParam = {
       ...ccrOptions,
       fromBlock: block.number - retroBlockCount,
@@ -52,7 +53,7 @@ export class BaseCrossChecker {
     ccfOptions: CrossCheckFromParam,
   ) {
     // TODO: use blockNumber for performance
-    const block = await retryOnNull(async () => await this.provider.getBlock('latest'))
+    const block = await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))
 
     // suggest use large retroBlockCount
     if (block.number - ccfOptions.fromBlock < ETH_BLOCK_COUNT_ONE_HOUR)
@@ -103,16 +104,18 @@ export class BaseCrossChecker {
       ...(address && { address }),
       ...(topics && { topics }),
     }
-    const logs = await this.provider.getLogs(params)
-    // get ignoreLogs keys
-    const ignoreLogs = options.ignoreLogs
+    if (this.provider.provider) {
+      const logs = await this.provider.provider?.getLogs(params)
+      // get ignoreLogs keys
+      const ignoreLogs = options.ignoreLogs
 
-    // crosscheck missing logs
-    const missingLogs = ignoreLogs ? await this.diff(logs, ignoreLogs) : logs
+      // crosscheck missing logs
+      const missingLogs = ignoreLogs ? await this.diff(logs, ignoreLogs) : logs
 
-    // callback on missing logs
-    for (const log of missingLogs)
-      await options.onMissingLog(log)
+      // callback on missing logs
+      for (const log of missingLogs)
+        await options.onMissingLog(log)
+    }
   }
 }
 
