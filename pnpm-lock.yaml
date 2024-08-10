@@ -95,12 +95,18 @@ importers:
       '@ora-io/utils':
         specifier: workspace:*
         version: link:../utils
+      ethers:
+        specifier: '>=6.13.0'
+        version: 6.13.2
 
   packages/rek:
     dependencies:
       '@ora-io/utils':
         specifier: workspace:*
         version: link:../utils
+      ethers:
+        specifier: '>=6.13.0'
+        version: 6.13.2
     devDependencies:
       '@types/ws':
         specifier: ^8.5.12
@@ -120,6 +126,9 @@ importers:
       cache-manager-ioredis-yet:
         specifier: ^2.1.1
         version: 2.1.1
+      ethers:
+        specifier: '>=6.13.0'
+        version: 6.13.2
       ioredis:
         specifier: ^5.4.1
         version: 5.4.1
