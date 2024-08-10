@@ -1,3 +1,5 @@
+<div align="center"><img src="./assets/orap.logo.png" alt="Orap Icon" width="200"/></div>
+
 # ORAP: Oracle Application Framework
 
 ORAP is an out of box, express style framework.

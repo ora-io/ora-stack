@@ -1,3 +1,5 @@
+<div align="center"><img src="./assets/rek.logo.png" alt="Rek Icon" width="200"  /></div>
+
 # Rek: Reliable ETH Kit
 
 ## Event Cross-Check
