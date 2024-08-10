@@ -40,7 +40,7 @@
   "scripts": {
     "clean": "rimraf packages/*/dist",
     "build": "esno scripts/build.ts",
-    "build:rollup": "NODE_OPTIONS=\"--max-old-space-size=6144\" rollup --config=rollup.config.ts --configPlugin=rollup-plugin-esbuild --bundleConfigAsCjs",
+    "build:rollup": "rollup --config=rollup.config.ts --configPlugin=rollup-plugin-esbuild --bundleConfigAsCjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "nr build",
