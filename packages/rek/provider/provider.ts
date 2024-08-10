@@ -41,7 +41,7 @@ export class RekProviderManager {
   }
 
   get provider() {
-    return this._provider
+    return this._provider as ethers.JsonRpcProvider | WebSocketProvider
   }
 
   get contracts() {
