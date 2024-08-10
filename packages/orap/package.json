@@ -39,6 +39,9 @@
     "dist",
     "LICENSE"
   ],
+  "peerDependencies": {
+    "ethers": ">=6.13.0"
+  },
   "dependencies": {
     "@ora-io/rek": "workspace:*",
     "@ora-io/utils": "workspace:*"
