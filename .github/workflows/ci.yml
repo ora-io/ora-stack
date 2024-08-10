@@ -27,7 +27,7 @@ jobs:
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: nci --no-frozen-lockfile
 
       - name: Lint
         run: nr lint
@@ -49,7 +49,7 @@ jobs:
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: nci --no-frozen-lockfile
 
       - name: Build
         run: nr build
@@ -81,7 +81,7 @@ jobs:
         run: npm i -g @antfu/ni
 
       - name: Install
-        run: nci
+        run: nci --no-frozen-lockfile
 
       - name: Build
         run: nr build
