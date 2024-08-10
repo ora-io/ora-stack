@@ -1,6 +1,6 @@
 {
   "name": "ora-stack",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@9.7.0",
   "description": "",
@@ -45,7 +45,7 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "nr build",
     "publish": "nr prepublishOnly && esno scripts/publish.ts",
-    "release": "bumpp && npm publish",
+    "release": "esno scripts/release.ts",
     "start": "esno src/index.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
