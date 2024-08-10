@@ -21,25 +21,25 @@ const nodePlugins = [
   }),
 ]
 
-const outputs = (packName: string): OutputOptions[] => [{
-  dir: path.join(__dirname, `./packages/${packName}/dist`),
+const outputs = (dir: string): OutputOptions[] => [{
+  dir: path.join(__dirname, `./packages/${dir}/dist`),
   format: 'esm',
   entryFileNames: '[name].mjs',
 }, {
-  dir: path.join(__dirname, `./packages/${packName}/dist`),
+  dir: path.join(__dirname, `./packages/${dir}/dist`),
   format: 'cjs',
   entryFileNames: '[name].cjs',
 }]
 
 for (const pkg of packages) {
-  const { packName, external } = pkg
-  const input = path.join(__dirname, `./packages/${packName}/index.ts`)
+  const { dir, external } = pkg
+  const input = path.join(__dirname, `./packages/${dir}/index.ts`)
 
   configs.push({
     external,
     treeshake: 'smallest',
     input,
-    output: outputs(packName),
+    output: outputs(dir),
     plugins: [
       ...nodePlugins,
     ],
@@ -48,7 +48,7 @@ for (const pkg of packages) {
   configs.push({
     input,
     output: {
-      dir: path.join(__dirname, `./packages/${packName}/dist`),
+      dir: path.join(__dirname, `./packages/${dir}/dist`),
       entryFileNames: '[name].d.ts',
       format: 'esm',
     },

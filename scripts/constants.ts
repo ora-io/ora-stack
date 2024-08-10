@@ -1,17 +1,17 @@
 export const packages = [
   {
-    packName: 'utils',
+    packName: '@ora-io/utils',
     dir: 'utils',
     external: ['cache-manager', 'cache-manager-ioredis-yet', 'ioredis'],
   }, {
-    packName: 'rek',
+    packName: '@ora-io/rek',
     dir: 'rek',
     external: [
       'ethers',
       '@ora-io/utils',
     ],
   }, {
-    packName: 'orap',
+    packName: '@ora-io/orap',
     dir: 'orap',
     external: [
       'ethers',
@@ -20,4 +20,4 @@ export const packages = [
     ],
   },
 ]
-export const haveWorkspacePackages = [packages[0], packages[1]]
+export const haveWorkspacePackages = [packages[0], packages[1], packages[2]]

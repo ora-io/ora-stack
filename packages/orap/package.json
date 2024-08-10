@@ -36,7 +36,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "dependencies": {
     "@ora-io/rek": "workspace:*",

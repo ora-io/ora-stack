@@ -36,12 +36,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
-  "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub"
-  },
   "dependencies": {
     "@murongg/utils": "^0.1.27",
     "cache-manager": "^5.7.6",
