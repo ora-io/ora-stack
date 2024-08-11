@@ -4,8 +4,8 @@ export const packages = [
     dir: 'utils',
     external: ['cache-manager', 'cache-manager-ioredis-yet', 'ioredis'],
   }, {
-    packName: '@ora-io/rek',
-    dir: 'rek',
+    packName: '@ora-io/reku',
+    dir: 'reku',
     external: [
       'ethers',
       '@ora-io/utils',
@@ -16,7 +16,7 @@ export const packages = [
     external: [
       'ethers',
       '@ora-io/utils',
-      '@ora-io/rek',
+      '@ora-io/reku',
     ],
   },
 ]

@@ -1,5 +1,5 @@
-import type { Providers } from '@ora-io/rek'
-import { RekProviderManager } from '@ora-io/rek'
+import type { Providers } from '@ora-io/reku'
+import { RekuProviderManager } from '@ora-io/reku'
 import { EventSignal } from './signal/event'
 
 export interface ListenOptions {
@@ -26,9 +26,9 @@ export class Orap {
 
   _listenChain(wsProvider: Providers | string, httpProvider?: Providers | string) {
     if (typeof wsProvider === 'string')
-      wsProvider = new RekProviderManager(wsProvider)
+      wsProvider = new RekuProviderManager(wsProvider)
     if (httpProvider && typeof httpProvider === 'string')
-      httpProvider = new RekProviderManager(httpProvider)
+      httpProvider = new RekuProviderManager(httpProvider)
     this.routes.event.forEach(es => es.listen(wsProvider as Providers, httpProvider as Providers))
   }
 

@@ -4,16 +4,16 @@ import { Interface, WebSocketProvider, ethers } from 'ethers'
 import type { ErrorEvent, WebSocket } from 'ws'
 import { ContractManager } from './contract'
 
-export interface RekProviderManagerOptions {
+export interface RekuProviderManagerOptions {
   /**
    * The interval of heartbeat, default is 10s
    */
   heartbeatInterval?: number
 }
 
-export type RekProviderManagerEvent = 'error' | 'close'
+export type RekuProviderManagerEvent = 'error' | 'close'
 
-export class RekProviderManager {
+export class RekuProviderManager {
   private _provider?: ethers.JsonRpcProvider | ethers.WebSocketProvider
   private _contracts: Map<string, ContractManager> = new Map()
 
@@ -23,7 +23,7 @@ export class RekProviderManager {
 
   private _event?: EventEmitter
 
-  constructor(public providerUrl: string, options?: RekProviderManagerOptions) {
+  constructor(public providerUrl: string, options?: RekuProviderManagerOptions) {
     this.connect()
     if (options?.heartbeatInterval)
       this._heartbeatInterval = options.heartbeatInterval
@@ -100,21 +100,21 @@ export class RekProviderManager {
     })
   }
 
-  on(event: RekProviderManagerEvent, listener: (...args: any[]) => void) {
+  on(event: RekuProviderManagerEvent, listener: (...args: any[]) => void) {
     if (!this._event)
       this._event = new EventEmitter()
 
     this._event?.on(event, listener)
   }
 
-  once(event: RekProviderManagerEvent, listener: (...args: any[]) => void) {
+  once(event: RekuProviderManagerEvent, listener: (...args: any[]) => void) {
     if (!this._event)
       this._event = new EventEmitter()
 
     this._event?.once(event, listener)
   }
 
-  removeEvent(event: RekProviderManagerEvent, listener: (...args: any[]) => void) {
+  removeEvent(event: RekuProviderManagerEvent, listener: (...args: any[]) => void) {
     this._event?.removeListener(event, listener)
   }
 

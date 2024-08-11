@@ -89,9 +89,9 @@ importers:
 
   packages/orap:
     dependencies:
-      '@ora-io/rek':
+      '@ora-io/reku':
         specifier: workspace:*
-        version: link:../rek
+        version: link:../reku
       '@ora-io/utils':
         specifier: workspace:*
         version: link:../utils
@@ -99,7 +99,7 @@ importers:
         specifier: '>=6.13.0'
         version: 6.13.2
 
-  packages/rek:
+  packages/reku:
     dependencies:
       '@ora-io/utils':
         specifier: workspace:*

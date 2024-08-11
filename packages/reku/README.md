@@ -1,6 +1,6 @@
-<div align="center"><img src="./assets/rek.logo.png" alt="Rek Icon" width="200"  /></div>
+<div align="center"><img src="./assets/reku.logo.png" alt="Reku Icon" width="200"  /></div>
 
-# Rek: Reliable ETH Kit
+# Reku: Reliable ETH Kit & Utils
 
 ## Event Cross-Check
 - used for cross-checking missing events using eth getLogs
