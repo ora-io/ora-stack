@@ -1,7 +1,7 @@
 import type { EventFragment, Log } from 'ethers'
 import { ethers } from 'ethers'
-import { AutoCrossChecker, ONE_MINUTE_MS, RekProviderManager } from '@ora-io/rek'
-import type { AutoCrossCheckParam, Providers } from '@ora-io/rek'
+import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
+import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
 import type { Signal } from './type'
 
 export interface EventSignalRegisterParams {
@@ -61,7 +61,7 @@ export class EventSignal implements Signal {
     this.provider = provider
 
     // start event listener
-    if (provider instanceof RekProviderManager) {
+    if (provider instanceof RekuProviderManager) {
       provider.addContract(this.params.address, this.contract)
       provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
     }

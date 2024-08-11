@@ -1,5 +1,5 @@
 {
-  "name": "@ora-io/rek",
+  "name": "@ora-io/reku",
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@8.10.5",
@@ -10,7 +10,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ora-io/ora-stack.git",
-    "directory": "packages/rek"
+    "directory": "packages/reku"
   },
   "bugs": {
     "url": "https://github.com/ora-io/ora-stack/issues"

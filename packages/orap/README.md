@@ -56,6 +56,6 @@ etc.
 
 ### EventSignal
 - define event listener as simple as: `orap.event({address:"0x", abi:"", eventName: "Transfer"}, handleSignal)`
-- provide crosschecker by `rek`, available config please checkout `AutoCrossCheckParam` in `rek`
+- provide crosschecker by `reku`, available config please checkout `AutoCrossCheckParam` in `reku`
 - currently one and only one crosschecker is set to each event signal
 - store: provide 2 options: use memory or redis, checkout `orap/store`
