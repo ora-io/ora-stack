@@ -1,4 +1,4 @@
-<div align="center"><img src="./assets/rek.logo.png" alt="Rek Icon" width="200"  /></div>
+<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/rek.logo.png?raw=true" alt="Rek Icon" width="200"  /></div>
 
 # Rek: Reliable ETH Kit
 

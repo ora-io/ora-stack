@@ -1,4 +1,4 @@
-<div align="center"><img src="./assets/orap.logo.png" alt="Orap Icon" width="200"/></div>
+<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/orap.logo.png?raw=true" alt="Orap Icon" width="200"/></div>
 
 # ORAP: Oracle Application Framework
 
