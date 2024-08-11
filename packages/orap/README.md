@@ -2,7 +2,7 @@
 
 # ORAP: Oracle Application Framework
 
-ORAP is an out of box, express style framework.
+ORAP is a declarative framework for building oracle services, handy to use out of the box.
 
 ## Usage
 ```ts

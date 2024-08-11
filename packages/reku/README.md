@@ -1,6 +1,6 @@
-<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/rek.logo.png?raw=true" alt="Rek Icon" width="200"  /></div>
+<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/reku.logo.png?raw=true" alt="Reku Icon" width="200"  /></div>
 
-# Reku: Reliable ETH Kit & Utils
+# [WIP] Reku: Reliable ETH Kit & Utils
 
 ## Event Cross-Check
 - used for cross-checking missing events using eth getLogs
@@ -8,7 +8,7 @@
 
 ### BaseCrossChecker
 - `onMissingLog: FnOnMissingLog`: the callback function that will be called when there's a missing log found;
-- `ignoreLogs?: SimpleLog[]` : it allows users to pass in the txhash list (,log index list) that already processed, let the crosschecker to ignore then.
+- `ignoreLogs?: SimpleLog[]` : it allows users to pass in the txhash list (,log index list) that already processed, let the crosschecker to ignore them.
 
 **crossCheckRange**
 
