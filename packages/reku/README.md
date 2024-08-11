@@ -1,4 +1,4 @@
-<div align="center"><img src="./assets/reku.logo.png" alt="Reku Icon" width="200"  /></div>
+<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/rek.logo.png?raw=true" alt="Rek Icon" width="200"  /></div>
 
 # Reku: Reliable ETH Kit & Utils
 
