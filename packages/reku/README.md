@@ -26,6 +26,7 @@ i.e. It starts with 'realtime' mode by default.
 
 Options:
 - `store`?: the Store used to cache the <txhash, logindex> that already processed.
+- `storeKeyPrefix`?: set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+'txHashList', prefix can be "project:app:" to form a "project:app:txHashList" redis key.
 - `batchBlocksCount`?: how many blocks to get per `getLogs` check, in readtime mode it waits until the new block num >= `batchBlocksCount`.
 - `pollingInterval`?: how long does it take between 2 block height check polling checks; mostly for limiting getLogs calling rate in catchup mode
 - `blockInterval`?: the block interval (in ms) of the given chain, default: 12000 for eth

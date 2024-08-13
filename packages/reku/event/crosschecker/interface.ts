@@ -32,6 +32,7 @@ export interface CrossCheckRetroParam extends BaseCrossCheckParam {
 // TODO: use rpc to calc blockInterval
 export interface AutoCrossCheckParam extends BaseCrossCheckParam {
   store?: Store
+  storeKeyPrefix?: string // set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+txHashList
   batchBlocksCount?: number // how many blocks at most to get per check
   pollingInterval?: number // mostly for limiting getLogs calling rate in catchup mode; how long does it take at least between 2 checks
   blockInterval?: number // the block interval of the given chain, default: eth

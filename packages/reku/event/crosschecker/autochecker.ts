@@ -16,7 +16,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     options?: AutoCrossCheckParam,
   ) {
     super(provider)
-    this.cache = new CrossCheckerCacheManager(options?.store)
+    this.cache = new CrossCheckerCacheManager(options?.store, { storeKeyPrefix: options?.storeKeyPrefix })
   }
 
   validate(options: AutoCrossCheckParam) {

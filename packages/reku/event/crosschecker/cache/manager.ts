@@ -6,7 +6,7 @@ import type { SimpleLog } from '../interface'
  * Basic cache for cross checker
  */
 export class CrossCheckerCacheManager extends SimpleStoreManager {
-  noLogIndex: boolean
+  noLogIndex: boolean // TODO: this is used no where for now, add when needed
   storeKeyPrefix: string
   addLog: any
 
