@@ -2,6 +2,7 @@ import type { EventFragment, Log } from 'ethers'
 import { ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
+import type { Logger } from '@ora-io/utils'
 import type { Signal } from './type'
 
 export interface EventSignalRegisterParams {
@@ -28,6 +29,7 @@ export class EventSignal implements Signal {
   constructor(
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
+    public logger: Logger,
   ) {
     this.contract = new ethers.Contract(
       params.address,
@@ -88,6 +90,7 @@ export class EventSignal implements Signal {
     if (!this.crosscheckerOptions)
       throw new Error('no crosscheck set, can\'t start crosschecker')
     this.crosschecker = new AutoCrossChecker(provider, this.crosscheckerOptions)
+    this.crosschecker.setLogger(this.logger)
     await this.crosschecker.start(this.crosscheckerOptions)
   }
 

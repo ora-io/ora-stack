@@ -1,4 +1,5 @@
 import type { ethers } from 'ethers'
+import type { Logger } from '@ora-io/utils'
 import { logger, retryOnNull } from '@ora-io/utils'
 import { ETH_BLOCK_COUNT_ONE_HOUR } from '../../constants'
 import type { Providers } from '../../types/w3'
@@ -6,6 +7,7 @@ import type { CrossCheckFromParam, CrossCheckRangeParam, CrossCheckRetroParam, S
 
 export class BaseCrossChecker {
   provider: Providers
+  logger: Logger = logger
   constructor(provider: Providers) {
     this.provider = provider
   }
@@ -30,7 +32,7 @@ export class BaseCrossChecker {
     const { retroBlockCount } = ccrOptions
     // TODO: change to chain rpc based block interval
     if (retroBlockCount < ETH_BLOCK_COUNT_ONE_HOUR)
-      logger.warn('crosscheck retroBlockCount too low, recommend block range >= 1 hour')
+      this.logger.warn('crosscheck retroBlockCount too low, recommend block range >= 1 hour')
 
     // define from, to
     // TODO: use blockNumber for performance
@@ -57,7 +59,7 @@ export class BaseCrossChecker {
 
     // suggest use large retroBlockCount
     if (block.number - ccfOptions.fromBlock < ETH_BLOCK_COUNT_ONE_HOUR)
-      logger.warn('crosscheck retroBlockCount too low, recommend crosscheck interval >= 1 hour')
+      this.logger.warn('crosscheck retroBlockCount too low, recommend crosscheck interval >= 1 hour')
 
     // define from, to
     const options: CrossCheckRangeParam = {
@@ -85,7 +87,7 @@ export class BaseCrossChecker {
     const missing = (logToFind: ethers.Log) => {
       const logIndex = ignoreLogs.findIndex(
         log => log.transactionHash === logToFind.transactionHash
-        && (!log.index || log.index === logToFind.index),
+          && (!log.index || log.index === logToFind.index),
       )
 
       return logIndex === -1
@@ -116,6 +118,10 @@ export class BaseCrossChecker {
       for (const log of missingLogs)
         await options.onMissingLog(log)
     }
+  }
+
+  setLogger(logger: Logger) {
+    this.logger = logger
   }
 }
 

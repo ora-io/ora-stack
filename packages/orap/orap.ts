@@ -1,5 +1,7 @@
 import type { Providers } from '@ora-io/reku'
 import { RekuProviderManager } from '@ora-io/reku'
+import type { Logger } from '@ora-io/utils'
+import { logger } from '@ora-io/utils'
 import { EventSignal } from './signal/event'
 
 export interface ListenOptions {
@@ -12,6 +14,8 @@ export class Orap {
     event: EventSignal[]
   }
 
+  logger: Logger = logger
+
   constructor() {
     this.routes = {
       event: [],
@@ -19,7 +23,7 @@ export class Orap {
   }
 
   event(options: any, fn: any) {
-    const es = new EventSignal(options, fn)
+    const es = new EventSignal(options, fn, this.logger)
     this.routes.event.push(es)
     return es
   }
@@ -36,5 +40,9 @@ export class Orap {
     this._listenChain(options.wsProvider, options.httpProvider)
     onListen()
     return this
+  }
+
+  setLogger(logger: Logger) {
+    this.logger = logger
   }
 }
