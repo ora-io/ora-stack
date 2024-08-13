@@ -54,7 +54,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     // TODO: use blockNumber for performance
     const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
     const {
-      fromBlock = latestblocknum,
+      fromBlock = latestblocknum + 1,
       batchBlocksCount = 10,
       pollingInterval = 1000,
       blockInterval = ETH_BLOCK_INTERVAL,

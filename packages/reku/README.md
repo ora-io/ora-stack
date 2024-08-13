@@ -18,7 +18,7 @@
 
 ### AutoCrossCheck
 Conceptually it supports 'catchup', 'realtime', 'mix' modes, controled by `fromBlock` and `toBlock`;
-- realtime mode: run over the latest block data; enter when `fromBlock` and `toBlock` are NOT present; starts from `latestblocknum` and never ends, always waits until `latestblocknum >= lastcheckpoint + batchBlocksCount`;
+- realtime mode: run over the latest block data; enter when `fromBlock` and `toBlock` are NOT present; starts from `latestblocknum+1` and never ends, always waits until `latestblocknum >= lastcheckpoint + batchBlocksCount`;
 - catchup mode: run over historical block data; enter when `fromBlock` and `toBlock` is present; starts from `fromBlock` and ends at `toBlock`;
 - mix mode: start in catchup mode and transit to realtime mode; enter when `fromBlock` is present and `toBlock` is NOT; auto-transit when `lastcheckpoint > latestblocknum - batchBlocksCount`;
 
