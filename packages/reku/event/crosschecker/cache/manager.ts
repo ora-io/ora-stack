@@ -7,12 +7,13 @@ import type { SimpleLog } from '../interface'
  */
 export class CrossCheckerCacheManager extends SimpleStoreManager {
   noLogIndex: boolean
-
+  storeKeyPrefix: string
   addLog: any
 
-  constructor(store?: Store, options?: { noLogIndex?: boolean }) {
+  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string }) {
     super(store)
     this.noLogIndex = options?.noLogIndex ?? false
+    this.storeKeyPrefix = options?.storeKeyPrefix ?? ''
     this.addLog = this.noLogIndex ? this.addLogWithoutLogIndex : this.addLogWithLogIndex
   }
 
@@ -92,18 +93,18 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
 
   // TODO: is this <txHashList, logIndexList> the most efficient internal storage format?
   async getTxHashList() {
-    return await this.get<string[]>('txHashList')
+    return await this.get<string[]>(`${this.storeKeyPrefix}txHashList`)
   }
 
   async getLogIndexList() {
-    return await this.get<number[][]>('logIndexList')
+    return await this.get<number[][]>(`${this.storeKeyPrefix}logIndexList`)
   }
 
   async setTxHashList(txHashList: string[]) {
-    await this.set('txHashList', txHashList)
+    await this.set(`${this.storeKeyPrefix}txHashList`, txHashList)
   }
 
   async setLogIndexList(logIndexList: number[][]) {
-    await this.set('logIndexList', logIndexList)
+    await this.set(`${this.storeKeyPrefix}logIndexList`, logIndexList)
   }
 }
