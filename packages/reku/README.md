@@ -27,8 +27,8 @@ i.e. It starts with 'realtime' mode by default.
 Options:
 - `store`?: the Store used to cache the <txhash, logindex> that already processed.
 - `batchBlocksCount`?: how many blocks to get per `getLogs` check, in readtime mode it waits until the new block num >= `batchBlocksCount`.
-- `intervalMsMin`?: mostly for limiting getLogs calling rate in catchup mode; how long does it take at least between 2 checks
-- `blockIntervalMs`?: the block interval (in ms) of the given chain, default: 12000 for eth
+- `pollingInterval`?: how long does it take between 2 block height check polling checks; mostly for limiting getLogs calling rate in catchup mode
+- `blockInterval`?: the block interval (in ms) of the given chain, default: 12000 for eth
 - `delayBlockFromLatest`?: mostly for realtime mode; each time cc wait until `latest height > toBlock + delayBlockFromLatest`
 - `fromBlock`?: once specified, it means start catching up from historical blocks
 - `toBlock`?: once specified, it means the crosscheck isn't infinite and will end at this height; need `fromBlock` present if this set
@@ -44,6 +44,6 @@ await acc.start({
   address: CONTRACT_ADDRESS,
   topics,
   batchBlocksCount: 1,
-  intervalMsMin: 3000,
+  pollingInterval: 3000,
 })
 ```

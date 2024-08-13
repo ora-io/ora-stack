@@ -97,7 +97,7 @@ export class EventSignal implements Signal {
   // TODO: hide address & topics & onMissingLog from interface AutoCrossCheckParam
   crosscheck(options?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
     const {
-      intervalMsMin = ONE_MINUTE_MS * 60,
+      pollingInterval = ONE_MINUTE_MS * 60,
       ignoreLogs = [],
     } = options ?? {}
     // save crosschecker param
@@ -106,7 +106,7 @@ export class EventSignal implements Signal {
       address: this.params.address,
       topics: [this.esig],
       onMissingLog: this.crosscheckCallback,
-      intervalMsMin,
+      pollingInterval,
       ignoreLogs,
     }
     return this

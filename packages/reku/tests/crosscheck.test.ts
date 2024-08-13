@@ -49,7 +49,7 @@ export async function crossCheckerTest() {
     address: CONTRACT_ADDRESS,
     topics,
     batchBlocksCount: 1,
-    intervalMsMin: 3000,
+    pollingInterval: 3000,
   })
 }
 

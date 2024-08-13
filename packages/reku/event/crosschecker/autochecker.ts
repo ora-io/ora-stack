@@ -1,6 +1,6 @@
 import type { ethers } from 'ethers'
 import { polling, retryOnNull, sleep } from '@ora-io/utils'
-import { ETH_BLOCK_INTERVAL_MS } from '../../constants'
+import { ETH_BLOCK_INTERVAL } from '../../constants'
 import type { Providers } from '../../types/w3'
 import { CrossCheckerCacheManager } from './cache/manager'
 import type { AutoCrossCheckParam, CrossCheckRangeParam } from './interface'
@@ -20,8 +20,8 @@ export class AutoCrossChecker extends BaseCrossChecker {
   }
 
   validate(options: AutoCrossCheckParam) {
-    const { batchBlocksCount, toBlock, fromBlock, intervalMsMin, blockIntervalMs } = options
-    const defaultBlockIntervalMs = ETH_BLOCK_INTERVAL_MS
+    const { batchBlocksCount, toBlock, fromBlock, pollingInterval, blockInterval } = options
+    const defaultBlockInterval = ETH_BLOCK_INTERVAL
 
     if (batchBlocksCount !== undefined) {
       if (batchBlocksCount <= 0)
@@ -36,10 +36,10 @@ export class AutoCrossChecker extends BaseCrossChecker {
         throw new Error('options invalid: should fromBlock <= toBlock')
     }
     else { // only throw in realtime mode
-      if (intervalMsMin !== undefined && batchBlocksCount !== undefined) {
-        const intervalLimit = batchBlocksCount * (blockIntervalMs ?? defaultBlockIntervalMs)
-        if (intervalMsMin > intervalLimit)
-          throw new Error('options invalid: should intervalMsMin <= batchBlocksCount * blockIntervalMs when no toBlock present, otherwise crosscheck will never catch up with the latest')
+      if (pollingInterval !== undefined && batchBlocksCount !== undefined) {
+        const intervalLimit = batchBlocksCount * (blockInterval ?? defaultBlockInterval)
+        if (pollingInterval > intervalLimit)
+          throw new Error('options invalid: should pollingInterval <= batchBlocksCount * blockInterval when no toBlock present, otherwise crosscheck will never catch up with the latest')
       }
     }
   }
@@ -56,8 +56,8 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const {
       fromBlock = latestblocknum,
       batchBlocksCount = 10,
-      intervalMsMin = 1000,
-      blockIntervalMs = ETH_BLOCK_INTERVAL_MS,
+      pollingInterval = 1000,
+      blockInterval = ETH_BLOCK_INTERVAL,
       delayBlockFromLatest = 1,
       toBlock, ignoreLogs,
     } = options
@@ -95,8 +95,8 @@ export class AutoCrossChecker extends BaseCrossChecker {
       this.logger.info('[*] ccrOptions: fromBlock', ccrOptions.fromBlock, ', toBlock', ccrOptions.toBlock, ', latestblocknum', latestblocknum)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
-        this.logger.debug('sleep until the latestblocknum >= toBlock + delayBlockFromLatest, i.e.', (ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockIntervalMs, 'ms')
-        await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockIntervalMs)
+        this.logger.debug('sleep until the latestblocknum >= toBlock + delayBlockFromLatest, i.e.', (ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval, 'ms')
+        await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
         return false
       }
       return true
@@ -123,6 +123,6 @@ export class AutoCrossChecker extends BaseCrossChecker {
       }
 
       return endingCondition()
-    }, intervalMsMin)
+    }, pollingInterval)
   }
 }

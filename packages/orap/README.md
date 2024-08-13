@@ -22,7 +22,7 @@ const eventSignalParam = {
 const handle = (...args: any) => { console.log('handle', args) }
 
 orap.event(eventSignalParam, handle)
-  .crosscheck({ intervalMsMin: 1000, batchBlocksCount: 1, blockIntervalMs: 12000 })
+  .crosscheck({ pollingInterval: 1000, batchBlocksCount: 1, blockInterval: 12000 })
 
 orap.listen(
   { wsProvider: 'wss://127.0.0.1', httpProvider: 'http://127.0.0.1' },
