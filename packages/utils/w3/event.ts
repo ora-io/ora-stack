@@ -8,7 +8,7 @@ export function getEventSignature(abi: any[], eventName: string): string {
   const eventFragment = iface.getEvent(eventName)
 
   if (!eventFragment)
-    throw new Error(`event ${eventName} not found.`)
+    throw new Error("event " + eventName + " not found.")
 
   // Return the event topic (which is the event signature)
   return eventFragment.topicHash

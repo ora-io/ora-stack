@@ -44,7 +44,7 @@ export class Logger {
       const method = type === 'info' ? 'log' : type
       const format = () => {
         const tag = this.tagMap[type]
-        return `${colors.dim(this.timeFormatter.format(new Date()))} ${tag} ${msg}`
+        return colors.dim(this.timeFormatter.format(new Date())) + ' ' + tag + ' ' + msg;
       }
       console[method](format())
     }

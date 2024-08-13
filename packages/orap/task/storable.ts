@@ -18,7 +18,7 @@ export abstract class TaskStorable extends TaskBase {
   static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager): Promise<T> {
     const instance = new this()
     // get all task keys
-    const keys = await sm.keys(`${instance.getTaskPrefix()}*`, true)
+    const keys = await sm.keys(instance.getTaskPrefix() + '*', true)
     // get the first task (del when finish)
     const serializedTask: string = (await sm.get(keys[0]))! // never undefined ensured by keys isWait=true
 
