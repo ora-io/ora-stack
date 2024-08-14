@@ -9,19 +9,19 @@ export abstract class TaskStorable extends TaskBase {
   static readonly taskTtl: number | undefined = undefined
   static readonly taskTtlDone: number | undefined = undefined
 
-  getTaskPrefix(): string {
+  getTaskPrefix<T extends TaskStorable>(_context?: Partial<T>): string {
     return (this.constructor as typeof TaskStorable).taskPrefix
   }
 
-  getTaskPrefixDone(): string {
+  getTaskPrefixDone<T extends TaskStorable>(_context?: Partial<T>): string {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
-  getTaskTtl(): number | undefined {
+  getTaskTtl<T extends TaskStorable>(_context?: Partial<T>): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtl
   }
 
-  getTaskTtlDone(): number | undefined {
+  getTaskTtlDone<T extends TaskStorable>(_context?: Partial<T>): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtlDone
   }
 
@@ -35,7 +35,7 @@ export abstract class TaskStorable extends TaskBase {
   static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Partial<T>): Promise<T> {
     const instance = (this as any).createInstance(context)
     // get all task keys
-    const keys = await sm.keys(`${instance.getTaskPrefix()}*`, true)
+    const keys = await sm.keys(`${instance.getTaskPrefix(context)}*`, true)
     // get the first task (del when finish)
     const serializedTask: string = (await sm.get(keys[0]))! // never undefined ensured by keys isWait=true
 
@@ -46,16 +46,16 @@ export abstract class TaskStorable extends TaskBase {
     return await (this as any)._load(sm, context)
   }
 
-  async save(sm: StoreManager) {
-    await sm.set(this.getTaskPrefix() + this.toKey(), this.toString(), this.getTaskTtl())
+  async save<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+    await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.getTaskTtl(context))
   }
 
-  async remove(sm: StoreManager) {
-    await sm.del(this.getTaskPrefix() + this.toKey())
+  async remove<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+    await sm.del(this.getTaskPrefix(context) + this.toKey())
   }
 
-  async done(sm: StoreManager) {
-    await sm.set(this.getTaskPrefixDone() + this.toKey(), this.toString(), this.getTaskTtlDone())
+  async done<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+    await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.getTaskTtlDone(context))
     await this.remove(sm)
   }
 }
