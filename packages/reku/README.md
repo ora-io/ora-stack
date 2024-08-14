@@ -1,6 +1,25 @@
-<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/dev/assets/reku.logo.png?raw=true" alt="Reku Icon" width="200"  /></div>
+<div align="center"><img src="https://github.com/ora-io/ora-stack/blob/main/assets/reku.logo.png?raw=true" alt="Reku Icon" width="200"  /></div>
 
 # [WIP] Reku: Reliable ETH Kit & Utils
+
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![bundle][bundle-src]][bundle-href]
+[![JSDocs][jsdocs-src]][jsdocs-href]
+[![License][license-src]][license-href]
+
+<!-- Badges -->
+
+[npm-version-src]: https://img.shields.io/npm/v/@ora-io/reku?style=flat&colorA=080f12&colorB=6e70d4
+[npm-version-href]: https://npmjs.com/package/@ora-io/reku
+[npm-downloads-src]: https://img.shields.io/npm/dm/@ora-io/reku?style=flat&colorA=080f12&colorB=6e70d4
+[npm-downloads-href]: https://npmjs.com/package/@ora-io/reku
+[bundle-src]: https://img.shields.io/bundlephobia/minzip/@ora-io/reku?style=flat&colorA=080f12&colorB=6e70d4&label=minzip
+[bundle-href]: https://bundlephobia.com/result?p=@ora-io/reku
+[license-src]: https://img.shields.io/badge/License-MIT-yellow.svg?style=flat&colorA=080f12&colorB=6e70d4
+[license-href]: https://github.com/ora-io/ora-stack/blob/main/LICENSE
+[jsdocs-src]: https://img.shields.io/badge/jsdocs-reference-080f12?style=flat&colorA=080f12&colorB=6e70d4
+[jsdocs-href]: https://www.jsdocs.io/package/@ora-io/reku
 
 ## Event Cross-Check
 - used for cross-checking missing events using eth getLogs
