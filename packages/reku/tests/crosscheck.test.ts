@@ -1,12 +1,16 @@
 /* eslint-disable no-console */
 import { ethers } from 'ethers'
 import { describe, expect, it, vi } from 'vitest'
+import { Logger, setLogger } from '@ora-io/utils'
 import { AutoCrossChecker } from '../event/crosschecker/autochecker'
 import { BaseCrossChecker } from '../event/crosschecker/basechecker'
 import type { BaseCrossCheckParam } from '../event/crosschecker/interface'
 
 const ETHEREUM_RPC_URL = 'https://rpc.ankr.com/eth'
 const CONTRACT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+
+setLogger(new Logger('debug', 'reku-tests'))
+
 export async function crossCheckerTest() {
   const rpcUrl = ETHEREUM_RPC_URL
   const provider = new ethers.JsonRpcProvider(rpcUrl)
