@@ -21,7 +21,7 @@ beforeEach(() => {
 })
 
 describe('Orap', () => {
-  it.skip('should run demo without errors', async () => {
+  it('should run demo without errors', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
     const storeConfig = { port: parseInt(process.env.REDIS_PORT!), host: process.env.REDIS_HOST }
