@@ -16,7 +16,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     options?: AutoCrossCheckParam,
   ) {
     super(provider)
-    this.cache = new CrossCheckerCacheManager(options?.store, { storeKeyPrefix: options?.storeKeyPrefix })
+    this.cache = new CrossCheckerCacheManager(options?.store, { storeKeyPrefix: options?.storeKeyPrefix, logger: this.logger })
   }
 
   validate(options: AutoCrossCheckParam) {
@@ -80,6 +80,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     if (ignoreLogs)
       await this.cache.addLogs(ignoreLogs)
 
+    // initialize the ignore logs from redis
     ccrOptions.ignoreLogs = await this.cache.getLogs()
 
     const updateCCROptions = async (ccrOptions: any) => {
@@ -130,7 +131,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const newlogs = await super.diff(logs, ignoreLogs)
     const res: ethers.Log[] = []
     for (const log of newlogs) {
-      const key = this.cache.getRedisKey(log)
+      const key = this.cache.encodeKey(log)
       const logExist = await this.cache.has(key)
       if (!logExist)
         res.push(log)

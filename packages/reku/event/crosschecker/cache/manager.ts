@@ -1,5 +1,5 @@
-import type { Store } from '@ora-io/utils'
-import { SimpleStoreManager } from '@ora-io/utils'
+import type { Logger, Store } from '@ora-io/utils'
+import { SimpleStoreManager, logger } from '@ora-io/utils'
 import type { SimpleLog } from '../interface'
 
 /**
@@ -8,11 +8,13 @@ import type { SimpleLog } from '../interface'
 export class CrossCheckerCacheManager extends SimpleStoreManager {
   noLogIndex: boolean // TODO: this is used no where for now, add when needed
   storeKeyPrefix: string
+  logger: Logger
 
-  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string }) {
+  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string; logger?: Logger }) {
     super(store)
     this.noLogIndex = options?.noLogIndex ?? false
     this.storeKeyPrefix = options?.storeKeyPrefix ?? ''
+    this.logger = options?.logger ?? logger
     // this.addLog = this.noLogIndex ? this.addLogWithoutLogIndex : this.addLogWithLogIndex
   }
 
@@ -29,35 +31,32 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
 
   // TODO: is this in high efficiency?
   async addLog(log: SimpleLog) {
-    // console.log('log', log)
-    // if (log.index == null || log.index === undefined)
-    //   throw new Error('addLogWithLogIndex: lack of log.index')
-
-    // const txHashList = await this.getTxHashList() || []
-    // const logIndexList = await this.getLogIndexList() || []
-
-    // const txFindIdx = txHashList.indexOf(log.transactionHash)
-
-    // if (txFindIdx === -1) {
-    //   // If the transaction hash is not in the list, add it and initialize a new log index list
-    //   txHashList.push(log.transactionHash)
-    //   logIndexList.push([log.index])
-    // }
-    // else {
-    //   // If the transaction hash is already in the list, check if the log.index is in the list
-    //   const logIndexFindIdx = logIndexList[txFindIdx].indexOf(log.index)
-    //   if (logIndexFindIdx === -1) {
-    //     // If the log.index is not in the list, add it to the corresponding log index list
-    //     logIndexList[txFindIdx].push(log.index)
-    //   }
-    // }
-
-    const key = this.getRedisKey(log)
+    this.logger.debug('cache manager - addLog:', log)
+    const key = this.encodeKey(log)
     await this.set(key, true)
   }
 
-  getRedisKey(log: SimpleLog) {
+  /**
+   * @dev can add this.style: string = 'redis' when supporting other store type
+   * @param log
+   * @returns
+   */
+  encodeKey(log: SimpleLog): string {
     return log.index && !this.noLogIndex ? `${this.storeKeyPrefix}:${log.transactionHash}:${log.index}` : `${this.storeKeyPrefix}:${log.transactionHash}`
+  }
+
+  decodeKey(key: string): SimpleLog {
+    if (!key.startsWith(this.storeKeyPrefix))
+      throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
+
+    const _noprefix_key = key.slice(this.storeKeyPrefix.length)
+
+    const parts = _noprefix_key.split(':')
+    if (parts.length > 2)
+      throw new Error(`wrong key format when decoding, expecting ${this.storeKeyPrefix}+xx:xx, getting ${key}`)
+
+    const log = { transactionHash: parts[0], index: parts.length === 2 ? parseInt(parts[1]) : undefined }
+    return log
   }
 
   /**
@@ -88,13 +87,15 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
 
     // const txHashList = await this.getTxHashList() || []
     // const logIndexList = await this.getLogIndexList() || []
-    const values = await this.keys()
+    const keys = await this.keys(this.storeKeyPrefix)
+    this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
-    for (const value of values) {
-      const [storeKeyPrefix, txHash, index] = value.split(':')
-      if (storeKeyPrefix !== this.storeKeyPrefix)
-        continue
-      logs.push({ transactionHash: txHash, index: index ? Number(index) : undefined })
+    for (const key of keys) {
+      // const [storeKeyPrefix, txHash, index] = key.split(':')
+      // if (storeKeyPrefix !== this.storeKeyPrefix)
+      //   continue
+      // logs.push({ transactionHash: txHash, index: index ? Number(index) : undefined })
+      logs.push(this.decodeKey(key))
     }
     return logs
   }
