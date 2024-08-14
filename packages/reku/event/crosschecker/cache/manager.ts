@@ -1,5 +1,5 @@
-import type { Store } from '@ora-io/utils'
-import { SimpleStoreManager } from '@ora-io/utils'
+import type { Logger, Store } from '@ora-io/utils'
+import { SimpleStoreManager, logger } from '@ora-io/utils'
 import type { SimpleLog } from '../interface'
 
 /**
@@ -8,60 +8,53 @@ import type { SimpleLog } from '../interface'
 export class CrossCheckerCacheManager extends SimpleStoreManager {
   noLogIndex: boolean // TODO: this is used no where for now, add when needed
   storeKeyPrefix: string
-  addLog: any
+  logger: Logger
 
-  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string }) {
+  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string; logger?: Logger }) {
     super(store)
     this.noLogIndex = options?.noLogIndex ?? false
     this.storeKeyPrefix = options?.storeKeyPrefix ?? ''
-    this.addLog = this.noLogIndex ? this.addLogWithoutLogIndex : this.addLogWithLogIndex
-  }
-
-  async validateFormat() {
-    const txHashList = await this.getTxHashList() || []
-    const logIndexList = await this.getLogIndexList() || []
-
-    if (!this.noLogIndex && txHashList.length !== logIndexList.length)
-      throw new Error('cache store: txHashList.length != logIndexList.length')
-  }
-
-  // TODO: is this in high efficiency?
-  async addLogWithLogIndex(log: SimpleLog) {
-    // console.log('log', log)
-    if (log.index == null || log.index === undefined)
-      throw new Error('addLogWithLogIndex: lack of log.index')
-
-    const txHashList = await this.getTxHashList() || []
-    const logIndexList = await this.getLogIndexList() || []
-
-    const txFindIdx = txHashList.indexOf(log.transactionHash)
-
-    if (txFindIdx === -1) {
-      // If the transaction hash is not in the list, add it and initialize a new log index list
-      txHashList.push(log.transactionHash)
-      logIndexList.push([log.index])
-    }
-    else {
-      // If the transaction hash is already in the list, check if the log.index is in the list
-      const logIndexFindIdx = logIndexList[txFindIdx].indexOf(log.index)
-      if (logIndexFindIdx === -1) {
-        // If the log.index is not in the list, add it to the corresponding log index list
-        logIndexList[txFindIdx].push(log.index)
-      }
-    }
-    await this.setTxHashList(txHashList)
-    await this.setLogIndexList(logIndexList)
-  }
-
-  async addLogWithoutLogIndex(log: SimpleLog) {
-    const txHashList = await this.getTxHashList() || []
-    if (!txHashList?.includes(log.transactionHash))
-      txHashList && txHashList.push(log.transactionHash)
-    await this.setTxHashList(txHashList)
+    this.logger = options?.logger ?? logger
   }
 
   /**
-   * parse logs into log ids that can indicate a log
+   * @dev can add this.style: string = 'redis' when supporting other store type
+   * @param log
+   * @returns
+   */
+  encodeKey(log: SimpleLog): string {
+    const key = log.index && !this.noLogIndex ? `${this.storeKeyPrefix + log.transactionHash}:${log.index}` : this.storeKeyPrefix + log.transactionHash
+    logger.debug('cc-cm-encodeKey', key)
+    return key
+  }
+
+  decodeKey(key: string): SimpleLog {
+    logger.debug('cc-cm-decodeKey', key)
+    if (!key.startsWith(this.storeKeyPrefix))
+      throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
+
+    const _noprefix_key = key.slice(this.storeKeyPrefix.length)
+
+    const parts = _noprefix_key.split(':')
+    if (parts.length > 2)
+      throw new Error(`wrong key format when decoding, expecting ${this.storeKeyPrefix}+xx:xx, getting ${key}`)
+
+    const log = { transactionHash: parts[0], index: parts.length === 2 ? parseInt(parts[1]) : undefined }
+    return log
+  }
+
+  /**
+   * add log into store record that can indicate a log
+   * @param log
+   */
+  async addLog(log: SimpleLog) {
+    this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
+    const key = this.encodeKey(log)
+    await this.set(key, true)
+  }
+
+  /**
+   * add logs into store records
    * @param logs
    * @returns CrossCheckerCache
    */
@@ -72,39 +65,17 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
     }
   }
 
+  /**
+   * get all known logs from store
+   * @returns
+   */
   async getLogs(): Promise<SimpleLog[]> {
-    this.validateFormat()
-
-    const txHashList = await this.getTxHashList() || []
-    const logIndexList = await this.getLogIndexList() || []
-
+    const keys = await this.keys(this.storeKeyPrefix)
+    this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
-    for (let i = 0; i < txHashList.length; i++) {
-      if (this.noLogIndex) {
-        logs.push({ transactionHash: txHashList[i] })
-      }
-      else {
-        for (let j = 0; j < logIndexList[i].length; j++)
-          logs.push({ transactionHash: txHashList[i], index: logIndexList[i][j] })
-      }
-    }
+    for (const key of keys)
+      logs.push(this.decodeKey(key))
+
     return logs
-  }
-
-  // TODO: is this <txHashList, logIndexList> the most efficient internal storage format?
-  async getTxHashList() {
-    return await this.get<string[]>(`${this.storeKeyPrefix}txHashList`)
-  }
-
-  async getLogIndexList() {
-    return await this.get<number[][]>(`${this.storeKeyPrefix}logIndexList`)
-  }
-
-  async setTxHashList(txHashList: string[]) {
-    await this.set(`${this.storeKeyPrefix}txHashList`, txHashList)
-  }
-
-  async setLogIndexList(logIndexList: number[][]) {
-    await this.set(`${this.storeKeyPrefix}logIndexList`, logIndexList)
   }
 }

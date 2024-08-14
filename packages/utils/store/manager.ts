@@ -38,4 +38,14 @@ export class SimpleStoreManager {
   async keys(pattern?: string): Promise<string[]> {
     return await this.cache.store.keys(pattern)
   }
+
+  async has(key: string): Promise<boolean> {
+    return !!await this.cache.store.get(key)
+  }
+
+  async getAll<T>(): Promise<T[]> {
+    const keys = await this.keys()
+    const values = await Promise.all(keys.map(async key => await this.get<T>(key)))
+    return values.filter(value => value !== undefined)
+  }
 }
