@@ -26,7 +26,7 @@ i.e. It starts with 'realtime' mode by default.
 
 Options:
 - `store`?: the Store used to cache the <txhash, logindex> that already processed.
-- `storeKeyPrefix`?: set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+'txHashList', prefix can be "project:app:" to form a "project:app:txHashList" redis key., defult: ''
+- `storeKeyPrefix`?: set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+'txHashList', prefix can be "project:app:network:" to form a "project:app:network:txHashList" redis key., defult: ''
 - `storeTtl`?: the ttl for <txhash, logindex> record in store, defualt: no limit
 - `batchBlocksCount`?: how many blocks to get per `getLogs` check, in readtime mode it waits until the new block num >= `batchBlocksCount`.
 - `delayBlockFromLatest`?: mostly for realtime mode; each time cc wait until `latest height > toBlock + delayBlockFromLatest`, default: 1

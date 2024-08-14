@@ -27,38 +27,12 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
   }
 
   /**
-   * @dev can add this.style: string = 'redis' when supporting other store type
-   * @param log
-   * @returns
-   */
-  encodeKey(log: SimpleLog): string {
-    const key = log.index && !this.noLogIndex ? `${this.storeKeyPrefix + log.transactionHash}:${log.index}` : this.storeKeyPrefix + log.transactionHash
-    logger.debug('cc-cm-encodeKey', key)
-    return key
-  }
-
-  decodeKey(key: string): SimpleLog {
-    logger.debug('cc-cm-decodeKey', key)
-    if (!key.startsWith(this.storeKeyPrefix))
-      throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
-
-    const _noprefix_key = key.slice(this.storeKeyPrefix.length)
-
-    const parts = _noprefix_key.split(':')
-    if (parts.length > 2)
-      throw new Error(`wrong key format when decoding, expecting ${this.storeKeyPrefix}+xx:xx, getting ${key}`)
-
-    const log = { transactionHash: parts[0], index: parts.length === 2 ? parseInt(parts[1]) : undefined }
-    return log
-  }
-
-  /**
    * add log into store record that can indicate a log
    * @param log
    */
   async addLog(log: SimpleLog) {
     this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
-    const key = this.encodeKey(log)
+    const key = this.encodeLogKey(log)
     await this.set(key, true, this.ttl)
   }
 
@@ -83,8 +57,46 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
     this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
     for (const key of keys)
-      logs.push(this.decodeKey(key))
+      logs.push(this.decodeLogKey(key))
 
     return logs
+  }
+
+  /**
+   * @dev can add this.style: string = 'redis' when supporting other store type
+   * @param log
+   * @returns
+   */
+  encodeLogKey(log: SimpleLog): string {
+    const key = log.index && !this.noLogIndex ? `${this.storeKeyPrefix + log.transactionHash}:${log.index}` : this.storeKeyPrefix + log.transactionHash
+    logger.debug('cc-cm-encodeKey', key)
+    return key
+  }
+
+  decodeLogKey(key: string): SimpleLog {
+    logger.debug('cc-cm-decodeKey', key)
+    if (!key.startsWith(this.storeKeyPrefix))
+      throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
+
+    const _noprefix_key = key.slice(this.storeKeyPrefix.length)
+
+    const parts = _noprefix_key.split(':')
+    if (parts.length > 2)
+      throw new Error(`wrong key format when decoding, expecting ${this.storeKeyPrefix}+xx:xx, getting ${key}`)
+
+    const log = { transactionHash: parts[0], index: parts.length === 2 ? parseInt(parts[1]) : undefined }
+    return log
+  }
+
+  /**
+   * ttl: no limit
+   * @param checkpoint
+   */
+  async setCheckpoint(checkpoint: number) {
+    await this.set(`${this.storeKeyPrefix}checkpoint`, checkpoint)
+  }
+
+  async getCheckpoint(): Promise<number | undefined> {
+    return await this.get(`${this.storeKeyPrefix}checkpoint`)
   }
 }

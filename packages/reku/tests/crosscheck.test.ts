@@ -2,19 +2,23 @@
 import { ethers } from 'ethers'
 import { describe, expect, it, vi } from 'vitest'
 import { Logger, setLogger } from '@ora-io/utils'
+import dotenv from 'dotenv'
 import { AutoCrossChecker } from '../event/crosschecker/autochecker'
 import { BaseCrossChecker } from '../event/crosschecker/basechecker'
 import type { BaseCrossCheckParam } from '../event/crosschecker/interface'
+dotenv.config({ path: './packages/reku/tests/.env' })
 
-const ETHEREUM_RPC_URL = 'https://rpc.ankr.com/eth'
 const CONTRACT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+
+const chain = 'mainnet'
+
+const httpProvider = new ethers.JsonRpcProvider(
+  process.env[`${chain.toUpperCase()}_HTTP`]!,
+)
 
 setLogger(new Logger('debug', 'reku-tests'))
 
 export async function crossCheckerTest() {
-  const rpcUrl = ETHEREUM_RPC_URL
-  const provider = new ethers.JsonRpcProvider(rpcUrl)
-
   const onMissingLog = async (log: any) => {
     console.log('onMissingLog', log)
   }
@@ -33,7 +37,7 @@ export async function crossCheckerTest() {
     '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
   ]
 
-  const cc = new BaseCrossChecker(provider)
+  const cc = new BaseCrossChecker(httpProvider)
   await cc.crossCheckRange({
     onMissingLog,
     ignoreLogs,
@@ -44,7 +48,7 @@ export async function crossCheckerTest() {
   })
 
   // choose catchup mode / realtime mode / catchup then realtime mode by fromBlock & toBlock
-  const acc = new AutoCrossChecker(provider)
+  const acc = new AutoCrossChecker(httpProvider)
   await acc.start({
     onMissingLog,
     ignoreLogs,

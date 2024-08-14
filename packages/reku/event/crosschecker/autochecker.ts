@@ -8,7 +8,7 @@ import { BaseCrossChecker } from './basechecker'
 
 export class AutoCrossChecker extends BaseCrossChecker {
   cache: CrossCheckerCacheManager | undefined = undefined
-  checkpointBlockNumber = 0
+  checkpointBlockNumber: number | undefined
 
   constructor(
     provider: Providers,
@@ -41,6 +41,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
     }
   }
 
+  async setCheckpoint(cp: number) {
+    this.checkpointBlockNumber = cp
+    await this.cache!.setCheckpoint(cp)
+  }
+
   // TODO: keep type hint of inside AutoCrossCheckParam
   /**
    * real time auto crosscheck, start from the lastest block
@@ -52,17 +57,20 @@ export class AutoCrossChecker extends BaseCrossChecker {
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, logger: this.logger, ttl: options?.storeTtl })
 
     const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
+
+    // resume checkpoint priority: options.fromBlock > cache > latestblocknum + 1
+    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? latestblocknum + 1
+
     const {
-      fromBlock = latestblocknum + 1,
+      fromBlock = defaultInitCheckpoint,
       batchBlocksCount = 10,
       pollingInterval = 3000,
       blockInterval = ETH_BLOCK_INTERVAL,
       delayBlockFromLatest = 1,
-      toBlock, ignoreLogs,
+      toBlock,
     } = options
 
-    // init checkpoint block num
-    this.checkpointBlockNumber = fromBlock
+    await this.setCheckpoint(fromBlock)
 
     const ccrOptions: CrossCheckRangeParam = {
       ...options,
@@ -72,26 +80,12 @@ export class AutoCrossChecker extends BaseCrossChecker {
           await options.onMissingLog(log)
           this.cache!.addLogs([log])
         },
-      fromBlock: -1, // placeholder
-      toBlock: -1, // placeholder
-    }
-
-    if (ignoreLogs)
-      await this.cache.addLogs(ignoreLogs)
-
-    // initialize the ignore logs from redis
-    ccrOptions.ignoreLogs = await this.cache.getLogs()
-
-    const updateCCROptions = async (ccrOptions: any) => {
-      // iterate block range
-      ccrOptions.fromBlock = this.checkpointBlockNumber
-      // batchBlocksCount should > 0
-      ccrOptions.toBlock = ccrOptions.fromBlock + batchBlocksCount - 1
+      fromBlock,
+      toBlock: fromBlock + batchBlocksCount - 1,
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
-      // TODO: use blockNumber for performance
-      const latestblocknum = (await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))).number
+      const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
       this.logger.info('[*] ccrOptions: fromBlock', ccrOptions.fromBlock, ', toBlock', ccrOptions.toBlock, ', latestblocknum', latestblocknum)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
@@ -106,22 +100,28 @@ export class AutoCrossChecker extends BaseCrossChecker {
       ? () => { ccrOptions.toBlock = Math.min(ccrOptions.toBlock, toBlock); return true }
       : waitNextCrosscheck
 
+    const updateCCROptions = async (ccrOptions: any) => {
+      // only set after cc succ
+      await this.setCheckpoint(ccrOptions.toBlock + 1)
+      // iterate block range
+      ccrOptions.fromBlock = this.checkpointBlockNumber
+      // batchBlocksCount should > 0
+      ccrOptions.toBlock = ccrOptions.fromBlock + batchBlocksCount - 1
+    }
+
     const endingCondition = toBlock
       // ends on up to options.toBlock
-      ? () => this.checkpointBlockNumber > toBlock
+      ? () => this.checkpointBlockNumber! > toBlock
       // never ends if options.toBlock is not provided
       : () => false
 
     // TODO: replace polling with schedule cron
     await polling(async () => {
-      await updateCCROptions(ccrOptions)
-
       if (await waitOrUpdateToBlock()) {
         await this.crossCheckRange(ccrOptions)
-        // only set after cc succ
-        this.checkpointBlockNumber = ccrOptions.toBlock + 1
+        // only update options after cc succ
+        await updateCCROptions(ccrOptions)
       }
-
       return endingCondition()
     }, pollingInterval)
   }
@@ -130,7 +130,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const newlogs = await super.diff(logs, ignoreLogs)
     const res: ethers.Log[] = []
     for (const log of newlogs) {
-      const key = this.cache!.encodeKey(log)
+      const key = this.cache!.encodeLogKey(log)
       const logExist = await this.cache!.has(key)
       if (!logExist)
         res.push(log)
