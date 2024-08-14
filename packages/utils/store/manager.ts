@@ -1,4 +1,4 @@
-import type { Cache, Store } from 'cache-manager'
+import type { Cache, Milliseconds, Store } from 'cache-manager'
 import { createCache, memoryStore } from 'cache-manager'
 import type { RedisStore } from 'cache-manager-ioredis-yet'
 
@@ -27,8 +27,8 @@ export class SimpleStoreManager {
     return await this.cache.get<T>(key)
   }
 
-  async set(key: string, value: unknown) {
-    await this.cache.set(key, value)
+  async set(key: string, value: unknown, ttl?: Milliseconds) {
+    await this.cache.set(key, value, ttl)
   }
 
   async del(key: string) {

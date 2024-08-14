@@ -16,7 +16,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     options?: AutoCrossCheckParam,
   ) {
     super(provider)
-    this.cache = new CrossCheckerCacheManager(options?.store, { storeKeyPrefix: options?.storeKeyPrefix, logger: this.logger })
+    this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, logger: this.logger, ttl: options?.storeTtl })
   }
 
   validate(options: AutoCrossCheckParam) {
@@ -56,7 +56,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const {
       fromBlock = latestblocknum + 1,
       batchBlocksCount = 10,
-      pollingInterval = 1000,
+      pollingInterval = 3000,
       blockInterval = ETH_BLOCK_INTERVAL,
       delayBlockFromLatest = 1,
       toBlock, ignoreLogs,

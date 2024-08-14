@@ -1,6 +1,13 @@
-import type { Logger, Store } from '@ora-io/utils'
+import type { Logger, Milliseconds, Store } from '@ora-io/utils'
 import { SimpleStoreManager, logger } from '@ora-io/utils'
 import type { SimpleLog } from '../interface'
+
+export interface CacheManagerOptions {
+  noLogIndex?: boolean
+  keyPrefix?: string
+  ttl?: Milliseconds
+  logger?: Logger
+}
 
 /**
  * Basic cache for cross checker
@@ -8,12 +15,14 @@ import type { SimpleLog } from '../interface'
 export class CrossCheckerCacheManager extends SimpleStoreManager {
   noLogIndex: boolean // TODO: this is used no where for now, add when needed
   storeKeyPrefix: string
+  ttl?: Milliseconds
   logger: Logger
 
-  constructor(store?: Store, options?: { noLogIndex?: boolean; storeKeyPrefix?: string; logger?: Logger }) {
+  constructor(store?: Store, options?: CacheManagerOptions) {
     super(store)
     this.noLogIndex = options?.noLogIndex ?? false
-    this.storeKeyPrefix = options?.storeKeyPrefix ?? ''
+    this.storeKeyPrefix = options?.keyPrefix ?? ''
+    this.ttl = options?.ttl
     this.logger = options?.logger ?? logger
   }
 
@@ -50,7 +59,7 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
   async addLog(log: SimpleLog) {
     this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
     const key = this.encodeKey(log)
-    await this.set(key, true)
+    await this.set(key, true, this.ttl)
   }
 
   /**

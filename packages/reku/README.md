@@ -26,11 +26,12 @@ i.e. It starts with 'realtime' mode by default.
 
 Options:
 - `store`?: the Store used to cache the <txhash, logindex> that already processed.
-- `storeKeyPrefix`?: set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+'txHashList', prefix can be "project:app:" to form a "project:app:txHashList" redis key.
+- `storeKeyPrefix`?: set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+'txHashList', prefix can be "project:app:" to form a "project:app:txHashList" redis key., defult: ''
+- `storeTtl`?: the ttl for <txhash, logindex> record in store, defualt: no limit
 - `batchBlocksCount`?: how many blocks to get per `getLogs` check, in readtime mode it waits until the new block num >= `batchBlocksCount`.
-- `delayBlockFromLatest`?: mostly for realtime mode; each time cc wait until `latest height > toBlock + delayBlockFromLatest`
+- `delayBlockFromLatest`?: mostly for realtime mode; each time cc wait until `latest height > toBlock + delayBlockFromLatest`, default: 1
 - `blockInterval`?: the block interval (in ms) of the given chain, default: 12000 for eth
-- `pollingInterval`?: how long does it take between 2 block height check polling checks; mostly for limiting getLogs calling rate in catchup mode
+- `pollingInterval`?: how long does it take between 2 block height check polling checks; mostly for limiting getLogs calling rate in catchup mode, default: 3000 ms
 - `fromBlock`?: once specified, it means start catching up from historical blocks
 - `toBlock`?: once specified, it means the crosscheck isn't infinite and will end at this height; need `fromBlock` present if this set
 
