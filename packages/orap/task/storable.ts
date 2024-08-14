@@ -25,8 +25,15 @@ export abstract class TaskStorable extends TaskBase {
     return (this.constructor as typeof TaskStorable).taskTtlDone
   }
 
-  static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager): Promise<T> {
+  // Factory method to create an instance with the necessary context
+  static createInstance<T extends TaskStorable>(this: Constructor<T>, context?: Partial<T>): T {
     const instance = new this()
+    Object.assign(instance, context)
+    return instance
+  }
+
+  static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Partial<T>): Promise<T> {
+    const instance = (this as any).createInstance(context)
     // get all task keys
     const keys = await sm.keys(`${instance.getTaskPrefix()}*`, true)
     // get the first task (del when finish)
@@ -35,8 +42,8 @@ export abstract class TaskStorable extends TaskBase {
     return instance.fromString(serializedTask)
   }
 
-  static async load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager): Promise<T> {
-    return await (this as any)._load(sm)
+  static async load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Partial<T>): Promise<T> {
+    return await (this as any)._load(sm, context)
   }
 
   async save(sm: StoreManager) {
