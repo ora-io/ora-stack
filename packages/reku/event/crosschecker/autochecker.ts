@@ -7,16 +7,13 @@ import type { AutoCrossCheckParam, CrossCheckRangeParam, SimpleLog } from './int
 import { BaseCrossChecker } from './basechecker'
 
 export class AutoCrossChecker extends BaseCrossChecker {
-  // TODO: make cache self-clean with a MAX cap
-  cache: CrossCheckerCacheManager
+  cache: CrossCheckerCacheManager | undefined = undefined
   checkpointBlockNumber = 0
 
   constructor(
     provider: Providers,
-    options?: AutoCrossCheckParam,
   ) {
     super(provider)
-    this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, logger: this.logger, ttl: options?.storeTtl })
   }
 
   validate(options: AutoCrossCheckParam) {
@@ -51,7 +48,9 @@ export class AutoCrossChecker extends BaseCrossChecker {
    */
   async start(options: AutoCrossCheckParam) {
     this.validate(options)
-    // TODO: use blockNumber for performance
+
+    this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, logger: this.logger, ttl: options?.storeTtl })
+
     const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
     const {
       fromBlock = latestblocknum + 1,
@@ -71,7 +70,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
       onMissingLog:
         async (log: ethers.Log) => {
           await options.onMissingLog(log)
-          this.cache.addLogs([log])
+          this.cache!.addLogs([log])
         },
       fromBlock: -1, // placeholder
       toBlock: -1, // placeholder
@@ -131,8 +130,8 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const newlogs = await super.diff(logs, ignoreLogs)
     const res: ethers.Log[] = []
     for (const log of newlogs) {
-      const key = this.cache.encodeKey(log)
-      const logExist = await this.cache.has(key)
+      const key = this.cache!.encodeKey(log)
+      const logExist = await this.cache!.has(key)
       if (!logExist)
         res.push(log)
     }

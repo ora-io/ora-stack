@@ -89,12 +89,11 @@ export class EventSignal implements Signal {
   async startCrossChecker(provider: Providers) {
     if (!this.crosscheckerOptions)
       throw new Error('no crosscheck set, can\'t start crosschecker')
-    this.crosschecker = new AutoCrossChecker(provider, this.crosscheckerOptions)
+    this.crosschecker = new AutoCrossChecker(provider)
     this.crosschecker.setLogger(this.logger)
     await this.crosschecker.start(this.crosscheckerOptions)
   }
 
-  // TODO: hide address & topics & onMissingLog from interface AutoCrossCheckParam
   crosscheck(options?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
     const {
       pollingInterval = ONE_MINUTE_MS * 60,
