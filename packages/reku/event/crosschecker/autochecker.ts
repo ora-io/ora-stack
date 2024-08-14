@@ -59,7 +59,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
 
     // resume checkpoint priority: options.fromBlock > cache > latestblocknum + 1
-    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? latestblocknum + 1
+    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestblocknum + 1)
 
     const {
       fromBlock = defaultInitCheckpoint,
@@ -86,7 +86,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
       const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
-      this.logger.info('[*] ccrOptions: fromBlock', ccrOptions.fromBlock, ', toBlock', ccrOptions.toBlock, ', latestblocknum', latestblocknum)
+      this.logger.debug('[*] ccrOptions: fromBlock', ccrOptions.fromBlock, ', toBlock', ccrOptions.toBlock, ', latestblocknum', latestblocknum)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
         this.logger.debug('sleep until the latestblocknum >= toBlock + delayBlockFromLatest, i.e.', (ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval, 'ms')
