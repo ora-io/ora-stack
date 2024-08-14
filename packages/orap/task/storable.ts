@@ -9,19 +9,19 @@ export abstract class TaskStorable extends TaskBase {
   static readonly taskTtl: number | undefined = undefined
   static readonly taskTtlDone: number | undefined = undefined
 
-  getTaskPrefix<T extends TaskStorable>(_context?: Partial<T>): string {
+  getTaskPrefix(_context?: Partial<this>): string {
     return (this.constructor as typeof TaskStorable).taskPrefix
   }
 
-  getTaskPrefixDone<T extends TaskStorable>(_context?: Partial<T>): string {
+  getTaskPrefixDone(_context?: Partial<this>): string {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
-  getTaskTtl<T extends TaskStorable>(_context?: Partial<T>): number | undefined {
+  getTaskTtl(_context?: Partial<this>): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtl
   }
 
-  getTaskTtlDone<T extends TaskStorable>(_context?: Partial<T>): number | undefined {
+  getTaskTtlDone(_context?: Partial<this>): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtlDone
   }
 
@@ -46,15 +46,15 @@ export abstract class TaskStorable extends TaskBase {
     return await (this as any)._load(sm, context)
   }
 
-  async save<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+  async save(sm: StoreManager, context?: Partial<this>) {
     await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.getTaskTtl(context))
   }
 
-  async remove<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+  async remove(sm: StoreManager, context?: Partial<this>) {
     await sm.del(this.getTaskPrefix(context) + this.toKey())
   }
 
-  async done<T extends TaskStorable>(sm: StoreManager, context?: Partial<T>) {
+  async done(sm: StoreManager, context?: Partial<this>) {
     await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.getTaskTtlDone(context))
     await this.remove(sm)
   }
