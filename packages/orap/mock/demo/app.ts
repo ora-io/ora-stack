@@ -29,6 +29,7 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     .crosscheck({
       store,
       storeKeyPrefix: 'ora-stack:orap:demo:cc:',
+      storeTtl: config.CROSSCHECKER_CACHE_TTL,
       pollingInterval: 3000,
       batchBlocksCount: 1,
       blockInterval: 12000,

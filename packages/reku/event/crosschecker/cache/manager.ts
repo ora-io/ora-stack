@@ -89,11 +89,11 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
   }
 
   /**
-   * ttl: no limit
+   * ttl: should be consist with log records, otherwise will do redundant work
    * @param checkpoint
    */
   async setCheckpoint(checkpoint: number) {
-    await this.set(`${this.storeKeyPrefix}checkpoint`, checkpoint)
+    await this.set(`${this.storeKeyPrefix}checkpoint`, checkpoint, this.ttl)
   }
 
   async getCheckpoint(): Promise<number | undefined> {

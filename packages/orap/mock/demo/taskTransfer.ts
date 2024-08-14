@@ -1,10 +1,12 @@
 import type { Constructor } from '@ora-io/utils'
 import { TaskStorable } from '../../index'
-import { logger } from './config'
+import { config, logger } from './config'
 
 export class TransferTask extends TaskStorable {
   static readonly taskPrefix: string = 'ora-stack:orap:demo:TransferTask:'
   static readonly taskPrefixDone: string = 'ora-stack:orap:demo:Done-TransferTask:'
+  static readonly taskTtl: number | undefined = config.TASK_TTL
+  static readonly taskTtlDone: number | undefined = config.TASK_DONE_TTL
 
   constructor(
     public id?: string,

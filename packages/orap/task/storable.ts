@@ -6,6 +6,8 @@ export abstract class TaskStorable extends TaskBase {
   // overwrite these for store key customize
   static readonly taskPrefix: string = 'Task:'
   static readonly taskPrefixDone: string = 'Done-Task:'
+  static readonly taskTtl: number | undefined = undefined
+  static readonly taskTtlDone: number | undefined = undefined
 
   getTaskPrefix(): string {
     return (this.constructor as typeof TaskStorable).taskPrefix
@@ -15,10 +17,18 @@ export abstract class TaskStorable extends TaskBase {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
+  getTaskTtl(): number | undefined {
+    return (this.constructor as typeof TaskStorable).taskTtl
+  }
+
+  getTaskTtlDone(): number | undefined {
+    return (this.constructor as typeof TaskStorable).taskTtlDone
+  }
+
   static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager): Promise<T> {
     const instance = new this()
     // get all task keys
-    const keys = await sm.keys(instance.getTaskPrefix() + '*', true)
+    const keys = await sm.keys(`${instance.getTaskPrefix()}*`, true)
     // get the first task (del when finish)
     const serializedTask: string = (await sm.get(keys[0]))! // never undefined ensured by keys isWait=true
 
@@ -30,7 +40,7 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async save(sm: StoreManager) {
-    await sm.set(this.getTaskPrefix() + this.toKey(), this.toString())
+    await sm.set(this.getTaskPrefix() + this.toKey(), this.toString(), this.getTaskTtl())
   }
 
   async remove(sm: StoreManager) {
@@ -38,7 +48,7 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async done(sm: StoreManager) {
-    await sm.set(this.getTaskPrefixDone() + this.toKey(), this.toString())
+    await sm.set(this.getTaskPrefixDone() + this.toKey(), this.toString(), this.getTaskTtlDone())
     await this.remove(sm)
   }
 }
