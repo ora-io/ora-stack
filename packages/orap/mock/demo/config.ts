@@ -6,4 +6,4 @@ export const config = {
 }
 
 const logLevel = 'debug'
-export const logger = new Logger(logLevel, '[demo]')
+export const logger = new Logger(logLevel, '[orap-mock-demo]')

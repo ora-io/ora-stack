@@ -1,4 +1,4 @@
-import type { Awaitable, Store } from '@ora-io/utils'
+import type { Awaitable, Milliseconds, Store } from '@ora-io/utils'
 import type { ethers } from 'ethers'
 
 export type FnOnMissingLog = (log: ethers.Log) => Awaitable<void>
@@ -34,7 +34,7 @@ export interface AutoCrossCheckParam extends BaseCrossCheckParam {
   store?: Store
   storeKeyPrefix?: string // set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+txHashList
   batchBlocksCount?: number // how many blocks at most to get per check
-  pollingInterval?: number // mostly for limiting getLogs calling rate in catchup mode; how long does it take at least between 2 checks
-  blockInterval?: number // the block interval of the given chain, default: eth
   delayBlockFromLatest?: number // mostly for realtime mode; each time cc wait until latest height > toBlock + delayBlockFromLatest
+  blockInterval?: Milliseconds // the block interval of the given chain, default: eth
+  pollingInterval?: Milliseconds // mostly for limiting getLogs calling rate in catchup mode; how long does it take at least between 2 checks
 }
