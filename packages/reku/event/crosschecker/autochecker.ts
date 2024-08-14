@@ -3,7 +3,7 @@ import { polling, retryOnNull, sleep } from '@ora-io/utils'
 import { ETH_BLOCK_INTERVAL } from '../../constants'
 import type { Providers } from '../../types/w3'
 import { CrossCheckerCacheManager } from './cache/manager'
-import type { AutoCrossCheckParam, CrossCheckRangeParam } from './interface'
+import type { AutoCrossCheckParam, CrossCheckRangeParam, SimpleLog } from './interface'
 import { BaseCrossChecker } from './basechecker'
 
 export class AutoCrossChecker extends BaseCrossChecker {
@@ -80,13 +80,13 @@ export class AutoCrossChecker extends BaseCrossChecker {
     if (ignoreLogs)
       await this.cache.addLogs(ignoreLogs)
 
+    ccrOptions.ignoreLogs = await this.cache.getLogs()
+
     const updateCCROptions = async (ccrOptions: any) => {
       // iterate block range
       ccrOptions.fromBlock = this.checkpointBlockNumber
       // batchBlocksCount should > 0
       ccrOptions.toBlock = ccrOptions.fromBlock + batchBlocksCount - 1
-      // return whole cache every time
-      ccrOptions.ignoreLogs = await this.cache.getLogs()
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
@@ -124,5 +124,17 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
       return endingCondition()
     }, pollingInterval)
+  }
+
+  async diff(logs: ethers.Log[], ignoreLogs: SimpleLog[]): Promise<ethers.Log[]> {
+    const newlogs = await super.diff(logs, ignoreLogs)
+    const res: ethers.Log[] = []
+    for (const log of newlogs) {
+      const key = this.cache.getRedisKey(log)
+      const logExist = await this.cache.has(key)
+      if (!logExist)
+        res.push(log)
+    }
+    return res
   }
 }
