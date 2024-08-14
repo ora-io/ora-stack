@@ -15,25 +15,6 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
     this.noLogIndex = options?.noLogIndex ?? false
     this.storeKeyPrefix = options?.storeKeyPrefix ?? ''
     this.logger = options?.logger ?? logger
-    // this.addLog = this.noLogIndex ? this.addLogWithoutLogIndex : this.addLogWithLogIndex
-  }
-
-  /**
-   * @deprecated
-   */
-  async validateFormat() {
-    const txHashList = await this.getTxHashList() || []
-    const logIndexList = await this.getLogIndexList() || []
-
-    if (!this.noLogIndex && txHashList.length !== logIndexList.length)
-      throw new Error('cache store: txHashList.length != logIndexList.length')
-  }
-
-  // TODO: is this in high efficiency?
-  async addLog(log: SimpleLog) {
-    this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
-    const key = this.encodeKey(log)
-    await this.set(key, true)
   }
 
   /**
@@ -63,18 +44,17 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
   }
 
   /**
-   * @deprecated
+   * add log into store record that can indicate a log
    * @param log
    */
-  async addLogWithoutLogIndex(log: SimpleLog) {
-    const txHashList = await this.getTxHashList() || []
-    if (!txHashList?.includes(log.transactionHash))
-      txHashList && txHashList.push(log.transactionHash)
-    await this.setTxHashList(txHashList)
+  async addLog(log: SimpleLog) {
+    this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
+    const key = this.encodeKey(log)
+    await this.set(key, true)
   }
 
   /**
-   * parse logs into log ids that can indicate a log
+   * add logs into store records
    * @param logs
    * @returns CrossCheckerCache
    */
@@ -85,53 +65,17 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
     }
   }
 
+  /**
+   * get all known logs from store
+   * @returns
+   */
   async getLogs(): Promise<SimpleLog[]> {
-    // this.validateFormat()
-
-    // const txHashList = await this.getTxHashList() || []
-    // const logIndexList = await this.getLogIndexList() || []
     const keys = await this.keys(this.storeKeyPrefix)
     this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
-    for (const key of keys) {
-      // const [storeKeyPrefix, txHash, index] = key.split(':')
-      // if (storeKeyPrefix !== this.storeKeyPrefix)
-      //   continue
-      // logs.push({ transactionHash: txHash, index: index ? Number(index) : undefined })
+    for (const key of keys)
       logs.push(this.decodeKey(key))
-    }
+
     return logs
-  }
-
-  // TODO: is this <txHashList, logIndexList> the most efficient internal storage format?
-  /**
-   * @deprecated
-   */
-  async getTxHashList() {
-    return await this.get<string[]>(`${this.storeKeyPrefix}txHashList`)
-  }
-
-  /**
-   * @deprecated
-   * @returns
-   */
-  async getLogIndexList() {
-    return await this.get<number[][]>(`${this.storeKeyPrefix}logIndexList`)
-  }
-
-  /**
-   * @deprecated
-   * @param txHashList
-   */
-  async setTxHashList(txHashList: string[]) {
-    await this.set(`${this.storeKeyPrefix}txHashList`, txHashList)
-  }
-
-  /**
-   * @deprecated
-   * @param logIndexList
-   */
-  async setLogIndexList(logIndexList: number[][]) {
-    await this.set(`${this.storeKeyPrefix}logIndexList`, logIndexList)
   }
 }
