@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 import { AutoCrossChecker } from '../event/crosschecker/autochecker'
 import { BaseCrossChecker } from '../event/crosschecker/basechecker'
 import type { BaseCrossCheckParam } from '../event/crosschecker/interface'
-dotenv.config({ path: './packages/reku/tests/.env' })
+dotenv.config({ path: './packages/reku/tests/.env.test' })
 
 const CONTRACT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 

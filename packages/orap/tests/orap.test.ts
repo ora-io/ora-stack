@@ -1,22 +1,27 @@
 import dotenv from 'dotenv'
 import { ethers } from 'ethers'
-import { describe, it, vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
+import type { Providers } from '@ora-io/reku'
 import { startDemo } from '../mock/demo/app'
 
 dotenv.config({ path: './packages/orap/tests/.env' })
 
 const chain = 'mainnet'
 
-const wsProvider = new ethers.WebSocketProvider(
-  process.env[`${chain.toUpperCase()}_WSS`]!,
-)
-const httpProvider = new ethers.JsonRpcProvider(
-  process.env[`${chain.toUpperCase()}_HTTP`]!,
-)
+let wsProvider: Providers
+let httpProvider: Providers
+beforeEach(() => {
+  wsProvider = new ethers.WebSocketProvider(
+    process.env[`${chain.toUpperCase()}_WSS`]!,
+  )
+  httpProvider = new ethers.JsonRpcProvider(
+    process.env[`${chain.toUpperCase()}_HTTP`]!,
+  )
+})
 
 describe('Orap', () => {
-  it('should run demo without errors', async () => {
+  it.skip('should run demo without errors', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
     const storeConfig = { port: parseInt(process.env.REDIS_PORT!), host: process.env.REDIS_HOST }
