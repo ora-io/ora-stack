@@ -32,14 +32,19 @@ export class ContractManager {
 
   removeAllListeners() {
     this._contract?.removeAllListeners()
+    for (const [event, listener] of this._listeners)
+      this._contract?.off(event, listener)
+
     this._listeners.clear()
   }
 
   retryAllListeners() {
-    this._listeners.forEach((listener, event) => {
+    for (const [event, listener] of this._listeners) {
       this._contract?.off(event, listener)
-      this._contract?.on(event, listener)
-    })
+      setTimeout(() => {
+        this._contract?.on(event, listener)
+      })
+    }
   }
 
   retryListener(event: ethers.ContractEventName) {
