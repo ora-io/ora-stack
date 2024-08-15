@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 
 // Function to get the event signature
-export function getEventSignature(abi: any[], eventName: string): string {
+export function getEventSignature(abi: ethers.InterfaceAbi, eventName: string): string {
   // Create an Interface object from the ABI
   const iface = new ethers.Interface(abi)
   // Get the event fragment by name
@@ -15,7 +15,7 @@ export function getEventSignature(abi: any[], eventName: string): string {
 }
 
 // Function to parse log to event parameters
-export function parseLogToEventParams(abi: any[], eventName: string, log: any): any {
+export function parseLogToEventParams(abi: ethers.InterfaceAbi, eventName: string, log: ethers.Log): any {
   // Create an Interface object from the ABI
   const iface = new ethers.Interface(abi)
 
