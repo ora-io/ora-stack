@@ -1,5 +1,6 @@
 import type { Constructor } from '@ora-io/utils'
 import type { StoreManager } from '../store/storemanager'
+import type { Context } from '../context'
 import { TaskBase } from './base'
 
 export abstract class TaskStorable extends TaskBase {
@@ -9,19 +10,19 @@ export abstract class TaskStorable extends TaskBase {
   static readonly taskTtl: number | undefined = undefined
   static readonly taskTtlDone: number | undefined = undefined
 
-  getTaskPrefix(_context?: Partial<this>): string {
+  getTaskPrefix(_context?: Context): string {
     return (this.constructor as typeof TaskStorable).taskPrefix
   }
 
-  getTaskPrefixDone(_context?: Partial<this>): string {
+  getTaskPrefixDone(_context?: Context): string {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
-  getTaskTtl(_context?: Partial<this>): number | undefined {
+  getTaskTtl(_context?: Context): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtl
   }
 
-  getTaskTtlDone(_context?: Partial<this>): number | undefined {
+  getTaskTtlDone(_context?: Context): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtlDone
   }
 
@@ -32,8 +33,9 @@ export abstract class TaskStorable extends TaskBase {
     return instance
   }
 
-  static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Partial<T>): Promise<T> {
-    const instance = (this as any).createInstance(context)
+  static async _load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Context): Promise<T> {
+    // const instance = (this as any).createInstance(context)
+    const instance = new this()
     // get all task keys
     const keys = await sm.keys(`${instance.getTaskPrefix(context)}*`, true)
     // get the first task (del when finish)
@@ -42,19 +44,19 @@ export abstract class TaskStorable extends TaskBase {
     return instance.fromString(serializedTask)
   }
 
-  static async load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Partial<T>): Promise<T> {
+  static async load<T extends TaskStorable>(this: Constructor<T>, sm: StoreManager, context?: Context): Promise<T> {
     return await (this as any)._load(sm, context)
   }
 
-  async save(sm: StoreManager, context?: Partial<this>) {
+  async save(sm: StoreManager, context?: Context) {
     await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.getTaskTtl(context))
   }
 
-  async remove(sm: StoreManager, context?: Partial<this>) {
+  async remove(sm: StoreManager, context?: Context) {
     await sm.del(this.getTaskPrefix(context) + this.toKey())
   }
 
-  async done(sm: StoreManager, context?: Partial<this>) {
+  async done(sm: StoreManager, context?: Context) {
     await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.getTaskTtlDone(context))
     await this.remove(sm)
   }
