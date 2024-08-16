@@ -1,6 +1,6 @@
 import type { Constructor } from '@ora-io/utils'
 import type { StoreManager } from '../store/storemanager'
-import type { Context } from '../context'
+import type { Context } from './context'
 import { TaskBase } from './base'
 
 export abstract class TaskStorable extends TaskBase {

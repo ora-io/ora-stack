@@ -3,7 +3,6 @@ import { RekuProviderManager } from '@ora-io/reku'
 import type { Logger } from '@ora-io/utils'
 import { logger } from '@ora-io/utils'
 import { EventSignal } from './signal/event'
-import type { Context } from './context'
 
 export interface ListenOptions {
   wsProvider: Providers
@@ -23,8 +22,8 @@ export class Orap {
     }
   }
 
-  event(options: any, fn: any, context?: Context) {
-    const es = new EventSignal(options, fn, this.logger, context)
+  event(options: any, fn: any) {
+    const es = new EventSignal(options, fn, this.logger)
     this.routes.event.push(es)
     return es
   }
