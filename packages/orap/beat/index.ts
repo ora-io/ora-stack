@@ -1,1 +1,1 @@
-export * from './event'
+export type { EventBeat } from './event'

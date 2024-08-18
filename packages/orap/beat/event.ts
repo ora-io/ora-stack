@@ -1,4 +1,4 @@
-import type { Logger } from '@ora-io/utils/index'
+import type { Logger } from '@ora-io/utils'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
 import type { EventSignalCallback, EventSignalRegisterParams } from '../signal'
 import { EventSignal } from '../signal'
