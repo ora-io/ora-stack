@@ -3,8 +3,8 @@ import { ethers } from 'ethers'
 import { beforeEach, describe, it, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
 import type { Providers } from '@ora-io/reku'
-import { startCustomDemo } from '../mock/customDemo/app'
-import { startDemo } from '../mock/declarativeDemo/app'
+import { startCustomDemo } from '../examples/customDemo/app'
+import { startDemo } from '../examples/declarativeDemo/app'
 
 dotenv.config({ path: './packages/orap/tests/.env' })
 

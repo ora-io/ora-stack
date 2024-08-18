@@ -30,13 +30,13 @@ ORAP is a declarative framework for building oracle services, handy to use out o
 `Orap` provides 2 ways for usage:
 - Traditional:
   - Use this framework as a basic toolset.
-  - example: [customDemo](./mock/customDemo)
+  - example: [customDemo](./examples/customDemo)
   - it's more flexible but cumbersome somehow. 
     - e.g. you can use your own storage other than Redis and Memory, e.g. mysql etc., for caching.
     - you can define your own Task structure and handle workflow.
 - Declarative: 
   - Use this as a declarative *Rap-lized* framework, writing oracle server as easy as rapping a song! (ok don't hit me, rap is not easy, but you know what I mean :P)
-  - example: [declarativeDemo](./mock/declarativeDemo)
+  - example: [declarativeDemo](./examples/declarativeDemo)
   - it's way more easy to implement, `Orap` handles most of the common part, e.g. signal handle, task defining, task caching, task fetch and processing, multitasks processing, etc., while it may sacrifice flexibility in some way.
 
 Back in the scene, there are 2 internal systems in `Orap`:
