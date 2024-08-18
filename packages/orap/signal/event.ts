@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
 import type { Logger } from '@ora-io/utils'
-import type { Signal } from './type'
+import type { Signal } from './interface'
 
 export interface EventSignalRegisterParams {
   address: string
@@ -30,6 +30,7 @@ export class EventSignal implements Signal {
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
     public logger: Logger,
+    _crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
   ) {
     this.contract = new ethers.Contract(
       params.address,
@@ -45,6 +46,10 @@ export class EventSignal implements Signal {
 
     this.esig = this.eventFragment.topicHash
 
+    // set crosscheckOptions only when speicified
+    if (_crosscheckOptions)
+      this._setCrosscheckOptions(_crosscheckOptions)
+
     // to align with crosschecker onMissing, parse the last arg from ContractEventPayload to EventLog
     this.subscribeCallback = async (...args: Array<any>) => {
       const _contractEventPayload = args.pop()
@@ -59,44 +64,7 @@ export class EventSignal implements Signal {
     }
   }
 
-  // TODO: how to integrate crosschecker
-  // TODO: should be wsProvider only?
-  listen(provider: Providers, crosscheckProvider?: Providers) {
-    this.provider = provider
-
-    // start event listener
-    if (provider instanceof RekuProviderManager) {
-      provider.addContract(this.params.address, this.contract)
-      provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
-    }
-    else {
-      const listener = this.contract.connect(provider)
-      listener?.on(
-        this.params.eventName,
-        // TODO: calling this seems to be async, should we make it to sequential?
-        this.subscribeCallback,
-      )
-    }
-
-    // start cross-checker if ever set
-    if (this.crosscheckerOptions) {
-      if (!crosscheckProvider)
-        throw new Error('crosschecker set, please provide crosscheckProvider to listen function')
-      this.startCrossChecker(crosscheckProvider)
-    }
-
-    return this
-  }
-
-  async startCrossChecker(provider: Providers) {
-    if (!this.crosscheckerOptions)
-      throw new Error('no crosscheck set, can\'t start crosschecker')
-    this.crosschecker = new AutoCrossChecker(provider)
-    this.crosschecker.setLogger(this.logger)
-    await this.crosschecker.start(this.crosscheckerOptions)
-  }
-
-  crosscheck(options?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
+  _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
     const {
       pollingInterval = ONE_MINUTE_MS * 60,
       ignoreLogs = [],
@@ -110,6 +78,45 @@ export class EventSignal implements Signal {
       pollingInterval,
       ignoreLogs,
     }
+  }
+
+  // TODO: should be wsProvider only?
+  listen(provider: Providers, crosscheckProvider?: Providers) {
+    this.provider = provider
+
+    // start event listener
+    this.startEventListener(provider)
+
+    // start cross-checker if ever set
+    this.startCrossChecker(crosscheckProvider)
+
     return this
+  }
+
+  startEventListener(provider: Providers) {
+    if (provider instanceof RekuProviderManager) {
+      provider.addContract(this.params.address, this.contract)
+      provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
+    }
+    else {
+      const listener = this.contract.connect(provider)
+      listener?.on(
+        this.params.eventName,
+        // TODO: calling this seems to be async, should we make it to sequential?
+        this.subscribeCallback,
+      )
+    }
+  }
+
+  async startCrossChecker(provider?: Providers) {
+    if (!this.crosscheckerOptions)
+      return
+
+    if (!provider)
+      throw new Error('crosscheckProvider is required in listen() when crosschecker is set')
+
+    this.crosschecker = new AutoCrossChecker(provider)
+    this.crosschecker.setLogger(this.logger)
+    await this.crosschecker.start(this.crosscheckerOptions)
   }
 }

@@ -23,7 +23,57 @@
 
 ORAP is a declarative framework for building oracle services, handy to use out of the box.
 
+
+## The Owl Rapper
+> Show you `Flow`s, I'll help you to `assemble` to `Verse`s, and `play` them, specifically, the whole song (orap) is played by `drop`ping the `Beat`s of the Signal verses.
+
+`Orap` provides 2 ways for usage:
+- Traditional:
+  - Use this framework as a basic toolset.
+  - example: [customDemo](./mock/customDemo)
+  - it's more flexible but cumbersome somehow. 
+    - e.g. you can use your own storage other than Redis and Memory, e.g. mysql etc., for caching.
+    - you can define your own Task structure and handle workflow.
+- Declarative: 
+  - Use this as a declarative *Rap-lized* framework, writing oracle server as easy as rapping a song! (ok don't hit me, rap is not easy, but you know what I mean :P)
+  - example: [declarativeDemo](./mock/declarativeDemo)
+  - it's way more easy to implement, `Orap` handles most of the common part, e.g. signal handle, task defining, task caching, task fetch and processing, multitasks processing, etc., while it may sacrifice flexibility in some way.
+
+Back in the scene, there are 2 internal systems in `Orap`:
+
+- Traditional: 
+  - mainly referring to the `Signal`, `StoreManager`, and `Task`, where the concepts are self-explained in engineering context.
+  - it can be used directly by users.
+- *Rap-lized*: 
+  - mainly referring to the `Flow`, `Verse`, and `Beat`, where the concepts are introduced by `Orap` only. 
+  - it helps to build the declarative functionality, which is way easier for users and save some developers.
+  - it mostly for internal developing purpose, and ~~should be~~ easy to scale and extend, though user also has access to them if they want.
+
+### *Rap-lized* Terminology
+
+The following terminology is internally, can be transparent to users.
+
+- `Flow`: handling user-defined option flows, 
+  - e.g. this is supported by multiple flow types
+    ```typescript
+    new Orap().event(..).crosscheck()
+    .handle(..)
+    .task(..).key(..).prefix(..).ttl(..)
+    .handle(..)
+    .another()
+    .task(..).key(..).prefix(..).ttl(..)
+    .handle(..)
+    ```
+  - `assemble`: wrap up the `Flow` definition and build a `Verse` based on it.
+- `Verse`: equivalent to an executor/processor of the corresponding `Flow`.
+  - `play`: equivalent to start/launch the executor/processor.
+- `Beat`: almost identical to `Signal`, wrap the `Signal` into a single phase class with only the `constructor` and `drop()`, easy for `Verse` to handle
+  - `drop()`: start the `Signal` listener process. Drop the Beats!
+
 ## Usage
+
+- TODO: add declarative usage
+
 ```ts
 import { ListenOptions, Orap, StoreManager } from '../../orap'
 import { memoryStore, redisStore } from '../../utils'

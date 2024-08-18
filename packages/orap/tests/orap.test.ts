@@ -3,7 +3,8 @@ import { ethers } from 'ethers'
 import { beforeEach, describe, it, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
 import type { Providers } from '@ora-io/reku'
-import { startDemo } from '../mock/demo/app'
+import { startCustomDemo } from '../mock/customDemo/app'
+import { startDemo } from '../mock/declarativeDemo/app'
 
 dotenv.config({ path: './packages/orap/tests/.env' })
 
@@ -21,7 +22,22 @@ beforeEach(() => {
 })
 
 describe('Orap', () => {
-  it('should run demo without errors', async () => {
+  it.skip('should run CustomDemo Demo without errors', async () => {
+    const consoleSpy = vi.spyOn(console, 'log')
+
+    const storeConfig = { port: parseInt(process.env.REDIS_PORT!), host: process.env.REDIS_HOST }
+
+    startCustomDemo({ wsProvider, httpProvider }, storeConfig)
+    // await expect().resolves.not.toThrow()
+
+    // Optionally, you can check if specific logs were called
+    // expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("onMissingLog"));
+    await sleep(1000000)
+    consoleSpy.mockRestore()
+  }, {
+    timeout: 100000000,
+  })
+  it('should run Declarative Demo without errors', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
     const storeConfig = { port: parseInt(process.env.REDIS_PORT!), host: process.env.REDIS_HOST }

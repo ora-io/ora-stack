@@ -27,7 +27,7 @@ export class Logger {
 
   private tagMap: Record<LogType, string>
 
-  constructor(level: LogLevel = 'info', prefix = '') {
+  constructor(level: LogLevel = 'debug', prefix = '') {
     this.level = level
     this.prefix = prefix
     this.thresh = LogLevels[this.level]
