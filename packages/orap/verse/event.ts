@@ -6,8 +6,7 @@ import type { TaskVerse } from './task'
 export class EventVerse implements Verse {
   private taskVerses: TaskVerse[] = []
 
-  constructor(private flow: EventFlow) {
-  }
+  constructor(private flow: EventFlow) { }
 
   // TODO: can rm if constructor works
   // new from flow
@@ -17,6 +16,10 @@ export class EventVerse implements Verse {
   //   return flowIns;
   // }
 
+  get logger() {
+    return this.flow.logger
+  }
+
   async _createTasks(...args: Array<any>) {
     // TODO: sequential or async?
     for (const verse of this.taskVerses)
@@ -25,9 +28,11 @@ export class EventVerse implements Verse {
 
   async handleSignal(...args: Array<any>) {
     const isContinue = await this.flow.handleFn(...args)
-    if (!isContinue)
+    if (!isContinue) {
+      this.logger.debug('[!] user handleFn return false, signal handle ends.')
       return
-    await this._createTasks(...args)
+    }
+    await this._createTasks(...args.slice(0, -1)) // not include the last ContactEventPayload obj
   }
 
   play() {
@@ -50,8 +55,8 @@ export class EventVerse implements Verse {
     const eventBeat = new EventBeat(
       // for create signal
       this.flow.params!,
-      this.handleSignal,
-      this.flow.logger,
+      this.handleSignal.bind(this),
+      this.logger,
       this.flow.partialCrosscheckOptions,
       // for listen
       this.flow._subscribeProvider!,

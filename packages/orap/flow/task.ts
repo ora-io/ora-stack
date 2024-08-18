@@ -1,23 +1,29 @@
+import type { Awaitable } from '@ora-io/utils'
 import { alphabetHex, randomStr } from '@ora-io/utils'
-import type { Context } from '../task'
+import type { Context, TaskClassForVerse } from '../task'
 import type { StoreManager } from '../store'
 import { TaskVerse } from '../verse/task'
 import type { Flow } from './interface'
 import type { EventFlow } from './event'
+
+// TODO: HandleFn and ToKeyFn use use Record or Task?
+export type ToKeyFn = (eventLog: Record<string, any>) => string
+export type HandleFn = (eventLog: Record<string, any>, context?: Context) => Awaitable<boolean>
+export type HandleResultFn = (task: TaskClassForVerse, context?: Context) => Awaitable<void>
 
 export class TaskFlow implements Flow {
   taskPrefixFn: (context?: any) => string = _ => 'Task:'
   donePrefixFn: (context?: any) => string = _ => 'Done-Task:'
   taskTtl?: number
   doneTtl?: number
-  toKeyFn: (task: any) => string = _ => randomStr(8, alphabetHex)
-  handleFn: (task: any, context?: any) => Promise<boolean> = (_, __) => { throw new Error('required to set task handler through .handle()') }
-  successFn: (task: any, context?: any) => Promise<void> = async (task: any) => {
+  toKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
+  handleFn: HandleFn = (_, __) => { throw new Error('required to set task handler through .handle()') }
+  successFn: HandleResultFn = async (task: any) => {
     await task.done()
     await task.remove()
   }
 
-  failFn: (task: any, context?: any) => Promise<void> = async (task: any) => {
+  failFn: HandleResultFn = async (task: any) => {
     await task.remove()
   }
 
@@ -50,22 +56,22 @@ export class TaskFlow implements Flow {
     return this
   }
 
-  key(toKey: (task: any) => string): this {
+  key(toKey: ToKeyFn): this {
     this.toKeyFn = toKey
     return this
   }
 
-  handle(handler: (task: any, context?: Context) => Promise<boolean>): this {
+  handle(handler: HandleFn): this {
     this.handleFn = handler
     return this
   }
 
-  success(onSuccess: (task: any, context?: Context) => Promise<void>): this {
+  success(onSuccess: HandleResultFn): this {
     this.successFn = onSuccess
     return this
   }
 
-  fail(onFail: (task: any, context?: Context) => Promise<void>): this {
+  fail(onFail: HandleResultFn): this {
     this.failFn = onFail
     return this
   }

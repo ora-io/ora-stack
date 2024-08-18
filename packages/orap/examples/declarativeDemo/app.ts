@@ -1,5 +1,5 @@
 import type { EventLog } from 'ethers'
-import { redisStore } from '@ora-io/utils'
+import { randomStr, redisStore } from '@ora-io/utils'
 import type { Context, ListenOptions } from '../../index'
 import { Orap, StoreManager } from '../../index'
 import { config, logger } from './config'
@@ -12,6 +12,7 @@ let store: any
 let sm: any
 
 export function startDemo(options: ListenOptions, storeConfig?: any) {
+  logger.log('declarative demo start...')
   store = redisStore(storeConfig) // use redis
   // store = memoryStore(storeConfig); // use memory
   sm = new StoreManager(store)
@@ -38,9 +39,9 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
       delayBlockFromLatest: 1,
     })
     .task(sm, context)
-    // .key(toKeyFn)
+    .key(log => randomStr(4) + log.from) // TODO: log receives [] rather than {}
     .prefix(taskprefixFn, doneprefixFn)
-    // .ttl({ taskTtl, doneTtl })
+    .ttl({ taskTtl: 120, doneTtl: 60 })
     .handle(taskHandler)
 
   // set logger before listen
@@ -53,7 +54,8 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
   )
 }
 
-async function taskHandler(task: any, _context?: Context) {
+// TODO: TaskClassForVerse?
+async function taskHandler(task: Record<string, any>, _context?: Context) {
   logger.log('[+] handleTask', task.toString())
   return true
 }
