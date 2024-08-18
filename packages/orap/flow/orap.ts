@@ -23,6 +23,7 @@ export class OrapFlow implements Flow {
 
   logger(logger: Logger) {
     this._logger = logger
+    return this
   }
 
   event(options: any, handler?: any): EventFlow {
@@ -44,7 +45,7 @@ export class OrapFlow implements Flow {
     }
 
     this.onListenFn = onListenFn
-    //
+
     const orapVerse = this.assemble()
     orapVerse.play()
   }

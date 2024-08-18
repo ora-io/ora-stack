@@ -18,6 +18,14 @@ export abstract class TaskStorable extends TaskBase {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
+  get taskTtl(): number | undefined {
+    return (this.constructor as typeof TaskStorable).taskTtl
+  }
+
+  get taskTtlDone(): number | undefined {
+    return (this.constructor as typeof TaskStorable).taskTtlDone
+  }
+
   getTaskTtl(_context?: Context): number | undefined {
     return (this.constructor as typeof TaskStorable).taskTtl
   }
@@ -49,7 +57,7 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async save(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.getTaskTtl(context))
+    await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.taskTtl)
   }
 
   async remove(sm: StoreManager, context?: Context) {
@@ -57,7 +65,7 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async done(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.getTaskTtlDone(context))
+    await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.taskTtlDone)
     await this.remove(sm)
   }
 }

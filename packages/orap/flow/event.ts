@@ -57,7 +57,7 @@ export class EventFlow implements Flow {
     this._crosscheckProvider = provider
   }
 
-  _assembleTaskFlows(): TaskVerse[] {
+  private _assembleTaskFlows(): TaskVerse[] {
     return this.taskFlows.map(flow => flow.assemble())
   }
 
