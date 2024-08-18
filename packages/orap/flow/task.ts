@@ -7,9 +7,9 @@ import type { Flow } from './interface'
 import type { EventFlow } from './event'
 
 // TODO: HandleFn and ToKeyFn use use Record or Task?
-export type ToKeyFn = (eventLog: Record<string, any>) => string
-export type HandleFn = (eventLog: Record<string, any>, context?: Context) => Awaitable<boolean>
-export type HandleResultFn = (task: TaskClassForVerse, context?: Context) => Awaitable<void>
+export type ToKeyFn = (...eventLog: Array<any>) => Awaitable<string>
+export type HandleFn = (...eventLog: Array<any>) => Awaitable<boolean>
+export type HandleResultFn = (task: TaskClassForVerse) => Awaitable<void>
 
 export class TaskFlow implements Flow {
   taskPrefixFn: (context?: any) => string = _ => 'Task:'
@@ -17,7 +17,7 @@ export class TaskFlow implements Flow {
   taskTtl?: number
   doneTtl?: number
   toKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
-  handleFn: HandleFn = (_, __) => { throw new Error('required to set task handler through .handle()') }
+  handleFn: HandleFn = (_) => { throw new Error('required to set task handler through .handle()') }
   successFn: HandleResultFn = async (task: any) => {
     await task.done()
     await task.remove()

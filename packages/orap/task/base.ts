@@ -1,8 +1,8 @@
-import type { Constructor } from '@ora-io/utils'
+import type { Awaitable, Constructor } from '@ora-io/utils'
 import { deepMerge } from '@ora-io/utils'
 
 export abstract class TaskBase {
-  abstract toKey(): string
+  abstract toKey(): Awaitable<string>
 
   toString() {
     const obj: Record<string, any> = {}

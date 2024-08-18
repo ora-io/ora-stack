@@ -28,8 +28,7 @@ export class TaskVerse implements Verse {
 
   async startTaskProcessor() {
     // used only for getTaskPrefix in log
-    this.logger.debug(`task with context ${this.flow.context?.toString()
-      } starts flowing. Will load tasks with prefix "${this.flow.taskPrefixFn(this.flow.context)}"`)
+    this.logger.debug(`task with context ${this.flow.context?.toString()} starts flowing. Will load tasks with prefix "${this.flow.taskPrefixFn(this.flow.context)}"`)
 
     // TODO: change to polling
     while (true) {

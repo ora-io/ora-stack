@@ -10,7 +10,7 @@ export class TaskClassForVerse extends TaskStorable {
   // TODO: fetch members from event params
   constructor(
     private flow: TaskFlow,
-    public eventLog: Record<string, any> = {},
+    public eventLog: Array<any> = [],
     private id?: string,
   ) { super() }
 
@@ -30,18 +30,18 @@ export class TaskClassForVerse extends TaskStorable {
     return this.flow.doneTtl
   }
 
-  toKey(): string {
+  async toKey(): Promise<string> {
     if (!this.id)
-      this.id = this.flow.toKeyFn(this.eventLog)
+      this.id = await this.flow.toKeyFn(...this.eventLog)
     return this.id
   }
 
   async handle(): Promise<void> {
-    this.flow.logger.debug('[+] handleTask', this.toKey(), this.toString())
-    if (await this.flow.handleFn(this.eventLog, this.flow.context))
-      await this.flow.successFn(this, this.flow.context)
+    this.flow.logger.debug('[+] handleTask', await this.toKey(), this.toString())
+    if (await this.flow.handleFn(...this.eventLog))
+      await this.flow.successFn(this)
     else
-      await this.flow.failFn(this, this.flow.context)
+      await this.flow.failFn(this)
   }
 
   /** ***************** overwrite **************/
@@ -58,7 +58,7 @@ export class TaskClassForVerse extends TaskStorable {
   }
 
   async load() {
-    this.flow.logger.debug('[*] load task 1', this)
+    // this.flow.logger.debug('[*] load task 1', this)
     // get all task keys
     const keys = await this.flow.sm.keys(`${this.getTaskPrefix(this.flow.context)}*`, true)
     // get the first task (del when finish)
@@ -69,18 +69,18 @@ export class TaskClassForVerse extends TaskStorable {
     // set key to task id
     this.id = this._trimPrefix(keys[0])
 
-    this.flow.logger.debug('[*] load task 2', this.toKey())
+    // this.flow.logger.debug('[*] load task 2', await this.toKey())
 
     return this
   }
 
   async done() {
-    this.flow.logger.debug('[*] done task', this.toKey())
+    this.flow.logger.debug('[*] done task', await this.toKey())
     await super.done(this.flow.sm, this.flow.context)
   }
 
   async remove() {
-    this.flow.logger.debug('[*] remove task', this.toKey())
+    this.flow.logger.debug('[*] remove task', await this.toKey())
     await super.remove(this.flow.sm, this.flow.context)
   }
 

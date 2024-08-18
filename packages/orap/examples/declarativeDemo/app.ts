@@ -39,9 +39,9 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
       delayBlockFromLatest: 1,
     })
     .task(sm, context)
-    .key(log => randomStr(4) + log.from) // TODO: log receives [] rather than {}
+    .key(toKey)
     .prefix(taskprefixFn, doneprefixFn)
-    .ttl({ taskTtl: 120, doneTtl: 60 })
+    .ttl({ taskTtl: 120000, doneTtl: 60000 })
     .handle(taskHandler)
 
   // set logger before listen
@@ -54,13 +54,17 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
   )
 }
 
+function toKey(from: string, _to: string, _amount: number) {
+  return `${from}_${randomStr(4)}`
+}
+
 // TODO: TaskClassForVerse?
-async function taskHandler(task: Record<string, any>, _context?: Context) {
-  logger.log('[+] handleTask', task.toString())
+async function taskHandler(from: string, to: string, amount: number) {
+  logger.log('[+] handleTask from =', from, 'to =', to, 'amount =', amount)
   return true
 }
 
-async function newSignalHook(from: any, to: any, amount: any, event: EventLog) {
+async function newSignalHook(from: string, to: string, amount: number, event: EventLog) {
   logger.log('new signal', event.transactionHash)
   return true // true to continue, false to hijack the process.
 }

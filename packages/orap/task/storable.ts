@@ -57,15 +57,15 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async save(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefix(context) + this.toKey(), this.toString(), this.taskTtl)
+    await sm.set(this.getTaskPrefix(context) + await this.toKey(), this.toString(), this.taskTtl)
   }
 
   async remove(sm: StoreManager, context?: Context) {
-    await sm.del(this.getTaskPrefix(context) + this.toKey())
+    await sm.del(this.getTaskPrefix(context) + await this.toKey())
   }
 
   async done(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefixDone(context) + this.toKey(), this.toString(), this.taskTtlDone)
+    await sm.set(this.getTaskPrefixDone(context) + await this.toKey(), this.toString(), this.taskTtlDone)
     await this.remove(sm)
   }
 }
