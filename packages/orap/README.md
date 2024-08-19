@@ -25,7 +25,9 @@ ORAP is a declarative framework for building oracle services, handy to use out o
 
 
 ## The Owl Rapper
-> Show me you `Flow`s, I'll help you `assemble` to `Verse`s, which compose into a `Orap`. `drop` the `Beat`s, let's `play`!
+> Show me you `Flow`s, I'll help you `assemble` to `Verse`s, which compose into a `Orap`. 
+>
+> `drop` the `Beat`s, let's `play`!
 
 `Orap` provides 2 styles of usage:
 - OO Style (Basic):
@@ -58,9 +60,9 @@ It comes with rich features like customized task cache, multitasks handling etc.
 Note the following already includes using Redis as the store to cache tasks, allowing continuation after service restart, it's reliable even when the service restarts.
 
 ```ts
-import { ethers } from "ethers"
+import { ethers } from 'ethers'
 import { Orap, StoreManager } from '@orap-io/orap'
-import { Logger, redisStore } from "@ora-io/utils"
+import { Logger, redisStore } from '@ora-io/utils'
 
 // new orap
 const orap = new Orap()
@@ -92,7 +94,7 @@ orap.event(eventSignalParam)
   .handle(handle)
 
 // set logger before listen
-orap.logger(logger);
+orap.logger(logger)
 
 // start signal listeners
 orap.listen(
@@ -194,7 +196,7 @@ Each `.task(...)` starts a `Task Flow`
 Note the following doesn't include task cache, it only calls `handle` every time it receives an event. So this service is only for demo, don't use it for production, otherwise it may miss events when service down.
 
 ```ts
-import { ethers } from "ethers"
+import { ethers } from 'ethers'
 import { Orap } from '@orap-io/orap'
 
 const orap = new Orap()
@@ -287,7 +289,7 @@ etc.
   - `taskPrefix` (recommend): set the prefix of all tasks, also is used when `load` task
   - `taskPrefixDone` (recommend): set the prefix of finished tasks, only used in `done`; no need to set if you don't use "task.done(sm)"
 
-## StorageManager
+### StorageManager
 - a wrap class designed for caching tasks in Orap
 - `store`: the store entity, currently provides 2 options: use memory or redis, checkout `orap/store`
 - `queryDelay`: when doing retry-able operations, e.g. get all keys with the given prefix, this defines the interval between retries.
