@@ -23,7 +23,6 @@
 
 ORAP is a declarative framework for building oracle services, handy to use out of the box.
 
-
 ## The Owl Rapper
 > Show me you `Flow`s, I'll help you `assemble` to `Verse`s, which compose into a `Orap`. 
 >
@@ -50,6 +49,12 @@ Back in the scene, there are 2 internal layers in `Orap`:
   - mainly referring to the `Flow`, `Verse`, and `Beat`, where the concepts are introduced by `Orap` only. 
   - it helps to build the declarative functionality, which is way easier for users and save some developers.
   - it mostly for internal developing purpose, and ~~should be~~ easy to scale and extend, though user also has access to them if they want.
+
+
+> About Multi-chain: Currently Each `Orap` listens to only 1 blockchain network by design, similar to http servers. Create multiple `Orap` instances to implement multi-chain listener.
+> 
+> Suggest to include network in task `prefix()`, to avoid key collision in cache store
+
 
 ## Usage
 
