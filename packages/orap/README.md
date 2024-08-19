@@ -74,24 +74,27 @@ const sm = new StoreManager(store)
 // use a logger
 const logger = new Logger('info', '[orap-raplize-sample]')
 
-const eventSignalParam = {
-  address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  abi: { anonymous: false, inputs: [{ indexed: true, name: 'from', type: 'address' }, { indexed: true, name: 'to', type: 'address' }, { indexed: false, name: 'value', type: 'uint256' }], name: 'Transfer', type: 'event' },
-  eventName: 'Transfer',
-}
+const handle1 = (...args: any) => { logger.log('handle task 1', args); return true }
 
-const handle = (...args: any) => { logger.log('handle', args); return true }
+const handle2 = (...args: any) => { logger.log('handle task 2', args); return true }
 
 // define event signal with crosscheck, and customized cacheable tasks
 // note: use redis as the cache layer
 orap.event(eventSignalParam)
-  .crosscheck({ pollingInterval: 1000, batchBlocksCount: 1, blockInterval: 12000 })
+  .crosscheck(ccOptions)
   // add a task
   .task()
   .cache(sm)
-  .prefix('ora-stack:orap:raplizeSample:TransferTask:', 'ora-stack:orap:raplizeSample:Done-TransferTask:')
+  .prefix('ora-stack:orap:raplizeSample:Task-1:', 'ora-stack:orap:raplizeSample:Done-Task-1:')
   .ttl({ taskTtl: 120000, doneTtl: 60000 })
-  .handle(handle)
+  .handle(handle1)
+  // add another task
+  .another()
+  .task()
+  .cache(sm)
+  .prefix('ora-stack:orap:raplizeSample:Task-2:', 'ora-stack:orap:raplizeSample:Done-Task-2:')
+  .ttl({ taskTtl: 120000, doneTtl: 60000 })
+  .handle(handle2)
 
 // set logger before listen
 orap.logger(logger)
