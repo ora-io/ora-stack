@@ -54,7 +54,7 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
    */
   async getLogs(): Promise<SimpleLog[]> {
     const keys = await this.keys(this.storeKeyPrefix)
-    this.logger.debug('cachemanager-getLogs:', keys)
+    // this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
     for (const key of keys)
       logs.push(this.decodeLogKey(key))
@@ -69,12 +69,12 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
    */
   encodeLogKey(log: SimpleLog): string {
     const key = log.index && !this.noLogIndex ? `${this.storeKeyPrefix + log.transactionHash}:${log.index}` : this.storeKeyPrefix + log.transactionHash
-    this.logger.debug('cc-cm-encodeKey', key)
+    // this.logger.debug('cc-cm-encodeKey', key)
     return key
   }
 
   decodeLogKey(key: string): SimpleLog {
-    this.logger.debug('cc-cm-decodeKey', key)
+    // this.logger.debug('cc-cm-decodeKey', key)
     if (!key.startsWith(this.storeKeyPrefix))
       throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
 
