@@ -1,4 +1,4 @@
-import assert from 'assert'
+import { isString, stripPrefix } from '@ora-io/utils'
 import type { TaskFlow } from '../flow'
 import type { Context } from './context'
 import { TaskStorable } from './storable'
@@ -6,7 +6,7 @@ import { TaskStorable } from './storable'
 /**
  * used in TaskVerse only
  */
-export class TaskClassForVerse extends TaskStorable {
+export class TaskRaplized extends TaskStorable {
   // TODO: fetch members from event params
   constructor(
     private flow: TaskFlow,
@@ -14,12 +14,16 @@ export class TaskClassForVerse extends TaskStorable {
     private id?: string,
   ) { super() }
 
-  getTaskPrefix(_context?: Context): string {
-    return this.flow.taskPrefixFn(this.flow.context)
+  async getTaskPrefix(_context?: Context): Promise<string> {
+    return isString(this.flow.taskPrefix)
+      ? this.flow.taskPrefix
+      : await this.flow.taskPrefix(this.flow.ctx)
   }
 
-  getTaskPrefixDone(_context?: Context): string {
-    return this.flow.donePrefixFn(this.flow.context)
+  async getTaskPrefixDone(_context?: Context): Promise<string> {
+    return isString(this.flow.donePrefix)
+      ? this.flow.donePrefix
+      : await this.flow.donePrefix(this.flow.ctx)
   }
 
   get taskTtl(): number | undefined {
@@ -37,7 +41,7 @@ export class TaskClassForVerse extends TaskStorable {
   }
 
   async handle(): Promise<void> {
-    this.flow.logger.debug('[+] handleTask', await this.toKey(), this.toString())
+    this.flow.logger.debug('[*] handle task:', await this.toKey())
     if (await this.flow.handleFn(...this.eventLog))
       await this.flow.successFn(this)
     else
@@ -47,41 +51,36 @@ export class TaskClassForVerse extends TaskStorable {
   /** ***************** overwrite **************/
 
   async save() {
-    this.flow.logger.debug('[*] save task', this.toString())
-    await super.save(this.flow.sm, this.flow.context)
-  }
-
-  private _trimPrefix(key: string) {
-    const prefix = this.getTaskPrefix(this.flow.context)
-    assert(key.startsWith(prefix))
-    return key.slice(prefix.length)
+    this.flow.logger.debug('[*] save task:', this.toString())
+    await super.save(this.flow.sm, this.flow.ctx)
   }
 
   async load() {
     // this.flow.logger.debug('[*] load task 1', this)
+    const prefix = await this.getTaskPrefix(this.flow.ctx)
     // get all task keys
-    const keys = await this.flow.sm.keys(`${this.getTaskPrefix(this.flow.context)}*`, true)
+    const keys = await this.flow.sm.keys(`${prefix}*`, true)
     // get the first task (del when finish)
     const serializedTask: string = (await this.flow.sm.get(keys[0]))! // never undefined ensured by keys isWait=true
 
     this.fromString(serializedTask)
 
     // set key to task id
-    this.id = this._trimPrefix(keys[0])
+    this.id = stripPrefix(keys[0], prefix)
 
-    // this.flow.logger.debug('[*] load task 2', await this.toKey())
+    // this.flow.logger.debug('[*] load task 4', await this.toKey())
 
     return this
   }
 
   async done() {
-    this.flow.logger.debug('[*] done task', await this.toKey())
-    await super.done(this.flow.sm, this.flow.context)
+    this.flow.logger.debug('[*] done task:', await this.toKey())
+    await super.done(this.flow.sm, this.flow.ctx)
   }
 
   async remove() {
-    this.flow.logger.debug('[*] remove task', await this.toKey())
-    await super.remove(this.flow.sm, this.flow.context)
+    this.flow.logger.debug('[*] remove task:', await this.toKey())
+    await super.remove(this.flow.sm, this.flow.ctx)
   }
 
   /**

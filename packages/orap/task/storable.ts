@@ -1,4 +1,4 @@
-import type { Constructor } from '@ora-io/utils'
+import type { Awaitable, Constructor } from '@ora-io/utils'
 import type { StoreManager } from '../store/storemanager'
 import type { Context } from './context'
 import { TaskBase } from './base'
@@ -10,11 +10,11 @@ export abstract class TaskStorable extends TaskBase {
   static readonly taskTtl: number | undefined = undefined
   static readonly taskTtlDone: number | undefined = undefined
 
-  getTaskPrefix(_context?: Context): string {
+  getTaskPrefix(_context?: Context): Awaitable<string> {
     return (this.constructor as typeof TaskStorable).taskPrefix
   }
 
-  getTaskPrefixDone(_context?: Context): string {
+  getTaskPrefixDone(_context?: Context): Awaitable<string> {
     return (this.constructor as typeof TaskStorable).taskPrefixDone
   }
 
@@ -45,7 +45,7 @@ export abstract class TaskStorable extends TaskBase {
     // const instance = (this as any).createInstance(context)
     const instance = new this()
     // get all task keys
-    const keys = await sm.keys(`${instance.getTaskPrefix(context)}*`, true)
+    const keys = await sm.keys(`${await instance.getTaskPrefix(context)}*`, true)
     // get the first task (del when finish)
     const serializedTask: string = (await sm.get(keys[0]))! // never undefined ensured by keys isWait=true
 
@@ -57,15 +57,14 @@ export abstract class TaskStorable extends TaskBase {
   }
 
   async save(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefix(context) + await this.toKey(), this.toString(), this.taskTtl)
+    await sm.set(await this.getTaskPrefix(context) + await this.toKey(), this.toString(), this.taskTtl)
   }
 
   async remove(sm: StoreManager, context?: Context) {
-    await sm.del(this.getTaskPrefix(context) + await this.toKey())
+    await sm.del(await this.getTaskPrefix(context) + await this.toKey())
   }
 
   async done(sm: StoreManager, context?: Context) {
-    await sm.set(this.getTaskPrefixDone(context) + await this.toKey(), this.toString(), this.taskTtlDone)
-    await this.remove(sm)
+    await sm.set(await this.getTaskPrefixDone(context) + await this.toKey(), this.toString(), this.taskTtlDone)
   }
 }

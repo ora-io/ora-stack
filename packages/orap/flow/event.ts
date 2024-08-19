@@ -1,18 +1,17 @@
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
-import type { Awaitable } from '@ora-io/utils'
 import type { Context } from '../task'
 import { TaskFlow } from '../flow/task'
 import type { StoreManager } from '../store'
 import type { EventSignalRegisterParams } from '../signal'
 import { EventVerse } from '../verse/event'
 import type { TaskVerse } from '../verse/task'
-import type { Flow } from './interface'
+import type { Flow, HandleFn } from './interface'
 import type { OrapFlow } from './orap'
 
 export class EventFlow implements Flow {
   private taskFlows: TaskFlow[] = []
 
-  handleFn: (...args: Array<any>) => Awaitable<boolean>
+  handleFn: HandleFn
   partialCrosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>
 
   _subscribeProvider?: Providers
@@ -21,11 +20,9 @@ export class EventFlow implements Flow {
   constructor(
     private parentFlow?: OrapFlow,
     public params?: EventSignalRegisterParams,
-    // TODO: all use Awaitable
-    handleFn?: (...args: Array<any>) => Awaitable<boolean>, // return: succ & continue if true, stop if false
+    handleFn?: HandleFn, // return: succ & continue if true, stop if false
   ) {
     // Default handleFn
-    // this.handleFn = async (from: any, to: any, amount: any, event: EventLog) {
     this.handleFn = handleFn ?? (async (..._args: Array<any>) => {
       const _contractEventPayload = _args.pop()
       this.logger.debug('handle event signal', _contractEventPayload.log.transactionHash)
@@ -43,18 +40,29 @@ export class EventFlow implements Flow {
   }
 
   // task(store: Store, context?: Context): TaskFlow {
-  task(sm: StoreManager, context?: Context): TaskFlow {
-    const tf = new TaskFlow(this, sm, context)
+  task(sm?: StoreManager, context?: Context): TaskFlow {
+    const tf = new TaskFlow(this)
+    if (sm)
+      tf.cache(sm)
+    if (context)
+      tf.context(context)
     this.taskFlows.push(tf)
     return tf
   }
 
   subscribeProvider(provider: Providers) {
     this._subscribeProvider = provider
+    return this
   }
 
   crosscheckProvider(provider: Providers) {
     this._crosscheckProvider = provider
+    return this
+  }
+
+  handle(handleFn: HandleFn) {
+    this.handleFn = handleFn
+    return this
   }
 
   private _assembleTaskFlows(): TaskVerse[] {

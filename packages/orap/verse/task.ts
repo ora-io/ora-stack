@@ -1,16 +1,10 @@
 import type { TaskFlow } from '../flow/task'
-import { TaskClassForVerse } from '../task/verse'
+import { TaskRaplized } from '../task/verse'
 import type { Verse } from './interface'
 
 export class TaskVerse implements Verse {
   constructor(private flow: TaskFlow) {
   }
-  // new from flow
-  // _from(flow: TaskFlow): TaskVerse {
-  //   const flowIns = new TaskVerse(); // Create B instance
-  //   Object.assign(flowIns, flow); // Copy all properties from A to B
-  //   return flowIns;
-  // }
 
   get logger() {
     return this.flow.logger
@@ -22,17 +16,16 @@ export class TaskVerse implements Verse {
    */
   async createTask(...args: Array<any>) {
     this.logger.debug('creating task with args:', args)
-    const task = new TaskClassForVerse(this.flow, args)
+    const task = new TaskRaplized(this.flow, args)
     task.save()
   }
 
   async startTaskProcessor() {
-    // used only for getTaskPrefix in log
-    this.logger.debug(`task with context ${this.flow.context?.toString()} starts flowing. Will load tasks with prefix "${this.flow.taskPrefixFn(this.flow.context)}"`)
+    this.logger.debug(`task with context ${this.flow.ctx?.toString()} starts flowing. Will load tasks with prefix "${await (new TaskRaplized(this.flow)).getTaskPrefix(this.flow.ctx)}"`)
 
     // TODO: change to polling
     while (true) {
-      const task = await (new TaskClassForVerse(this.flow)).load()
+      const task = await (new TaskRaplized(this.flow)).load()
 
       await task.handle()
     }

@@ -1,48 +1,54 @@
 import type { EventLog } from 'ethers'
-import { randomStr, redisStore } from '@ora-io/utils'
-import type { Context, ListenOptions } from '../../index'
+import { Logger, randomStr, redisStore } from '@ora-io/utils'
+import type { ListenOptions, ToKeyFn } from '../../index'
 import { Orap, StoreManager } from '../../index'
-import { config, logger } from './config'
 import ABI from './erc20.abi.json'
 
-// new orap
-const orap = new Orap()
-
-let store: any
-let sm: any
+const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+const TRANSFER_EVENT_NAME = 'Transfer'
+const logger = new Logger('info', '[orap-mock-demo]')
 
 export function startDemo(options: ListenOptions, storeConfig?: any) {
-  logger.log('declarative demo start...')
-  store = redisStore(storeConfig) // use redis
-  // store = memoryStore(storeConfig); // use memory
-  sm = new StoreManager(store)
+  // new orap
+  const orap = new Orap()
+
+  const store = redisStore(storeConfig)
+  const sm = new StoreManager(store)
 
   const eventSignalParam = {
-    address: config.MAINNET_USDT_ADDR,
+    address: MAINNET_USDT_ADDR,
     abi: ABI,
-    eventName: config.TRANSFER_EVENT_NAME,
+    eventName: TRANSFER_EVENT_NAME,
   }
 
-  const context = { chain: 'testchain' }
+  const toKey: ToKeyFn = (from: string, _to: string, _amount: number) => `${from}_${randomStr(4)}`
 
-  const taskprefixFn = (_context?: Context) => { return 'ora-stack:orap:demo:TransferTask:' }
-  const doneprefixFn = (_context?: Context) => { return 'ora-stack:orap:demo:Done-TransferTask:' }
-
-  orap.event(eventSignalParam, newSignalHook)
+  orap.event(eventSignalParam)
     .crosscheck({
       store,
       storeKeyPrefix: 'ora-stack:orap:demo:cc:',
-      storeTtl: config.CROSSCHECKER_CACHE_TTL,
+      storeTtl: 60000,
       pollingInterval: 3000,
       batchBlocksCount: 1,
       blockInterval: 12000,
       delayBlockFromLatest: 1,
     })
-    .task(sm, context)
+    // event hook, not necessary
+    .handle(newEventSignalHook)
+    // add a task
+    .task()
+    .cache(sm)
     .key(toKey)
-    .prefix(taskprefixFn, doneprefixFn)
+    .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
     .ttl({ taskTtl: 120000, doneTtl: 60000 })
-    .handle(taskHandler)
+    .handle(handleTask)
+    // add another task
+    .another()
+    .task()
+    .prefix('ora-stack:orap:demo:AnotherTask:', 'ora-stack:orap:demo:Done-AnotherTask:')
+    .cache(sm) // rm to use mem by default
+    .ttl({ taskTtl: 20000, doneTtl: 20000 })
+    .handle(handleTask_2)
 
   // set logger before listen
   orap.logger(logger)
@@ -54,17 +60,18 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
   )
 }
 
-function toKey(from: string, _to: string, _amount: number) {
-  return `${from}_${randomStr(4)}`
-}
-
-// TODO: TaskClassForVerse?
-async function taskHandler(from: string, to: string, amount: number) {
-  logger.log('[+] handleTask from =', from, 'to =', to, 'amount =', amount)
+async function handleTask(from: string, to: string, amount: number) {
+  logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount)
   return true
 }
 
-async function newSignalHook(from: string, to: string, amount: number, event: EventLog) {
-  logger.log('new signal', event.transactionHash)
-  return true // true to continue, false to hijack the process.
+async function newEventSignalHook(from: string, to: string, amount: number, event: EventLog) {
+  logger.log('receive new event signal, tx:', event.transactionHash)
+  logger.debug(' - from:', from, ' - to:', to, ' - amount:', amount)
+  return true // true to continue handle tasks, false to hijack the process.
+}
+
+async function handleTask_2(from: string, to: string, amount: number) {
+  logger.log('[+] handleTask_2: from =', from, 'to =', to, 'amount =', amount)
+  return true
 }

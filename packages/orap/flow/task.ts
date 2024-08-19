@@ -1,52 +1,46 @@
-import type { Awaitable } from '@ora-io/utils'
-import { alphabetHex, randomStr } from '@ora-io/utils'
-import type { Context, TaskClassForVerse } from '../task'
-import type { StoreManager } from '../store'
+import { alphabetHex, memoryStore, randomStr } from '@ora-io/utils'
+import type { Context, TaskRaplized } from '../task'
+import { StoreManager } from '../store'
 import { TaskVerse } from '../verse/task'
-import type { Flow } from './interface'
+import type { Flow, HandleFn, HandleResultFn, Prefix, ToKeyFn } from './interface'
 import type { EventFlow } from './event'
 
-// TODO: HandleFn and ToKeyFn use use Record or Task?
-export type ToKeyFn = (...eventLog: Array<any>) => Awaitable<string>
-export type HandleFn = (...eventLog: Array<any>) => Awaitable<boolean>
-export type HandleResultFn = (task: TaskClassForVerse) => Awaitable<void>
-
 export class TaskFlow implements Flow {
-  taskPrefixFn: (context?: any) => string = _ => 'Task:'
-  donePrefixFn: (context?: any) => string = _ => 'Done-Task:'
+  sm: StoreManager = new StoreManager(memoryStore())
+  taskPrefix: Prefix = 'Task:'
+  donePrefix: Prefix = 'Done-Task:'
   taskTtl?: number
   doneTtl?: number
   toKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
   handleFn: HandleFn = (_) => { throw new Error('required to set task handler through .handle()') }
-  successFn: HandleResultFn = async (task: any) => {
+  successFn: HandleResultFn = async (task: TaskRaplized) => {
     await task.done()
     await task.remove()
   }
 
-  failFn: HandleResultFn = async (task: any) => {
+  failFn: HandleResultFn = async (task: TaskRaplized) => {
     await task.remove()
   }
 
-  // event(params: any): this {
-  //   this.eventParams = params;
-  //   return this;
-  // }
-
-  // crosscheck(params: any): this {
-  //   this.crossCheckParams = params;
-  //   return this;
-  // }
+  ctx?: Context
 
   constructor(
     private parentFlow: EventFlow,
-    // TODO: let user pass in sm or store?
-    public sm: StoreManager,
-    public context?: Context) {
+  ) { }
+
+  cache(sm: StoreManager) {
+    this.sm = sm
+    return this
   }
 
-  prefix(taskPrefixFn: (context?: Context) => string, donePrefixFn: (context?: Context) => string): this {
-    this.taskPrefixFn = taskPrefixFn
-    this.donePrefixFn = donePrefixFn
+  context(ctx: Context) {
+    this.ctx = ctx
+    return this
+  }
+
+  prefix(taskPrefix: Prefix, donePrefix: Prefix): this {
+    this.taskPrefix = taskPrefix
+    this.donePrefix = donePrefix
     return this
   }
 
@@ -80,7 +74,6 @@ export class TaskFlow implements Flow {
     return this.parentFlow!
   }
 
-  // TODO: make it orap universal logger
   get logger() {
     return this.parentFlow!.logger
   }
