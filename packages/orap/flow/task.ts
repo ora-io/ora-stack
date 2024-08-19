@@ -4,7 +4,7 @@ import { StoreManager } from '../store'
 import { TaskVerse } from '../verse/task'
 import type { Flow, HandleFn, HandleResultFn, Prefix, ToKeyFn } from './interface'
 import type { EventFlow } from './event'
-
+// TODO: add 'Failed-Task:' ?
 export class TaskFlow implements Flow {
   sm: StoreManager = new StoreManager(memoryStore())
   taskPrefix: Prefix = 'Task:'
