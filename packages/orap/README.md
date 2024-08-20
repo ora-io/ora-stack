@@ -23,7 +23,7 @@
 
 ORAP is a declarative framework for building oracle services, handy to use out of the box.
 
-## The Owl Rapper
+## Owl The Rapper
 > Show me you `Flow`s, I'll help you `assemble` to `Verse`s, which compose into a `Orap`. 
 >
 > `drop` the `Beat`s, let's `play`!
