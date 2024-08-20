@@ -62,7 +62,7 @@ Back in the scene, there are 2 internal layers in `Orap`:
 
 It comes with rich features like customized task cache, multitasks handling etc.
 
-Note the following already includes using Redis as the store to cache tasks, allowing continuation after service restart, it's reliable even when the service restarts.
+Note the following already includes using Redis as the store to cache tasks, allowing continuation after service restart, it's robust even when the service restarts.
 
 ```ts
 import { ethers } from 'ethers'
@@ -233,8 +233,8 @@ orap.listen(
 
 The following terminology is internally, can be transparent to users.
 
-- A `Orap` compromises multiple `Verses`;
-- Some `Verses` includes `Beat`s, which define the pace or incoming triggers of the song. 
+- A `Orap` compromises multiple `Verses` as the processors;
+- Some `Verses` includes `Beat`s, which define the pace and the incoming signals that triggering task handling in Orap.
 - For users want to build a `Orap`: only need to define `Flow`s **intuitively**, the Owl Rapper will take care of all the rest things.
 
 **Terminology**
@@ -261,8 +261,10 @@ The following terminology is internally, can be transparent to users.
   - a wrap of the `Signal`, which defines the incoming triggers that initiate the runtime process flow
     - e.g. `EventBeat` defines the event listener
   - `Beat` wraps `Signal` into a uniformed class with only the `constructor` and `drop()`, easy for `Verse` to handle
+  - **Beats Drives the Song!**
 - `Beat.drop()`:
-  - start the `Signal` listener process. **Drop the Beats!**
+  - start the `Signal` listener process. 
+  - **Drop the Beats!**
 
 ## Basic Layer
 
