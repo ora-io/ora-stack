@@ -1,4 +1,3 @@
 import { OrapFlow } from './flow/orap'
 
-export class Orap extends OrapFlow {
-}
+export class Orap extends OrapFlow { }
