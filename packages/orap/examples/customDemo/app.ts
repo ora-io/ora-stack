@@ -8,13 +8,12 @@ import { TransferTask } from './taskTransfer'
 
 // new orap
 const orap = new Orap()
-// set to app specific logger
-orap.setLogger(logger)
+orap.logger(logger)
 
 let store: any
 let sm: any
 
-export function startDemo(options: ListenOptions, storeConfig?: any) {
+export function startCustomDemo(options: ListenOptions, storeConfig?: any) {
   store = redisStore(storeConfig) // use redis
   // store = memoryStore(storeConfig); // use memory
   sm = new StoreManager(store)

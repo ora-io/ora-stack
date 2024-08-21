@@ -19,3 +19,6 @@ export const ONE_WEEK = {
   MILLISECONDS: 7 * 24 * 60 * 60 * 1000,
   SECONDS: 7 * 24 * 60 * 60,
 }
+
+export const alphabetHex = '0123456789abcdef'
+export const alphabetHexUpper = '0123456789ABCDEF'

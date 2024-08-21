@@ -1,12 +1,12 @@
 # ORA STACK
 
 ## What is ORA STACK
-ORA Stack is a comprehensive framework designed for quickly setting up a web3 Oracle Service.
+ORA Stack is a comprehensive framework designed for quickly setting up a robust web3 Oracle Service.
 
 It includes:
-- [Orap](./packages/orap/): the declarative signal-based backend framework;
-- [Reku](./packages/reku/): the reliable ethereum toolkit and utils;
-- [Utils](./packages/utils/): the common swiss-knife package.
+- [Orap](./packages/orap/): A Declarative Robust Oracle Backend Framework
+- [Reku](./packages/reku/): A Reliable Ethereum Kit & Utils
+- [Utils](./packages/utils/): A Common Swiss-knife Utils Package
 
 Comming soon:
 - UAO: the async oracle framework

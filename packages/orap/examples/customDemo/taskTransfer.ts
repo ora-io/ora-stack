@@ -35,17 +35,17 @@ export class TransferTask extends TaskStorable {
 
   static async load<T extends TaskStorable>(this: Constructor<T>, sm: any): Promise<T> {
     const task = await (this as any)._load(sm)
-    logger.log('[*] load task', task.toKey())
+    logger.log('[*] load task', await task.toKey())
     return task
   }
 
   async done(sm: any) {
-    logger.log('[*] done task', this.toKey())
+    logger.log('[*] done task', await this.toKey())
     await super.done(sm)
   }
 
   async remove(sm: any) {
-    logger.log('[*] remove task', this.toKey())
+    logger.log('[*] remove task', await this.toKey())
     await super.remove(sm)
   }
 }
