@@ -30,7 +30,7 @@ export class EventSignal implements Signal {
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
     public logger: Logger,
-    _crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
+    crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
   ) {
     this.contract = new ethers.Contract(
       params.address,
@@ -47,8 +47,8 @@ export class EventSignal implements Signal {
     this.esig = this.eventFragment.topicHash
 
     // set crosscheckOptions only when speicified
-    if (_crosscheckOptions)
-      this._setCrosscheckOptions(_crosscheckOptions)
+    if (crosscheckOptions)
+      this._setCrosscheckOptions(crosscheckOptions)
 
     // to align with crosschecker onMissing, parse the last arg from ContractEventPayload to EventLog
     this.subscribeCallback = async (...args: Array<any>) => {
@@ -64,7 +64,7 @@ export class EventSignal implements Signal {
     }
   }
 
-  _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
+  private _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
     const {
       pollingInterval = ONE_MINUTE_MS * 60,
       ignoreLogs = [],

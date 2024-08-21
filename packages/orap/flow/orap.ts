@@ -39,9 +39,9 @@ export class OrapFlow implements Flow {
    */
   listen(options: ListenOptions, onListenFn: any = () => { }) {
     for (const eventFlow of this.subflows.event) {
-      eventFlow.subscribeProvider(options.wsProvider)
+      eventFlow.setSubscribeProvider(options.wsProvider)
       if (options.httpProvider)
-        eventFlow.crosscheckProvider(options.httpProvider)
+        eventFlow.setCrosscheckProvider(options.httpProvider)
     }
 
     this.onListenFn = onListenFn

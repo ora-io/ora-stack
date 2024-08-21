@@ -12,11 +12,11 @@ export class EventBeat extends EventSignal {
     params: EventSignalRegisterParams,
     callback: EventSignalCallback,
     logger: Logger,
-    _crosscheckOptions: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'> | undefined,
+    crosscheckOptions: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'> | undefined,
     private subscribeProvider: Providers,
     private crosscheckProvider: Providers | undefined,
   ) {
-    super(params, callback, logger, _crosscheckOptions)
+    super(params, callback, logger, crosscheckOptions)
   }
 
   drop() {

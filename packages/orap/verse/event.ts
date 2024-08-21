@@ -45,12 +45,12 @@ export class EventVerse implements Verse {
     return this
   }
 
-  _playTaskVerses() {
+  private _playTaskVerses() {
     for (const verse of this.taskVerses)
       verse.play() // no await, off it goes
   }
 
-  _play() {
+  private _play() {
     // create an beat per verse
     const eventBeat = new EventBeat(
       // for create signal
@@ -59,8 +59,8 @@ export class EventVerse implements Verse {
       this.logger,
       this.flow.partialCrosscheckOptions,
       // for listen
-      this.flow._subscribeProvider!,
-      this.flow._crosscheckProvider,
+      this.flow.subscribeProvider!,
+      this.flow.crosscheckProvider,
     )
     eventBeat.drop()
 

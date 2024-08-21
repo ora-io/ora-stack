@@ -3,6 +3,8 @@ import type { StoreManager } from '../store/storemanager'
 import type { Context } from './context'
 import { TaskBase } from './base'
 
+type TypeofTaskStorable = typeof TaskStorable
+
 export abstract class TaskStorable extends TaskBase {
   // overwrite these for store key customize
   static readonly taskPrefix: string = 'Task:'
@@ -11,27 +13,27 @@ export abstract class TaskStorable extends TaskBase {
   static readonly taskTtlDone: number | undefined = undefined
 
   getTaskPrefix(_context?: Context): Awaitable<string> {
-    return (this.constructor as typeof TaskStorable).taskPrefix
+    return (this.constructor as TypeofTaskStorable).taskPrefix
   }
 
   getTaskPrefixDone(_context?: Context): Awaitable<string> {
-    return (this.constructor as typeof TaskStorable).taskPrefixDone
+    return (this.constructor as TypeofTaskStorable).taskPrefixDone
   }
 
   get taskTtl(): number | undefined {
-    return (this.constructor as typeof TaskStorable).taskTtl
+    return (this.constructor as TypeofTaskStorable).taskTtl
   }
 
   get taskTtlDone(): number | undefined {
-    return (this.constructor as typeof TaskStorable).taskTtlDone
+    return (this.constructor as TypeofTaskStorable).taskTtlDone
   }
 
   getTaskTtl(_context?: Context): number | undefined {
-    return (this.constructor as typeof TaskStorable).taskTtl
+    return (this.constructor as TypeofTaskStorable).taskTtl
   }
 
   getTaskTtlDone(_context?: Context): number | undefined {
-    return (this.constructor as typeof TaskStorable).taskTtlDone
+    return (this.constructor as TypeofTaskStorable).taskTtlDone
   }
 
   // Factory method to create an instance with the necessary context

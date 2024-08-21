@@ -14,8 +14,8 @@ export class EventFlow implements Flow {
   handleFn: HandleFn
   partialCrosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>
 
-  _subscribeProvider?: Providers
-  _crosscheckProvider?: Providers
+  private _subscribeProvider?: Providers
+  private _crosscheckProvider?: Providers
 
   constructor(
     private parentFlow?: OrapFlow,
@@ -50,12 +50,20 @@ export class EventFlow implements Flow {
     return tf
   }
 
-  subscribeProvider(provider: Providers) {
+  get subscribeProvider() {
+    return this._subscribeProvider
+  }
+
+  setSubscribeProvider(provider: Providers) {
     this._subscribeProvider = provider
     return this
   }
 
-  crosscheckProvider(provider: Providers) {
+  get crosscheckProvider() {
+    return this._crosscheckProvider
+  }
+
+  setCrosscheckProvider(provider: Providers) {
     this._crosscheckProvider = provider
     return this
   }
