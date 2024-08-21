@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Logger, redisStore } from '@ora-io/utils'
 import { Orap } from '../../orap'
-import { StoreManager } from '../../store'
+import { StoreManager } from '../../src/store'
 // import { Orap } from '@orap-io/orap'
 
 // new orap

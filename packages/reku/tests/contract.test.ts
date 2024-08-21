@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
-import { ContractManager } from '../provider/contract'
+import { ContractManager } from '../src/provider/contract'
 
 describe('ContractManager', () => {
   let contractManager: ContractManager
