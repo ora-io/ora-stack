@@ -100,11 +100,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
       ? () => { ccrOptions.toBlock = Math.min(ccrOptions.toBlock, toBlock); return true }
       : waitNextCrosscheck
 
-    const updateCCROptions = async (ccrOptions: any) => {
+    const updateCCROptions = async (ccrOptions: CrossCheckRangeParam) => {
       // only set after cc succ
       await this.setCheckpoint(ccrOptions.toBlock + 1)
       // iterate block range
-      ccrOptions.fromBlock = this.checkpointBlockNumber
+      ccrOptions.fromBlock = this.checkpointBlockNumber!
       // batchBlocksCount should > 0
       ccrOptions.toBlock = ccrOptions.fromBlock + batchBlocksCount - 1
     }
