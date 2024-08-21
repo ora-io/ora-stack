@@ -31,10 +31,10 @@ export class ContractManager {
   }
 
   removeAllListeners() {
-    this._contract?.removeAllListeners()
     for (const [event, listener] of this._listeners)
       this._contract?.off(event, listener)
 
+    this._contract?.removeAllListeners()
     this._listeners.clear()
   }
 
