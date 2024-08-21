@@ -1,5 +1,5 @@
 import type { Fn } from '@ora-io/utils'
-import { isWin } from '@ora-io/utils/os'
+import { isWin } from '@ora-io/utils'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { ethers } from 'ethers'
 
