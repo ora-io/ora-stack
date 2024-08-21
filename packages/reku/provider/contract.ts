@@ -1,4 +1,5 @@
 import type { Fn } from '@ora-io/utils'
+import { isWin } from '@ora-io/utils/os'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { ethers } from 'ethers'
 
@@ -31,10 +32,15 @@ export class ContractManager {
   }
 
   removeAllListeners() {
+    if (!isWin)
+      this._contract?.removeAllListeners()
+
     for (const [event, listener] of this._listeners)
       this._contract?.off(event, listener)
 
-    this._contract?.removeAllListeners()
+    if (isWin)
+      this._contract?.removeAllListeners()
+
     this._listeners.clear()
   }
 
