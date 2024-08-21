@@ -1,7 +1,7 @@
-import { ethers } from "ethers"
-import { Orap } from "../../orap"
-import { StoreManager } from "../../store"
-import { Logger, redisStore } from "@ora-io/utils"
+import { ethers } from 'ethers'
+import { Logger, redisStore } from '@ora-io/utils'
+import { Orap } from '../../orap'
+import { StoreManager } from '../../store'
 // import { Orap } from '@orap-io/orap'
 
 // new orap
@@ -34,13 +34,13 @@ orap.event(eventSignalParam)
   .handle(handle)
 
 // set logger before listen
-orap.logger(logger);
+orap.logger(logger)
 
 // start signal listeners
 orap.listen(
   {
     wsProvider: new ethers.WebSocketProvider('wss://127.0.0.1'),
-    httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
+    httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1'),
   },
-  () => { logger.log('listening on provider.network') }
+  () => { logger.log('listening on provider.network') },
 )

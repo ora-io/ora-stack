@@ -1,5 +1,6 @@
-import { ethers } from "ethers"
-import { Orap } from "../../orap"
+/* eslint-disable no-console */
+import { ethers } from 'ethers'
+import { Orap } from '../../orap'
 // import { Orap } from '@orap-io/orap'
 
 // new orap
@@ -23,7 +24,7 @@ orap.event(eventSignalParam, handle)
 orap.listen(
   {
     wsProvider: new ethers.WebSocketProvider('wss://127.0.0.1'),
-    httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
+    httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1'),
   },
-  () => { console.log('listening on provider.network') }
+  () => { console.log('listening on provider.network') },
 )
