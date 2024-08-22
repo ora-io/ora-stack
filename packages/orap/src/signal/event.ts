@@ -46,10 +46,6 @@ export class EventSignal implements Signal {
 
     this.esig = this.eventFragment.topicHash
 
-    // set crosscheckOptions only when speicified
-    if (crosscheckOptions)
-      this._setCrosscheckOptions(crosscheckOptions)
-
     // to align with crosschecker onMissing, parse the last arg from ContractEventPayload to EventLog
     this.subscribeCallback = async (...args: Array<any>) => {
       const _contractEventPayload = args.pop()
@@ -62,6 +58,10 @@ export class EventSignal implements Signal {
       this.logger.info('crosschecker capture a missing event! processing...', log.transactionHash, log.index)
       await this.callback(...parsedLog, log)
     }
+
+    // set crosscheckOptions only when speicified
+    if (crosscheckOptions)
+      this._setCrosscheckOptions(crosscheckOptions)
   }
 
   private _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
