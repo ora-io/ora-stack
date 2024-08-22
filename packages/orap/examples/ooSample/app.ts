@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { ethers } from 'ethers'
-import { Orap } from '../../orap'
+import { Orap } from '../../src'
 // import { Orap } from '@orap-io/orap'
 
 // new orap

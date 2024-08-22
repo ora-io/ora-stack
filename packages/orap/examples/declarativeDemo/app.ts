@@ -1,7 +1,7 @@
 import type { EventLog } from 'ethers'
 import { Logger, randomStr, redisStore } from '@ora-io/utils'
-import type { ListenOptions, ToKeyFn } from '../../index'
-import { Orap, StoreManager } from '../../index'
+import type { ListenOptions, ToKeyFn } from '../../src'
+import { Orap, StoreManager } from '../../src'
 import ABI from './erc20.abi.json'
 
 const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'

@@ -1,5 +1,5 @@
 import type { Constructor } from '@ora-io/utils'
-import { TaskStorable } from '../../index'
+import { TaskStorable } from '../../src'
 import { config, logger } from './config'
 
 export class TransferTask extends TaskStorable {
