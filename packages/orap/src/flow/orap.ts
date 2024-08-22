@@ -2,6 +2,7 @@ import type { Logger } from '@ora-io/utils'
 import { logger } from '@ora-io/utils'
 import type { Providers } from '@ora-io/reku'
 import { OrapVerse } from '../verse/orap'
+import type { EventSignalRegisterParams } from '../signal'
 import { EventFlow } from './event'
 import type { Flow } from './interface'
 
@@ -26,7 +27,7 @@ export class OrapFlow implements Flow {
     return this
   }
 
-  event(options: any, handler?: any): EventFlow {
+  event(options?: EventSignalRegisterParams, handler?: any): EventFlow {
     const eventFlow = new EventFlow(this, options, handler)
     this.subflows.event.push(eventFlow)
     return eventFlow

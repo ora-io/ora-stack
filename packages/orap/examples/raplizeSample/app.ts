@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
 import { Logger, redisStore } from '@ora-io/utils'
+import type { EventSignalRegisterParams } from '../../src'
 import { Orap } from '../../src'
 import { StoreManager } from '../../src/store'
 // import { Orap } from '@orap-io/orap'
@@ -14,9 +15,9 @@ const sm = new StoreManager(store)
 // use a logger
 const logger = new Logger('info', '[orap-raplize-sample]')
 
-const eventSignalParam = {
+const eventSignalParam: EventSignalRegisterParams = {
   address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  abi: { anonymous: false, inputs: [{ indexed: true, name: 'from', type: 'address' }, { indexed: true, name: 'to', type: 'address' }, { indexed: false, name: 'value', type: 'uint256' }], name: 'Transfer', type: 'event' },
+  abi: [{ anonymous: false, inputs: [{ indexed: true, name: 'from', type: 'address' }, { indexed: true, name: 'to', type: 'address' }, { indexed: false, name: 'value', type: 'uint256' }], name: 'Transfer', type: 'event' }],
   eventName: 'Transfer',
 }
 

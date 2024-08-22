@@ -1,4 +1,4 @@
-import type { EventFragment, Interface, Log } from 'ethers'
+import type { EventFragment, Interface, InterfaceAbi, Log } from 'ethers'
 import { ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
@@ -7,7 +7,7 @@ import type { Signal } from './interface'
 
 export interface EventSignalRegisterParams {
   address: string
-  abi: Interface
+  abi: Interface | InterfaceAbi
   eventName: string
   // esig?: string,
 }
