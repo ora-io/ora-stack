@@ -3,11 +3,15 @@ import { TaskRaplized } from '../task/verse'
 import type { Verse } from './interface'
 
 export class TaskVerse implements Verse {
-  constructor(private flow: TaskFlow) {
+  constructor(private _flow: TaskFlow) {
   }
 
   get logger() {
-    return this.flow.logger
+    return this._flow.logger
+  }
+
+  get flow() {
+    return this._flow
   }
 
   /**
@@ -16,23 +20,23 @@ export class TaskVerse implements Verse {
    */
   async createTask(...args: Array<any>) {
     this.logger.debug('creating task with args:', args)
-    const task = new TaskRaplized(this.flow, args)
+    const task = new TaskRaplized(this._flow, args)
     task.save()
   }
 
   async startTaskProcessor() {
-    this.logger.debug(`task with context ${this.flow.ctx?.toString()} starts flowing. Will load tasks with prefix "${await (new TaskRaplized(this.flow)).getTaskPrefix(this.flow.ctx)}"`)
+    this.logger.debug(`task with context ${this._flow.ctx?.toString()} starts flowing. Will load tasks with prefix "${await (new TaskRaplized(this._flow)).getTaskPrefix(this._flow.ctx)}"`)
 
     // TODO: change to polling
     while (true) {
-      const task = await (new TaskRaplized(this.flow)).load()
+      const task = await (new TaskRaplized(this._flow)).load()
 
       await task.handle()
     }
   }
 
   /**
-   * start processor for this task flow
+   * start processor for this task _flow
    */
   play() {
     this.startTaskProcessor()

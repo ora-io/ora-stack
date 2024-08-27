@@ -27,6 +27,10 @@ export class OrapFlow implements Flow {
     return this
   }
 
+  get eventFlows() {
+    return this.subflows.event
+  }
+
   event(options?: EventSignalRegisterParams, handler?: any): EventFlow {
     const eventFlow = new EventFlow(this, options, handler)
     this.subflows.event.push(eventFlow)
