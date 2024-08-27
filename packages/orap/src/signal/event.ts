@@ -111,9 +111,15 @@ export class EventSignal implements Signal {
   async startCrossChecker(provider?: Providers) {
     if (!this.crosscheckerOptions)
       return
-
     if (!provider)
       throw new Error('crosscheckProvider is required in listen() when crosschecker is set')
+
+    if (
+      !(provider instanceof RekuProviderManager)
+      && !(provider instanceof ethers.JsonRpcProvider)
+      && !(provider instanceof ethers.WebSocketProvider)
+    )
+      throw new Error('crosscheckProvider must be an instance of RekuProviderManager or ethers.JsonRpcProvider or ethers.WebSocketProvider')
 
     this.crosschecker = new AutoCrossChecker(provider)
     this.crosschecker.setLogger(this.logger)
