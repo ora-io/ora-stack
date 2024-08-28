@@ -13,6 +13,7 @@ describe('TaskRaplized', () => {
 
   beforeEach(() => {
     taskFlow = new TaskFlow(new EventFlow(new OrapFlow()))
+    taskFlow.handle(vi.fn())
     taskFlow.taskPrefix = taskFlowTaskPrefix
     taskFlow.donePrefix = taskFlowDonePrefix
     taskFlow.taskTtl = taskFlowTaskTtl
@@ -95,15 +96,16 @@ describe('TaskRaplized', () => {
   it('should load the task', async () => {
     const taskKey = 'taskKey'
     const prefix = 'taskPrefix'
-    const serializedTask = 'serializedTask'
+    const serializedTask = '[{"test": "test"}]'
     const sm = {
       keys: vi.fn().mockResolvedValue([`${prefix}${taskKey}`]),
       get: vi.fn().mockResolvedValue(serializedTask),
+      del: vi.fn(),
     } as unknown as StoreManager
 
     taskFlow.sm = sm
     taskRaplized.getTaskPrefix = vi.fn().mockResolvedValue(prefix)
-    taskRaplized.fromString = vi.fn()
+    taskRaplized.fromString = vi.fn().mockImplementationOnce(taskRaplized.fromString)
     await taskRaplized.load()
     expect(taskFlow.sm.keys).toHaveBeenCalledWith(`${prefix}*`, true)
     expect(taskFlow.sm.get).toHaveBeenCalledWith(`${prefix}${taskKey}`)

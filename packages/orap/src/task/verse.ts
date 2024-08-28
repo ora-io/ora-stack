@@ -1,4 +1,4 @@
-import { isString, stripPrefix } from '@ora-io/utils'
+import { isJsonString, isString, stripPrefix } from '@ora-io/utils'
 import type { TaskFlow } from '../flow'
 import type { Context } from './context'
 import { TaskStorable } from './storable'
@@ -55,20 +55,32 @@ export class TaskRaplized extends TaskStorable {
     await super.save(this.flow.sm, this.flow.ctx)
   }
 
-  async load() {
-    // this.flow.logger.debug('[*] load task 1', this)
-    const prefix = await this.getTaskPrefix(this.flow.ctx)
-    // get all task keys
-    const keys = await this.flow.sm.keys(`${prefix}*`, true)
-    // get the first task (del when finish)
-    const serializedTask: string = (await this.flow.sm.get(keys[0]))! // never undefined ensured by keys isWait=true
-
-    this.fromString(serializedTask)
-
-    // set key to task id
-    this.id = stripPrefix(keys[0], prefix)
-
+  async load(): Promise<TaskRaplized>
+  async load(key: string): Promise<TaskRaplized>
+  async load(key?: string) {
+    if (key) {
+      return await this.loadByKey(key)
+    }
+    else {
+      // this.flow.logger.debug('[*] load task 1', this)
+      const prefix = await this.getTaskPrefix(this.flow.ctx)
+      // get all task keys
+      const keys = await this.flow.sm.keys(`${prefix}*`, true)
+      // get the first task (del when finish)
+      const serializedTask: string = (await this.flow.sm.get(keys[0]))! // never undefined ensured by keys isWait=true
+      this.fromString(serializedTask)
+      // set key to task id
+      this.id = stripPrefix(keys[0], prefix)
     // this.flow.logger.debug('[*] load task 4', await this.toKey())
+    }
+    return this
+  }
+
+  async loadByKey(key: string) {
+    const serializedTask: string = (await this.flow.sm.get(key))! // never undefined ensured by keys isWait=true
+    this.fromString(serializedTask)
+    // set key to task id
+    this.id = stripPrefix(key, await this.getTaskPrefix(this.flow.ctx))
 
     return this
   }
@@ -92,7 +104,9 @@ export class TaskRaplized extends TaskStorable {
   }
 
   fromString(jsonString: string) {
-    this.eventLog = JSON.parse(jsonString)
+    if (isJsonString(jsonString))
+      this.eventLog = JSON.parse(jsonString)
+
     return this
   }
 }
