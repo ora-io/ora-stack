@@ -1,5 +1,3 @@
-import type { Logger } from '@ora-io/utils'
-import { logger } from '@ora-io/utils'
 import type { Providers } from '@ora-io/reku'
 import { OrapVerse } from '../verse/orap'
 import type { EventSignalRegisterParams } from '../signal'
@@ -20,12 +18,6 @@ export class OrapFlow implements Flow {
   } = { event: [] }
 
   onListenFn: any = () => { }
-  _logger: Logger = logger
-
-  logger(logger: Logger) {
-    this._logger = logger
-    return this
-  }
 
   get eventFlows() {
     return this.subflows.event
@@ -56,8 +48,7 @@ export class OrapFlow implements Flow {
   }
 
   assemble(): OrapVerse {
-    // const es = new EventSignal(options, fn, this.logger)
-    const eventVerses = this.subflows.event.map(flow => flow.assemble(), { logger: this.logger })
+    const eventVerses = this.subflows.event.map(flow => flow.assemble())
     return new OrapVerse(this).setEventVerses(eventVerses)
     // this.routes.event.push(es)
   }

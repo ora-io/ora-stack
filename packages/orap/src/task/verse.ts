@@ -41,7 +41,6 @@ export class TaskRaplized extends TaskStorable {
   }
 
   async handle(): Promise<void> {
-    this.flow.logger.debug('[*] handle task:', await this.toKey())
     if (await this.flow.handleFn(...this.eventLog))
       await this.flow.successFn(this)
     else
@@ -51,7 +50,6 @@ export class TaskRaplized extends TaskStorable {
   /** ***************** overwrite **************/
 
   async save() {
-    this.flow.logger.debug('[*] save task:', this.toString())
     await super.save(this.flow.sm, this.flow.ctx)
   }
 
@@ -62,7 +60,6 @@ export class TaskRaplized extends TaskStorable {
       return await this.loadByKey(key)
     }
     else {
-      // this.flow.logger.debug('[*] load task 1', this)
       const prefix = await this.getTaskPrefix(this.flow.ctx)
       // get all task keys
       const keys = await this.flow.sm.keys(`${prefix}*`, true)
@@ -71,7 +68,6 @@ export class TaskRaplized extends TaskStorable {
       this.fromString(serializedTask)
       // set key to task id
       this.id = stripPrefix(keys[0], prefix)
-    // this.flow.logger.debug('[*] load task 4', await this.toKey())
     }
     return this
   }
@@ -86,12 +82,10 @@ export class TaskRaplized extends TaskStorable {
   }
 
   async done() {
-    this.flow.logger.debug('[*] done task:', await this.toKey())
     await super.done(this.flow.sm, this.flow.ctx)
   }
 
   async remove() {
-    this.flow.logger.debug('[*] remove task:', await this.toKey())
     await super.remove(this.flow.sm, this.flow.ctx)
   }
 

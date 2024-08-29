@@ -101,9 +101,6 @@ orap.event(eventSignalParam)
   .ttl({ taskTtl: 120000, doneTtl: 60000 })
   .handle(handle2)
 
-// set logger before listen
-orap.logger(logger)
-
 // start signal listeners
 orap.listen(
   {
@@ -130,8 +127,6 @@ Each `new Orap()` starts a `Orap Flow`
   - optional: httpProvider, for crosscheck only, since crosscheck is based on getLogs
 - `onListenFn`: customized hook when listener started.
 
-**.logger(logger)**
-- set which logger to use across this orap
 
 #### Event Flow
 

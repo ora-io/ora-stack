@@ -50,9 +50,6 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     .ttl({ taskTtl: 20000, doneTtl: 20000 })
     .handle(handleTask_2)
 
-  // set logger before listen
-  orap.logger(logger)
-
   // start signal listener
   orap.listen(
     options,

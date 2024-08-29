@@ -24,14 +24,8 @@ export class EventFlow implements Flow {
   ) {
     // Default handleFn
     this.handleFn = handleFn ?? (async (..._args: Array<any>) => {
-      const _contractEventPayload = _args.pop()
-      this.logger.debug('handle event signal', _contractEventPayload.log.transactionHash)
       return true
     })
-  }
-
-  get logger() {
-    return this.parentFlow!._logger
   }
 
   get taskFlows() {

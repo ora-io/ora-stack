@@ -1,12 +1,11 @@
-import type { Logger, Milliseconds, Store } from '@ora-io/utils'
-import { SimpleStoreManager, logger } from '@ora-io/utils'
+import type { Milliseconds, Store } from '@ora-io/utils'
+import { SimpleStoreManager } from '@ora-io/utils'
 import type { SimpleLog } from '../interface'
 
 export interface CacheManagerOptions {
   noLogIndex?: boolean
   keyPrefix?: string
   ttl?: Milliseconds
-  logger?: Logger
 }
 
 /**
@@ -16,14 +15,12 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
   noLogIndex: boolean // TODO: this is used no where for now, add when needed
   storeKeyPrefix: string
   ttl?: Milliseconds
-  logger: Logger
 
   constructor(store?: Store, options?: CacheManagerOptions) {
     super(store)
     this.noLogIndex = options?.noLogIndex ?? false
     this.storeKeyPrefix = options?.keyPrefix ?? ''
     this.ttl = options?.ttl
-    this.logger = options?.logger ?? logger
   }
 
   /**
@@ -31,7 +28,6 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
    * @param log
    */
   async addLog(log: SimpleLog) {
-    this.logger.debug('cache manager - addLog:', log.transactionHash, log.index)
     const key = this.encodeLogKey(log)
     await this.set(key, true, this.ttl)
   }
@@ -54,7 +50,6 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
    */
   async getLogs(): Promise<SimpleLog[]> {
     const keys = await this.keys(this.storeKeyPrefix)
-    // this.logger.debug('cachemanager-getLogs:', keys)
     const logs: SimpleLog[] = []
     for (const key of keys)
       logs.push(this.decodeLogKey(key))
@@ -69,12 +64,10 @@ export class CrossCheckerCacheManager extends SimpleStoreManager {
    */
   encodeLogKey(log: SimpleLog): string {
     const key = log.index && !this.noLogIndex ? `${this.storeKeyPrefix + log.transactionHash}:${log.index}` : this.storeKeyPrefix + log.transactionHash
-    // this.logger.debug('cc-cm-encodeKey', key)
     return key
   }
 
   decodeLogKey(key: string): SimpleLog {
-    // this.logger.debug('cc-cm-decodeKey', key)
     if (!key.startsWith(this.storeKeyPrefix))
       throw new Error(`The prefix ${this.storeKeyPrefix} is not a prefix of ${key}`)
 

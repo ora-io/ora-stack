@@ -8,10 +8,6 @@ export class TaskVerse implements Verse {
   constructor(private _flow: TaskFlow) {
   }
 
-  get logger() {
-    return this._flow.logger
-  }
-
   get flow() {
     return this._flow
   }
@@ -26,7 +22,6 @@ export class TaskVerse implements Verse {
       if (this.loading)
         return
       this.loading = true
-      this.logger.debug('creating task with args:', args)
       await this.loadAndHandleAll(task)
       this.loading = false
     })
@@ -34,7 +29,6 @@ export class TaskVerse implements Verse {
   }
 
   async loadAndHandleAll(task: TaskRaplized) {
-    // this.flow.logger.debug('[*] load task 1', this)
     const prefix = await task.getTaskPrefix(this.flow.ctx)
     // get all task keys
     let keys = await this.flow.sm.keys(`${prefix}*`)

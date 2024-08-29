@@ -2,7 +2,6 @@ import type { EventFragment, Interface, InterfaceAbi, Log } from 'ethers'
 import { ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
-import type { Logger } from '@ora-io/utils'
 import type { Signal } from './interface'
 
 export interface EventSignalRegisterParams {
@@ -29,7 +28,6 @@ export class EventSignal implements Signal {
   constructor(
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
-    public logger: Logger,
     crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
   ) {
     this.contract = new ethers.Contract(
@@ -55,7 +53,6 @@ export class EventSignal implements Signal {
     // to align with subscribe listener, parse event params and add EventLog to the last
     this.crosscheckCallback = async (log: Log) => {
       const parsedLog = this.contract.interface.decodeEventLog(this.eventFragment, log.data, log.topics)
-      this.logger.info('crosschecker capture a missing event! processing...', log.transactionHash, log.index)
       await this.callback(...parsedLog, log)
     }
 
@@ -122,7 +119,6 @@ export class EventSignal implements Signal {
       throw new Error('crosscheckProvider must be an instance of RekuProviderManager or ethers.JsonRpcProvider or ethers.WebSocketProvider')
 
     this.crosschecker = new AutoCrossChecker(provider)
-    this.crosschecker.setLogger(this.logger)
     await this.crosschecker.start(this.crosscheckerOptions)
   }
 }

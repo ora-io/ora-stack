@@ -15,10 +15,9 @@ describe('EventSignal', () => {
     eventName: 'Transfer',
   }
   const callback: EventSignalCallback = vi.fn()
-  const logger = console
 
   beforeEach(() => {
-    eventSignal = new EventSignal(params, callback, logger as any)
+    eventSignal = new EventSignal(params, callback)
     rekuProviderManager = new RekuProviderManager(MAINNET_WSS)
   })
 
