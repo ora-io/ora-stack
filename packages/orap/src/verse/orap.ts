@@ -3,22 +3,26 @@ import type { EventVerse } from './event'
 import type { Verse } from './interface'
 
 export class OrapVerse implements Verse {
-  private eventVerses: EventVerse[] = []
+  private _eventVerses: EventVerse[] = []
 
   constructor(private flow: OrapFlow) {
   }
 
+  get eventVerses() {
+    return this._eventVerses
+  }
+
   play() {
     // this._listenChain(this.sub)
-    for (const verse of this.eventVerses)
+    for (const verse of this._eventVerses)
       verse.play()
 
     this.flow.onListenFn()
     // return this
   }
 
-  setEventVerses(eventVerses: EventVerse[]) {
-    this.eventVerses = eventVerses
+  setEventVerses(_eventVerses: EventVerse[]) {
+    this._eventVerses = _eventVerses
     return this
   }
 

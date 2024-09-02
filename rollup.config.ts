@@ -33,7 +33,7 @@ const outputs = (dir: string): OutputOptions[] => [{
 
 for (const pkg of packages) {
   const { dir, external } = pkg
-  const input = path.join(__dirname, `./packages/${dir}/index.ts`)
+  const input = path.join(__dirname, `./packages/${dir}/src/index.ts`)
 
   configs.push({
     external,

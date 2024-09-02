@@ -54,7 +54,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
   async start(options: AutoCrossCheckParam) {
     this.validate(options)
 
-    this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, logger: this.logger, ttl: options?.storeTtl })
+    this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
 
     const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
 
@@ -86,10 +86,8 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
       const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
-      this.logger.debug('[*] ccrOptions: fromBlock', ccrOptions.fromBlock, ', toBlock', ccrOptions.toBlock, ', latestblocknum', latestblocknum)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
-        this.logger.debug('sleep until the latestblocknum >= toBlock + delayBlockFromLatest, i.e.', (ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval, 'ms')
         await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
         return false
       }
@@ -100,11 +98,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
       ? () => { ccrOptions.toBlock = Math.min(ccrOptions.toBlock, toBlock); return true }
       : waitNextCrosscheck
 
-    const updateCCROptions = async (ccrOptions: any) => {
+    const updateCCROptions = async (ccrOptions: CrossCheckRangeParam) => {
       // only set after cc succ
       await this.setCheckpoint(ccrOptions.toBlock + 1)
       // iterate block range
-      ccrOptions.fromBlock = this.checkpointBlockNumber
+      ccrOptions.fromBlock = this.checkpointBlockNumber!
       // batchBlocksCount should > 0
       ccrOptions.toBlock = ccrOptions.fromBlock + batchBlocksCount - 1
     }

@@ -1,7 +1,7 @@
 {
   "name": "@ora-io/utils",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packageManager": "pnpm@8.10.5",
   "description": "",
   "author": "Norman (nom4dv3), MuRong",
@@ -43,7 +43,7 @@
     "ethers": ">=6.13.0"
   },
   "dependencies": {
-    "@murongg/utils": "^0.1.27",
+    "@murongg/utils": "^0.1.28",
     "cache-manager": "^5.7.6",
     "cache-manager-ioredis-yet": "^2.1.1",
     "ioredis": "^5.4.1",

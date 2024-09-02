@@ -1,14 +1,13 @@
 import type { EventLog } from 'ethers'
 import { redisStore } from '@ora-io/utils'
-import type { ListenOptions } from '../../index'
-import { Orap, StoreManager } from '../../index'
+import type { ListenOptions } from '../../src'
+import { Orap, StoreManager } from '../../src'
 import { config, logger } from './config'
 import ABI from './erc20.abi.json'
 import { TransferTask } from './taskTransfer'
 
 // new orap
 const orap = new Orap()
-orap.logger(logger)
 
 let store: any
 let sm: any

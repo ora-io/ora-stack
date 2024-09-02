@@ -1,7 +1,8 @@
 import { ethers } from 'ethers'
 import { Logger, redisStore } from '@ora-io/utils'
-import { Orap } from '../../orap'
-import { StoreManager } from '../../store'
+import type { EventSignalRegisterParams } from '../../src'
+import { Orap } from '../../src'
+import { StoreManager } from '../../src/store'
 // import { Orap } from '@orap-io/orap'
 
 // new orap
@@ -14,9 +15,9 @@ const sm = new StoreManager(store)
 // use a logger
 const logger = new Logger('info', '[orap-raplize-sample]')
 
-const eventSignalParam = {
+const eventSignalParam: EventSignalRegisterParams = {
   address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-  abi: { anonymous: false, inputs: [{ indexed: true, name: 'from', type: 'address' }, { indexed: true, name: 'to', type: 'address' }, { indexed: false, name: 'value', type: 'uint256' }], name: 'Transfer', type: 'event' },
+  abi: [{ anonymous: false, inputs: [{ indexed: true, name: 'from', type: 'address' }, { indexed: true, name: 'to', type: 'address' }, { indexed: false, name: 'value', type: 'uint256' }], name: 'Transfer', type: 'event' }],
   eventName: 'Transfer',
 }
 
@@ -32,9 +33,6 @@ orap.event(eventSignalParam)
   .prefix('ora-stack:orap:raplizeSample:TransferTask:', 'ora-stack:orap:raplizeSample:Done-TransferTask:')
   .ttl({ taskTtl: 120000, doneTtl: 60000 })
   .handle(handle)
-
-// set logger before listen
-orap.logger(logger)
 
 // start signal listeners
 orap.listen(

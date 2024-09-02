@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
-import type { RekuProviderManagerOptions } from '../provider/provider'
-import { RekuProviderManager } from '../provider/provider'
+import type { RekuProviderManagerOptions } from '../src/provider/provider'
+import { RekuProviderManager } from '../src/provider/provider'
 
 vi.mock('ethers', async () => {
   const originalModule = await vi.importActual<typeof import('ethers')>('ethers')

@@ -15,7 +15,7 @@ export function getEventSignature(abi: ethers.InterfaceAbi, eventName: string): 
 }
 
 // Function to parse log to event parameters
-export function parseLogToEventParams(abi: ethers.InterfaceAbi, eventName: string, log: ethers.Log): any {
+export function parseLogToEventParams(abi: ethers.InterfaceAbi, eventName: string, log: ethers.Log) {
   // Create an Interface object from the ABI
   const iface = new ethers.Interface(abi)
 
