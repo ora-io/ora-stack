@@ -3,11 +3,13 @@ import { TaskRaplized } from '../task/verse'
 import type { Verse } from './interface'
 
 export class TaskVerse implements Verse {
-  constructor(private flow: TaskFlow) {
+  private loading = false
+
+  constructor(private _flow: TaskFlow) {
   }
 
-  get logger() {
-    return this.flow.logger
+  get flow() {
+    return this._flow
   }
 
   /**
@@ -15,30 +17,46 @@ export class TaskVerse implements Verse {
    * @param args exactly the same with eventsignal.callback, i.e. event log fields + eventlog obj
    */
   async createTask(...args: Array<any>) {
-    this.logger.debug('creating task with args:', args)
-    const task = new TaskRaplized(this.flow, args)
-    task.save()
+    const task = new TaskRaplized(this._flow, args)
+    task.save().finally(async () => {
+      if (this.loading)
+        return
+      this.loading = true
+      await this.loadAndHandleAll(task)
+      this.loading = false
+    })
+    return this
   }
 
-  async startTaskProcessor() {
-    this.logger.debug(`task with context ${this.flow.ctx?.toString()} starts flowing. Will load tasks with prefix "${await (new TaskRaplized(this.flow)).getTaskPrefix(this.flow.ctx)}"`)
-
-    // TODO: change to polling
+  async loadAndHandleAll(task: TaskRaplized) {
+    const prefix = await task.getTaskPrefix(this.flow.ctx)
+    // get all task keys
+    let keys = await this.flow.sm.keys(`${prefix}*`)
     while (true) {
-      const task = await (new TaskRaplized(this.flow)).load()
-
-      await task.handle()
+      // break if no more keys
+      if (keys.length === 0)
+        break
+      for (const key of keys) {
+        await task.loadByKey(key)
+        await task.handle()
+      }
+      // get all task keys again
+      keys = await this.flow.sm.keys(`${prefix}*`)
     }
   }
 
+  preload() {
+    this.loading = true
+    const task = new TaskRaplized(this._flow)
+    this.loadAndHandleAll(task).finally(() => {
+      this.loading = false
+    })
+  }
+
   /**
-   * start processor for this task flow
+   * start processor for this task _flow
    */
   play() {
-    this.startTaskProcessor()
-      .catch((reason) => {
-        // TODO: print full Error
-        this.logger.error('TaskVerse.play Error:', reason)
-      })
+    this.preload()
   }
 }

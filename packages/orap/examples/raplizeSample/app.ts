@@ -34,9 +34,6 @@ orap.event(eventSignalParam)
   .ttl({ taskTtl: 120000, doneTtl: 60000 })
   .handle(handle)
 
-// set logger before listen
-orap.logger(logger)
-
 // start signal listeners
 orap.listen(
   {

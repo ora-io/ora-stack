@@ -90,10 +90,6 @@ export class TaskFlow implements Flow {
     return this.parentFlow!
   }
 
-  get logger() {
-    return this.parentFlow!.logger
-  }
-
   assemble(): TaskVerse {
     return new TaskVerse(this)
   }

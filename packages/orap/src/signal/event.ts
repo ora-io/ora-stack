@@ -2,7 +2,6 @@ import type { EventFragment, Interface, InterfaceAbi, Log } from 'ethers'
 import { ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
-import type { Logger } from '@ora-io/utils'
 import type { Signal } from './interface'
 
 export interface EventSignalRegisterParams {
@@ -29,7 +28,6 @@ export class EventSignal implements Signal {
   constructor(
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
-    public logger: Logger,
     crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
   ) {
     this.contract = new ethers.Contract(
@@ -46,10 +44,6 @@ export class EventSignal implements Signal {
 
     this.esig = this.eventFragment.topicHash
 
-    // set crosscheckOptions only when speicified
-    if (crosscheckOptions)
-      this._setCrosscheckOptions(crosscheckOptions)
-
     // to align with crosschecker onMissing, parse the last arg from ContractEventPayload to EventLog
     this.subscribeCallback = async (...args: Array<any>) => {
       const _contractEventPayload = args.pop()
@@ -59,9 +53,12 @@ export class EventSignal implements Signal {
     // to align with subscribe listener, parse event params and add EventLog to the last
     this.crosscheckCallback = async (log: Log) => {
       const parsedLog = this.contract.interface.decodeEventLog(this.eventFragment, log.data, log.topics)
-      this.logger.info('crosschecker capture a missing event! processing...', log.transactionHash, log.index)
       await this.callback(...parsedLog, log)
     }
+
+    // set crosscheckOptions only when speicified
+    if (crosscheckOptions)
+      this._setCrosscheckOptions(crosscheckOptions)
   }
 
   private _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
@@ -111,12 +108,17 @@ export class EventSignal implements Signal {
   async startCrossChecker(provider?: Providers) {
     if (!this.crosscheckerOptions)
       return
-
     if (!provider)
       throw new Error('crosscheckProvider is required in listen() when crosschecker is set')
 
+    if (
+      !(provider instanceof RekuProviderManager)
+      && !(provider instanceof ethers.JsonRpcProvider)
+      && !(provider instanceof ethers.WebSocketProvider)
+    )
+      throw new Error('crosscheckProvider must be an instance of RekuProviderManager or ethers.JsonRpcProvider or ethers.WebSocketProvider')
+
     this.crosschecker = new AutoCrossChecker(provider)
-    this.crosschecker.setLogger(this.logger)
     await this.crosschecker.start(this.crosscheckerOptions)
   }
 }

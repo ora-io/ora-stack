@@ -16,10 +16,6 @@ export class EventVerse implements Verse {
   //   return flowIns;
   // }
 
-  get logger() {
-    return this.flow.logger
-  }
-
   async _createTasks(...args: Array<any>) {
     // TODO: sequential or async?
     for (const verse of this.taskVerses)
@@ -28,10 +24,9 @@ export class EventVerse implements Verse {
 
   async handleSignal(...args: Array<any>) {
     const isContinue = await this.flow.handleFn(...args)
-    if (!isContinue) {
-      this.logger.debug('[!] user handleFn return false, signal handle ends.')
+    if (!isContinue)
       return
-    }
+
     await this._createTasks(...args.slice(0, -1)) // not include the last ContactEventPayload obj
   }
 
@@ -56,7 +51,6 @@ export class EventVerse implements Verse {
       // for create signal
       this.flow.params!,
       this.handleSignal.bind(this),
-      this.logger,
       this.flow.partialCrosscheckOptions,
       // for listen
       this.flow.subscribeProvider!,

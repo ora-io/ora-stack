@@ -8,7 +8,6 @@ import { TransferTask } from './taskTransfer'
 
 // new orap
 const orap = new Orap()
-orap.logger(logger)
 
 let store: any
 let sm: any

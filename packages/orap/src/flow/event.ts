@@ -9,7 +9,7 @@ import type { Flow, HandleFn } from './interface'
 import type { OrapFlow } from './orap'
 
 export class EventFlow implements Flow {
-  private taskFlows: TaskFlow[] = []
+  private _taskFlows: TaskFlow[] = []
 
   handleFn: HandleFn
   partialCrosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>
@@ -24,14 +24,12 @@ export class EventFlow implements Flow {
   ) {
     // Default handleFn
     this.handleFn = handleFn ?? (async (..._args: Array<any>) => {
-      const _contractEventPayload = _args.pop()
-      this.logger.debug('handle event signal', _contractEventPayload.log.transactionHash)
       return true
     })
   }
 
-  get logger() {
-    return this.parentFlow!._logger
+  get taskFlows() {
+    return this._taskFlows
   }
 
   crosscheck(options?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
@@ -46,7 +44,7 @@ export class EventFlow implements Flow {
       tf.cache(sm)
     if (context)
       tf.context(context)
-    this.taskFlows.push(tf)
+    this._taskFlows.push(tf)
     return tf
   }
 
@@ -74,7 +72,7 @@ export class EventFlow implements Flow {
   }
 
   private _assembleTaskFlows(): TaskVerse[] {
-    return this.taskFlows.map(flow => flow.assemble())
+    return this._taskFlows.map(flow => flow.assemble())
   }
 
   // TODO: use _assemble? for ux?
