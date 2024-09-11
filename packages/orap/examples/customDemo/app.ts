@@ -47,6 +47,7 @@ async function handleSignal(from: any, to: any, amount: any, event: EventLog) {
   logger.log('handleSignal', event.transactionHash)
   const task = new TransferTask(event.transactionHash, from, to, amount)
   await task.save(sm)
+  return true
 }
 
 // TODO: make the following DBApp?
