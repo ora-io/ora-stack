@@ -1,5 +1,5 @@
 import type { EventFragment, Interface, InterfaceAbi, Log } from 'ethers'
-import { ethers } from 'ethers'
+import { ContractEventPayload, ethers } from 'ethers'
 import { AutoCrossChecker, ONE_MINUTE_MS, RekuProviderManager } from '@ora-io/reku'
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
 import type { Signal } from './interface'
@@ -53,7 +53,8 @@ export class EventSignal implements Signal {
     // to align with subscribe listener, parse event params and add EventLog to the last
     this.crosscheckCallback = async (log: Log) => {
       const parsedLog = this.contract.interface.decodeEventLog(this.eventFragment, log.data, log.topics)
-      await this.callback(...parsedLog, log)
+      const payload = new ContractEventPayload(this.contract, this.subscribeCallback, this.params.eventName, this.eventFragment, log)
+      await this.callback(...parsedLog, payload)
     }
 
     // set crosscheckOptions only when speicified
