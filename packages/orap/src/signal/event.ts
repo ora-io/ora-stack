@@ -47,7 +47,7 @@ export class EventSignal implements Signal {
     // to align with crosschecker onMissing, parse the last arg from ContractEventPayload to EventLog
     this.subscribeCallback = async (...args: Array<any>) => {
       const _contractEventPayload = args.pop()
-      await this.callback(...args, _contractEventPayload.log)
+      await this.callback(...args, _contractEventPayload)
       await this.crosschecker?.cache!.addLog(_contractEventPayload.log)
     }
     // to align with subscribe listener, parse event params and add EventLog to the last
