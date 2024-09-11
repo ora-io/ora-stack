@@ -9,6 +9,10 @@ export interface RekuProviderManagerOptions {
    * The interval of heartbeat, default is 10s
    */
   heartbeatInterval?: number
+  /**
+   * Disable heartbeat
+   */
+  disabledHeartbeat?: boolean
 }
 
 export type RekuProviderManagerEvent = 'error' | 'close'
@@ -23,10 +27,10 @@ export class RekuProviderManager {
 
   private _event?: EventEmitter
 
-  constructor(public providerUrl: string, options?: RekuProviderManagerOptions) {
+  constructor(public providerUrl: string, private _options?: RekuProviderManagerOptions) {
     this.connect()
-    if (options?.heartbeatInterval)
-      this._heartbeatInterval = options.heartbeatInterval
+    if (_options?.heartbeatInterval)
+      this._heartbeatInterval = _options.heartbeatInterval
 
     this._handleError()
     this._sendHeartbeat()
@@ -164,6 +168,8 @@ export class RekuProviderManager {
   }
 
   private _sendHeartbeat() {
+    if (this._options?.disabledHeartbeat)
+      return
     this._heartbeatTimer = setInterval(() => {
       this._provider?.send('net_version', [])
         .then()
@@ -175,7 +181,8 @@ export class RekuProviderManager {
   }
 
   private _clearHeartbeat() {
-    clearInterval(this._heartbeatTimer)
+    if (this._heartbeatTimer)
+      clearInterval(this._heartbeatTimer)
   }
 
   private _handleError() {
