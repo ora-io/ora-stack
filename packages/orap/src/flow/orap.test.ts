@@ -15,7 +15,7 @@ describe('OrapFlow', () => {
   })
 
   it('should create an event flow', () => {
-    const eventFlow = orapFlow.event()
+    const eventFlow = orapFlow.event({ address: '0x1234567890abcdef', abi: [], eventName: 'Transfer' })
     expect(eventFlow).toBeDefined()
     expect(orapFlow.eventFlows).toContain(eventFlow)
   })
@@ -27,7 +27,7 @@ describe('OrapFlow', () => {
   })
 
   it('should assemble the OrapVerse', () => {
-    const eventFlow = orapFlow.event()
+    const eventFlow = orapFlow.event({ address: '0x1234567890abcdef', abi: [], eventName: 'Transfer' })
     const orapVerse = orapFlow.assemble()
     expect(orapVerse).toBeDefined()
     expect(eventFlow).toBeDefined()

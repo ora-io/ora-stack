@@ -14,7 +14,10 @@ const eventSignalParam: EventSignalRegisterParams = {
 }
 
 // define handle function
-const handle = (...args: any) => { console.log('handle', args) }
+const handle = (...args: any) => {
+  console.log('handle', args)
+  return true
+}
 
 // define event signal with crosscheck and link with handle function
 // note: no cache functionality
