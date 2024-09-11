@@ -19,7 +19,7 @@ export class OrapFlow implements Flow {
     event: EventFlow[]
   } = { event: [] }
 
-  onListenFn: any = () => { }
+  onListenFn: Fn = () => { }
 
   get eventFlows() {
     return this.subflows.event
@@ -43,14 +43,15 @@ export class OrapFlow implements Flow {
    * @param options
    * @param onListenFn
    */
-  listen(options: ListenOptions, onListenFn: Fn) {
+  listen(options: ListenOptions, onListenFn?: Fn) {
     for (const eventFlow of this.subflows.event) {
       eventFlow.setSubscribeProvider(options.wsProvider)
       if (options.httpProvider)
         eventFlow.setCrosscheckProvider(options.httpProvider)
     }
 
-    this.onListenFn = onListenFn
+    if (onListenFn)
+      this.onListenFn = onListenFn
 
     const orapVerse = this.assemble()
     orapVerse.play()
