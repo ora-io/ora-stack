@@ -37,8 +37,8 @@ describe('EventVerse', () => {
 
     await eventVerse.handleSignal('arg1', 'arg2', 'event payload')
     expect(handleFn).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
-    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2')
-    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2')
+    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
+    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
   })
 
   it('should play task verses', () => {
