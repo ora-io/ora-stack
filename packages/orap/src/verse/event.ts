@@ -27,7 +27,7 @@ export class EventVerse implements Verse {
     if (!isContinue)
       return
 
-    await this._createTasks(...args.slice(0, -1)) // not include the last ContactEventPayload obj
+    await this._createTasks(...args) // not include the last ContactEventPayload obj
   }
 
   play() {
