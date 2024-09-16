@@ -15,6 +15,7 @@ export class TaskRaplized extends TaskStorable {
   constructor(
     private flow: TaskFlow,
     public eventLog: Array<any> = [],
+    public next: NextFunction,
     private id?: string,
   ) { super() }
 
