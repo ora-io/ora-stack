@@ -17,7 +17,7 @@ export class OrapVerse implements Verse {
     for (const verse of this._eventVerses)
       verse.play()
 
-    this.flow?.onListenFn()
+    // this.flow?.onListenFn()
     // return this
   }
 
