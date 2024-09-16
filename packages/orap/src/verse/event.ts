@@ -3,6 +3,8 @@ import type { EventFlow } from '../flow/event'
 import type { Verse } from './interface'
 import type { TaskVerse } from './task'
 
+type HandleFn = (...args: any[]) => any
+
 export class EventVerse implements Verse {
   private taskVerses: TaskVerse[] = []
 
@@ -18,8 +20,22 @@ export class EventVerse implements Verse {
 
   async _createTasks(...args: Array<any>) {
     // TODO: sequential or async?
+    const handles: HandleFn[] = []
     for (const verse of this.taskVerses)
-      await verse.createTask(...args)
+      handles.push(verse.createTask.bind(verse))
+    this.compose(handles, ...args)
+  }
+
+  compose(handles: HandleFn[], ...args: Array<any>) {
+    function dispatch(index: number) {
+      if (index === handles.length)
+        return Promise.resolve()
+
+      const handle = handles[index]
+      return Promise.resolve(handle(...args, () => dispatch(index + 1)))
+    }
+
+    return dispatch(0)
   }
 
   async handleSignal(...args: Array<any>) {
@@ -41,8 +57,10 @@ export class EventVerse implements Verse {
   }
 
   private _playTaskVerses() {
+    const handles: HandleFn[] = []
     for (const verse of this.taskVerses)
-      verse.play() // no await, off it goes
+      handles.push(verse.play.bind(verse))
+    this.compose(handles)
   }
 
   private _play() {

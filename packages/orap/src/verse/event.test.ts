@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Fn } from '@ora-io/utils'
 import { EventFlow, OrapFlow } from '../flow'
 import { EventBeat } from '../beat/event'
 import { EventVerse } from './event'
@@ -17,28 +18,47 @@ describe('EventVerse', () => {
   })
 
   it('should create tasks', async () => {
-    const taskVerse1 = { createTask: vi.fn() } as unknown as TaskVerse
-    const taskVerse2 = { createTask: vi.fn() } as unknown as TaskVerse
+    const taskVerse1 = {
+      createTask: vi.fn(async (...args: any[]) => {
+        const next = args.pop() as Fn
+        await next()
+      }),
+    } as unknown as TaskVerse
+    const taskVerse2 = {
+      createTask: vi.fn(async (...args: any[]) => {
+        const next = args.pop() as Fn
+        await next()
+      }),
+    } as unknown as TaskVerse
     eventVerse.setTaskVerses([taskVerse1, taskVerse2])
 
     await eventVerse._createTasks('arg1', 'arg2')
-
-    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2')
-    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2')
+    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2', expect.any(Function))
+    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2', expect.any(Function))
   })
 
   it('should handle signal', async () => {
     const handleFn = vi.fn().mockResolvedValue(true)
     eventFlow.handle(handleFn)
 
-    const taskVerse1 = { createTask: vi.fn() } as unknown as TaskVerse
-    const taskVerse2 = { createTask: vi.fn() } as unknown as TaskVerse
+    const taskVerse1 = {
+      createTask: vi.fn(async (...args: any[]) => {
+        const next = args.pop() as Fn
+        await next()
+      }),
+    } as unknown as TaskVerse
+    const taskVerse2 = {
+      createTask: vi.fn(async (...args: any[]) => {
+        const next = args.pop() as Fn
+        await next()
+      }),
+    } as unknown as TaskVerse
     eventVerse.setTaskVerses([taskVerse1, taskVerse2])
 
     await eventVerse.handleSignal('arg1', 'arg2', 'event payload')
     expect(handleFn).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
-    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
-    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload')
+    expect(taskVerse1.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload', expect.any(Function))
+    expect(taskVerse2.createTask).toHaveBeenCalledWith('arg1', 'arg2', 'event payload', expect.any(Function))
   })
 
   it('should play task verses', () => {

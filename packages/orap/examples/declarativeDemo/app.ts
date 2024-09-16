@@ -1,6 +1,6 @@
-import type { EventLog } from 'ethers'
+import type { ContractEventName, EventLog } from 'ethers'
 import { Logger, randomStr, redisStore } from '@ora-io/utils'
-import type { ListenOptions, ToKeyFn } from '../../src'
+import type { ListenOptions, NextFunction, ToKeyFn } from '../../src'
 import { Orap, StoreManager } from '../../src'
 import ABI from './erc20.abi.json'
 
@@ -57,8 +57,9 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
   )
 }
 
-async function handleTask(from: string, to: string, amount: number) {
+async function handleTask(from: string, to: string, amount: number, payload: ContractEventName, next: NextFunction) {
   logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount)
+  await next()
   return true
 }
 
@@ -68,7 +69,8 @@ async function newEventSignalHook(from: string, to: string, amount: number, even
   return true // true to continue handle tasks, false to hijack the process.
 }
 
-async function handleTask_2(from: string, to: string, amount: number) {
+async function handleTask_2(from: string, to: string, amount: number, payload: ContractEventName, next: NextFunction) {
   logger.log('[+] handleTask_2: from =', from, 'to =', to, 'amount =', amount)
+  await next()
   return true
 }

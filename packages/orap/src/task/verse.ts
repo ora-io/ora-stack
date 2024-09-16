@@ -1,5 +1,5 @@
 import { isJsonString, isString, stripPrefix } from '@ora-io/utils'
-import type { TaskFlow } from '../flow'
+import type { NextFunction, TaskFlow } from '../flow'
 import type { Context } from './context'
 import { TaskStorable } from './storable'
 
@@ -11,6 +11,7 @@ export class TaskRaplized extends TaskStorable {
   constructor(
     private flow: TaskFlow,
     public eventLog: Array<any> = [],
+    public next: NextFunction,
     private id?: string,
   ) { super() }
 
@@ -41,7 +42,7 @@ export class TaskRaplized extends TaskStorable {
   }
 
   async handle(): Promise<void> {
-    if (await this.flow.handleFn(...this.eventLog))
+    if (await this.flow.handleFn(...this.eventLog, this.next!))
       await this.flow.successFn(this)
     else
       await this.flow.failFn(this)

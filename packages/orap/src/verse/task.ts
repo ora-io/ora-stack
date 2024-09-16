@@ -1,3 +1,4 @@
+import type { NextFunction } from '../flow'
 import type { TaskFlow } from '../flow/task'
 import { TaskRaplized } from '../task/verse'
 import type { Verse } from './interface'
@@ -17,7 +18,8 @@ export class TaskVerse implements Verse {
    * @param args exactly the same with eventsignal.callback, i.e. event log fields + eventlog obj
    */
   async createTask(...args: Array<any>) {
-    const task = new TaskRaplized(this._flow, args)
+    const next = args.pop()
+    const task = new TaskRaplized(this._flow, args, next)
     task.save().finally(async () => {
       if (this.loading)
         return
@@ -45,9 +47,9 @@ export class TaskVerse implements Verse {
     }
   }
 
-  preload() {
+  preload(next?: NextFunction) {
     this.loading = true
-    const task = new TaskRaplized(this._flow)
+    const task = new TaskRaplized(this._flow, [], next!)
     this.loadAndHandleAll(task).finally(() => {
       this.loading = false
     })
@@ -56,7 +58,7 @@ export class TaskVerse implements Verse {
   /**
    * start processor for this task _flow
    */
-  play() {
-    this.preload()
+  play(next?: NextFunction) {
+    this.preload(next)
   }
 }
