@@ -1,3 +1,4 @@
+import { composeFns } from '@ora-io/utils'
 import { EventBeat } from '../beat/event'
 import type { EventFlow } from '../flow/event'
 import type { Verse } from './interface'
@@ -23,19 +24,7 @@ export class EventVerse implements Verse {
     const handles: HandleFn[] = []
     for (const verse of this.taskVerses)
       handles.push(verse.createTask.bind(verse))
-    this.compose(handles, ...args)
-  }
-
-  compose(handles: HandleFn[], ...args: Array<any>) {
-    function dispatch(index: number) {
-      if (index === handles.length)
-        return Promise.resolve()
-
-      const handle = handles[index]
-      return Promise.resolve(handle(...args, () => dispatch(index + 1)))
-    }
-
-    return dispatch(0)
+    composeFns(handles, args)
   }
 
   async handleSignal(...args: Array<any>) {
@@ -60,7 +49,7 @@ export class EventVerse implements Verse {
     const handles: HandleFn[] = []
     for (const verse of this.taskVerses)
       handles.push(verse.play.bind(verse))
-    this.compose(handles)
+    composeFns(handles)
   }
 
   private _play() {

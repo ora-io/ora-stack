@@ -1,4 +1,6 @@
+import type { ArgumentsFn } from '@ora-io/utils'
 import { isJsonString, isString, stripPrefix } from '@ora-io/utils'
+import { composeFns } from '@ora-io/utils/src'
 import type { NextFunction, TaskFlow } from '../flow'
 import type { Context } from './context'
 import { TaskStorable } from './storable'
@@ -7,11 +9,12 @@ import { TaskStorable } from './storable'
  * used in TaskVerse only
  */
 export class TaskRaplized extends TaskStorable {
+  private _composeFns: ArgumentsFn<any>[] = []
+
   // TODO: fetch members from event params
   constructor(
     private flow: TaskFlow,
     public eventLog: Array<any> = [],
-    public next: NextFunction,
     private id?: string,
   ) { super() }
 
@@ -41,11 +44,14 @@ export class TaskRaplized extends TaskStorable {
     return this.id
   }
 
-  async handle(): Promise<void> {
-    if (await this.flow.handleFn(...this.eventLog, this.next!))
-      await this.flow.successFn(this)
-    else
-      await this.flow.failFn(this)
+  handle() {
+    const fn = async (next: NextFunction) => {
+      if (await this.flow.handleFn(...this.eventLog, next))
+        await this.flow.successFn(this)
+      else
+        await this.flow.failFn(this)
+    }
+    this._composeFns.push(fn)
   }
 
   /** ***************** overwrite **************/
@@ -103,5 +109,10 @@ export class TaskRaplized extends TaskStorable {
       this.eventLog = JSON.parse(jsonString)
 
     return this
+  }
+
+  public async handleComposeFns(next: NextFunction) {
+    await composeFns(this._composeFns)
+    await next()
   }
 }

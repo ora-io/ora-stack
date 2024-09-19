@@ -43,7 +43,7 @@
     "ethers": ">=6.13.0"
   },
   "dependencies": {
-    "@murongg/utils": "^0.1.28",
+    "@murongg/utils": "^0.1.29",
     "cache-manager": "^5.7.6",
     "cache-manager-ioredis-yet": "^2.1.1",
     "ioredis": "^5.4.1",

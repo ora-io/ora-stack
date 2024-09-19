@@ -19,18 +19,18 @@ export class TaskVerse implements Verse {
    */
   async createTask(...args: Array<any>) {
     const next = args.pop()
-    const task = new TaskRaplized(this._flow, args, next)
+    const task = new TaskRaplized(this._flow, args)
     task.save().finally(async () => {
       if (this.loading)
         return
       this.loading = true
-      await this.loadAndHandleAll(task)
+      await this.loadAndHandleAll(task, next)
       this.loading = false
     })
     return this
   }
 
-  async loadAndHandleAll(task: TaskRaplized) {
+  async loadAndHandleAll(task: TaskRaplized, next: NextFunction = () => {}) {
     const prefix = await task.getTaskPrefix(this.flow.ctx)
     // get all task keys
     let keys = await this.flow.sm.keys(`${prefix}*`)
@@ -45,12 +45,14 @@ export class TaskVerse implements Verse {
       // get all task keys again
       keys = await this.flow.sm.keys(`${prefix}*`)
     }
+
+    await task.handleComposeFns(next)
   }
 
   preload(next?: NextFunction) {
     this.loading = true
-    const task = new TaskRaplized(this._flow, [], next!)
-    this.loadAndHandleAll(task).finally(() => {
+    const task = new TaskRaplized(this._flow, [])
+    this.loadAndHandleAll(task, next).finally(() => {
       this.loading = false
     })
   }
