@@ -54,7 +54,7 @@ export function memoryStore(arguments_?: MemoryConfig): MemoryStore {
       if (!pattern)
         return keys
 
-      const regex = new RegExp(pattern)
+      const regex = new RegExp(`(?<!.)${pattern}`)
       return keys.filter(key => regex.test(key))
     },
 
