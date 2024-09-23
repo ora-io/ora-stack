@@ -1,7 +1,7 @@
 {
   "name": "@ora-io/utils",
   "type": "module",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "packageManager": "pnpm@8.10.5",
   "description": "",
   "author": "Norman (nom4dv3), MuRong",
