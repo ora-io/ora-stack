@@ -54,6 +54,7 @@ describe('TaskFlow', () => {
     const handler = vi.fn()
     const result = taskFlow.handle(handler)
     expect(result).toBe(taskFlow)
+    expect(taskFlow.middlewares).toContain(handler)
     expect(taskFlow.handleFn).toBe(handler)
   })
 

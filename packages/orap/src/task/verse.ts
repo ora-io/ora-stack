@@ -1,5 +1,7 @@
-import { isJsonString, isString, stripPrefix } from '@ora-io/utils'
+import { composeFns, isJsonString, isString, stripPrefix } from '@ora-io/utils'
 import type { TaskFlow } from '../flow'
+import { HandleSuccessMiddleware } from '../middlewares/HandleSuccessMiddleware'
+import { HandleFailedMiddleware } from '../middlewares/private'
 import type { Context } from './context'
 import { TaskStorable } from './storable'
 
@@ -9,7 +11,7 @@ import { TaskStorable } from './storable'
 export class TaskRaplized extends TaskStorable {
   // TODO: fetch members from event params
   constructor(
-    private flow: TaskFlow,
+    public flow: TaskFlow,
     public eventLog: Array<any> = [],
     private id?: string,
   ) { super() }
@@ -41,10 +43,10 @@ export class TaskRaplized extends TaskStorable {
   }
 
   async handle(): Promise<void> {
-    if (await this.flow.handleFn(...this.eventLog))
-      await this.flow.successFn(this)
-    else
-      await this.flow.failFn(this)
+    const middlewares = [...this.flow.middlewares]
+    middlewares.unshift(HandleFailedMiddleware)
+    middlewares.push(HandleSuccessMiddleware)
+    await composeFns([this])(middlewares, this.eventLog)
   }
 
   /** ***************** overwrite **************/

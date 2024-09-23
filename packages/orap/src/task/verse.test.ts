@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { sleep } from '@ora-io/utils'
 import { EventFlow, OrapFlow, TaskFlow } from '../flow'
 import type { StoreManager } from '../store'
+import { getTaskContext } from '../utils'
+import { HandleFailedMiddleware, HandleSuccessMiddleware } from '../middlewares/private'
 import { TaskRaplized } from './verse'
 
 describe('TaskRaplized', () => {
@@ -13,7 +16,11 @@ describe('TaskRaplized', () => {
 
   beforeEach(() => {
     taskFlow = new TaskFlow(new EventFlow(new OrapFlow()))
-    taskFlow.handle(vi.fn())
+    taskFlow.handle(vi.fn(async (...args: any[]) => {
+      const { next } = getTaskContext(args)
+
+      await next()
+    }))
     taskFlow.taskPrefix = taskFlowTaskPrefix
     taskFlow.donePrefix = taskFlowDonePrefix
     taskFlow.taskTtl = taskFlowTaskTtl
@@ -60,21 +67,31 @@ describe('TaskRaplized', () => {
 
   it('should handle the task successfully', async () => {
     const eventLog = [1, 2, 3]
-    taskFlow.handleFn = vi.fn().mockResolvedValue(true)
+    const handle = vi.fn(async (...args: any[]) => {
+      const { next } = getTaskContext(args)
+      await next()
+      return true
+    })
+    taskFlow.handle(handle).use(HandleSuccessMiddleware)
     taskFlow.successFn = vi.fn()
     taskRaplized.eventLog = eventLog
     await taskRaplized.handle()
-    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog)
+    await sleep(0)
+    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, taskRaplized, expect.any(Function))
     expect(taskFlow.successFn).toHaveBeenCalledWith(taskRaplized)
   })
 
   it('should handle the task as a failure', async () => {
     const eventLog = [1, 2, 3]
-    taskFlow.handleFn = vi.fn().mockResolvedValue(false)
+    const handle = vi.fn(async () => {
+      throw new Error('error')
+    })
+    taskFlow.use(HandleFailedMiddleware).handle(handle)
     taskFlow.failFn = vi.fn()
     taskRaplized.eventLog = eventLog
     await taskRaplized.handle()
-    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog)
+    await sleep(0)
+    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, taskRaplized, expect.any(Function))
     expect(taskFlow.failFn).toHaveBeenCalledWith(taskRaplized)
   })
 
