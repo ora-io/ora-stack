@@ -1,6 +1,6 @@
 {
   "name": "ora-stack",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "packageManager": "pnpm@9.7.0",
   "description": "",
@@ -54,6 +54,9 @@
     "@antfu/ni": "^0.22.0",
     "@murongg/eslint-config": "^0.2.1",
     "@murongg/utils": "^0.1.27",
+    "@ora-io/orap": "workspace:*",
+    "@ora-io/reku": "workspace:*",
+    "@ora-io/utils": "workspace:*",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
