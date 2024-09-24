@@ -8,7 +8,6 @@ export const HandleFailedMiddleware: HandleFn = async (...args: any[]) => {
     await next()
   }
   catch (error) {
-    await task.remove()
     await task.flow.failFn(task)
   }
 }
