@@ -46,7 +46,7 @@ export class TaskRaplized extends TaskStorable {
     const middlewares = [...this.flow.middlewares]
     middlewares.unshift(HandleFailedMiddleware)
     middlewares.push(HandleSuccessMiddleware)
-    await composeFns([this])(middlewares, this.eventLog)
+    await composeFns(this)(middlewares, this.eventLog)
   }
 
   /** ***************** overwrite **************/

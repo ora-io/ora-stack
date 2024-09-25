@@ -1,6 +1,6 @@
 import type { ArgumentsFn } from '@murongg/utils'
 
-export function composeFns<T>(beforeNextArgs: Array<any> = []) {
+export function composeFns<T>(...beforeNextArgs: Array<any>) {
   return (handles: ArgumentsFn<T>[], args: Array<any> = []) => {
     function dispatch(index: number, ...childArgs: Array<any>) {
       if (index === handles.length)
