@@ -1,5 +1,5 @@
 import type { ethers } from 'ethers'
-import { retryOnNull } from '@ora-io/utils'
+import { timeoutWithRetry } from '@ora-io/utils'
 import { ETH_BLOCK_COUNT_ONE_HOUR } from '../../constants'
 import type { Providers } from '../../types/w3'
 import type { CrossCheckFromParam, CrossCheckRangeParam, CrossCheckRetroParam, SimpleLog } from './interface'
@@ -34,7 +34,11 @@ export class BaseCrossChecker {
 
     // define from, to
     // TODO: use blockNumber for performance
-    const block = await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))
+    const block = await timeoutWithRetry(() => this.provider.provider.getBlock('latest'), 15 * 1000, 3)
+    if (!block) {
+      console.warn('crosscheck failed to get latest block')
+      return
+    }
     const options: CrossCheckRangeParam = {
       ...ccrOptions,
       fromBlock: block.number - retroBlockCount,
@@ -53,8 +57,11 @@ export class BaseCrossChecker {
     ccfOptions: CrossCheckFromParam,
   ) {
     // TODO: use blockNumber for performance
-    const block = await retryOnNull(async () => await this.provider.provider?.getBlock('latest'))
-
+    const block = await timeoutWithRetry(() => this.provider.provider.getBlock('latest'), 15 * 1000, 3)
+    if (!block) {
+      console.warn('crosscheck failed to get latest block')
+      return
+    }
     // suggest use large retroBlockCount
     if (block.number - ccfOptions.fromBlock < ETH_BLOCK_COUNT_ONE_HOUR)
       console.warn('crosscheck retroBlockCount too low, recommend crosscheck interval >= 1 hour')
@@ -105,7 +112,7 @@ export class BaseCrossChecker {
       ...(topics && { topics }),
     }
     if (this.provider.provider) {
-      const logs = await this.provider.provider?.getLogs(params)
+      const logs = await timeoutWithRetry(() => this.provider.provider.getLogs(params), 15 * 1000, 3)
       // get ignoreLogs keys
       const ignoreLogs = options.ignoreLogs
 

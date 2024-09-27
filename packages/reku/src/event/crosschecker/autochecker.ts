@@ -1,5 +1,5 @@
 import type { ethers } from 'ethers'
-import { polling, retryOnNull, sleep } from '@ora-io/utils'
+import { polling, sleep, timeoutWithRetry } from '@ora-io/utils'
 import { ETH_BLOCK_INTERVAL } from '../../constants'
 import type { Providers } from '../../types/w3'
 import { CrossCheckerCacheManager } from './cache/manager'
@@ -56,7 +56,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
 
-    const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
+    const latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
 
     // resume checkpoint priority: options.fromBlock > cache > latestblocknum + 1
     const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestblocknum + 1)
@@ -85,7 +85,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
-      const latestblocknum = await retryOnNull(async () => await this.provider.provider?.getBlockNumber())
+      const latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
         await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
