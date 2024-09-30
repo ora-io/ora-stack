@@ -154,10 +154,14 @@ Each `.event(...)` starts an `Event Flow`
 
 Each `.task(...)` starts a `Task Flow`
 
+**.use(handler: HandleFn)**
+- set the task middleware, which will be called in order, click here to see the [middlewares](#middlewares)
+
 **.handle(handler: HandleFn)**
-- set the task handler, the most important property for a task.
-  - `return true` to identify handle success, and entering `onSuccess`
-  - `return false` to identify handle failed, and entering `onSuccess`
+- set the task handler, the most important property for a task, **you can think of this as a middleware**.
+  - ~~`return true` to identify handle success, and entering `onSuccess`~~
+  - ~~`return false` to identify handle failed, and entering `onFailed`~~
+- It will automatically detect success and failed and call the `onSuccess` and `onFailed` hooks
 
 **.cache(sm: StoreManager)**
 - set the store to cache the tasks
@@ -193,6 +197,17 @@ Each `.task(...)` starts a `Task Flow`
 **.another()**
 - back to the parent `Event Flow`, so that it can add another `.task`
 - e.g. `orap.event(...).task().another().task()`
+
+### Middlewares
+
+The middlewares are used in the `Task Flow` to handle the task processing, it's a chain of functions that can be called in order.
+
+#### Features
+
+- the last parameter of the handler is the `next` fn, so you have to call it to continue the next handler.
+- the penultimate parameter is the `TaskRaplized` object, which contains the task info.
+- you can pass parameters to the next handler by calling `next(param1, param2, ...)`, it will be passed to the next handler as arguments, note: you cannot pass `TaskRaplized` object and `next` fn to the next handler, it will pass the next handler with the `TaskRaplized` object and `next` fn automatically.
+
 
 ### OO Style (Basic)
 

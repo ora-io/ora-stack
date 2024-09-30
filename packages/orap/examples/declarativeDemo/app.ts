@@ -1,7 +1,8 @@
+/* eslint-disable prefer-rest-params */
 import type { ContractEventPayload } from 'ethers'
-import { Logger, randomStr, redisStore } from '@ora-io/utils'
+import { Logger, objectKeys, randomStr, redisStore } from '@ora-io/utils'
 import type { ListenOptions, ToKeyFn } from '../../src'
-import { Orap, StoreManager } from '../../src'
+import { Orap, StoreManager, getTaskContext } from '../../src'
 import ABI from './erc20.abi.json'
 
 const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
@@ -59,7 +60,10 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
 
 async function handleTask(from: string, to: string, amount: number, _event: ContractEventPayload) {
   logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount)
-  return true
+  const args = objectKeys(arguments).map(k => arguments[k])
+
+  const { next } = getTaskContext(...args)
+  await next()
 }
 
 async function newEventSignalHook(from: string, to: string, amount: number, event: ContractEventPayload) {
@@ -70,5 +74,8 @@ async function newEventSignalHook(from: string, to: string, amount: number, even
 
 async function handleTask_2(from: string, to: string, amount: number) {
   logger.log('[+] handleTask_2: from =', from, 'to =', to, 'amount =', amount)
-  return true
+  const args = objectKeys(arguments).map(k => arguments[k])
+
+  const { next } = getTaskContext(...args)
+  await next()
 }
