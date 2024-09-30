@@ -28,6 +28,8 @@ export class TaskFlow implements Flow {
   handleFn: HandleFn = defaultHandleFn
   successFn: HandleResultFn = defaultSuccessFn
 
+  private _middlewares: Array<HandleFn> = []
+
   failFn: HandleResultFn = async (task: TaskRaplized) => {
     await task.remove()
   }
@@ -37,6 +39,10 @@ export class TaskFlow implements Flow {
   constructor(
     private parentFlow: EventFlow,
   ) { }
+
+  get middlewares() {
+    return this._middlewares
+  }
 
   cache(sm: StoreManager) {
     this.sm = sm
@@ -73,6 +79,12 @@ export class TaskFlow implements Flow {
 
   handle(handler: HandleFn): this {
     this.handleFn = handler
+    this._middlewares.push(handler)
+    return this
+  }
+
+  use(middleware: HandleFn): this {
+    this._middlewares.push(middleware)
     return this
   }
 

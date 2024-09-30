@@ -22,14 +22,14 @@ export class TaskVerse implements Verse {
       if (this.loading)
         return
       this.loading = true
-      await this.loadAndHandleAll(task)
+      const prefix = await task.getTaskPrefix(this.flow.ctx)
+      await this.loadAndHandleAll(prefix, ...args)
       this.loading = false
     })
     return this
   }
 
-  async loadAndHandleAll(task: TaskRaplized) {
-    const prefix = await task.getTaskPrefix(this.flow.ctx)
+  async loadAndHandleAll(prefix: string, ...args: Array<any>) {
     // get all task keys
     let keys = await this.flow.sm.keys(`${prefix}*`)
     while (true) {
@@ -37,6 +37,7 @@ export class TaskVerse implements Verse {
       if (keys.length === 0)
         break
       for (const key of keys) {
+        const task = new TaskRaplized(this.flow, args)
         await task.loadByKey(key)
         await task.handle()
       }
@@ -48,8 +49,10 @@ export class TaskVerse implements Verse {
   preload() {
     this.loading = true
     const task = new TaskRaplized(this._flow)
-    this.loadAndHandleAll(task).finally(() => {
-      this.loading = false
+    task.getTaskPrefix(this._flow.ctx).then((prefix) => {
+      this.loadAndHandleAll(prefix).finally(() => {
+        this.loading = false
+      })
     })
   }
 
