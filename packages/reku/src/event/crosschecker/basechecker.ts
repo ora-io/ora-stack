@@ -2,6 +2,7 @@ import type { ethers } from 'ethers'
 import { timeoutWithRetry } from '@ora-io/utils'
 import { ETH_BLOCK_COUNT_ONE_HOUR } from '../../constants'
 import type { Providers } from '../../types/w3'
+import { debug } from '../../debug'
 import type { CrossCheckFromParam, CrossCheckRangeParam, CrossCheckRetroParam, SimpleLog } from './interface'
 
 export class BaseCrossChecker {
@@ -77,6 +78,13 @@ export class BaseCrossChecker {
     return block.number
   }
 
+  /**
+   * @deprecated
+   * @param logs
+   * @param txHashList
+   * @param logIndexList
+   * @returns
+   */
   async diff_old(logs: ethers.Log[], txHashList: string[], logIndexList: number[][]): Promise<ethers.Log[]> {
     const missing = (log: ethers.Log) => {
       const txIndex = txHashList?.indexOf(log.transactionHash) || -1
@@ -105,6 +113,7 @@ export class BaseCrossChecker {
   async _crossCheck(options: CrossCheckRangeParam) {
     // get period logs
     const { fromBlock, toBlock, address, topics } = options
+    debug('start crosscheck from %d to %d', fromBlock, toBlock)
     const params = {
       fromBlock,
       toBlock,
@@ -120,8 +129,10 @@ export class BaseCrossChecker {
       const missingLogs = ignoreLogs ? await this.diff(logs, ignoreLogs) : logs
 
       // callback on missing logs
-      for (const log of missingLogs)
+      for (const log of missingLogs) {
+        debug('missing tx hash: %s', log.transactionHash)
         await options.onMissingLog(log)
+      }
     }
   }
 }

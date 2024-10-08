@@ -2,6 +2,7 @@ import type { ethers } from 'ethers'
 import { polling, sleep, timeoutWithRetry } from '@ora-io/utils'
 import { ETH_BLOCK_INTERVAL } from '../../constants'
 import type { Providers } from '../../types/w3'
+import { debug } from '../../debug'
 import { CrossCheckerCacheManager } from './cache/manager'
 import type { AutoCrossCheckParam, CrossCheckRangeParam, SimpleLog } from './interface'
 import { BaseCrossChecker } from './basechecker'
@@ -113,9 +114,13 @@ export class AutoCrossChecker extends BaseCrossChecker {
       // never ends if options.toBlock is not provided
       : () => false
 
+    debug('crosscheck running')
+
     // TODO: replace polling with schedule cron
     await polling(async () => {
-      if (await waitOrUpdateToBlock()) {
+      const wait = await waitOrUpdateToBlock()
+      debug('polling interval: %d, wait: %s', pollingInterval, wait)
+      if (wait) {
         await this.crossCheckRange(ccrOptions)
         // only update options after cc succ
         await updateCCROptions(ccrOptions)

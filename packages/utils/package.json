@@ -46,6 +46,7 @@
     "@murongg/utils": "^0.1.28",
     "cache-manager": "^5.7.6",
     "cache-manager-ioredis-yet": "^2.1.1",
+    "debug": "^4.3.7",
     "ioredis": "^5.4.1",
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "^11.0.1",
@@ -53,6 +54,7 @@
     "telejson": "^7.2.0"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "@types/lodash.clonedeep": "^4.5.9"
   }
 }
