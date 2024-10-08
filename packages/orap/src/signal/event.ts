@@ -124,8 +124,7 @@ export class EventSignal implements Signal {
       && !(provider instanceof ethers.WebSocketProvider)
     )
       throw new Error('crosscheckProvider must be an instance of RekuProviderManager or ethers.JsonRpcProvider or ethers.WebSocketProvider')
-
     this.crosschecker = new AutoCrossChecker(provider)
-    await this.crosschecker.start(this.crosscheckerOptions)
+    this.crosschecker.start(this.crosscheckerOptions)
   }
 }

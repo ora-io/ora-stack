@@ -1,5 +1,5 @@
 import type { ethers } from 'ethers'
-import { polling, sleep, timeoutWithRetry } from '@ora-io/utils'
+import { polling, timeoutWithRetry } from '@ora-io/utils'
 import { ETH_BLOCK_INTERVAL } from '../../constants'
 import type { Providers } from '../../types/w3'
 import { debug } from '../../debug'
@@ -53,20 +53,21 @@ export class AutoCrossChecker extends BaseCrossChecker {
    * @param options
    */
   async start(options: AutoCrossCheckParam) {
+    debug('auto crosscheck start with options: %O', options)
     this.validate(options)
 
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
 
-    const latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+    let latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
 
     // resume checkpoint priority: options.fromBlock > cache > latestblocknum + 1
-    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestblocknum + 1)
+    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestblocknum)
 
     const {
       fromBlock = defaultInitCheckpoint,
       batchBlocksCount = 10,
       pollingInterval = 3000,
-      blockInterval = ETH_BLOCK_INTERVAL,
+      // blockInterval = ETH_BLOCK_INTERVAL,
       delayBlockFromLatest = 1,
       toBlock,
     } = options
@@ -86,17 +87,20 @@ export class AutoCrossChecker extends BaseCrossChecker {
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
-      const latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+      latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
       if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
         // sleep until the toBlock
-        await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
+        // await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
         return false
       }
       return true
     }
 
     const waitOrUpdateToBlock = toBlock
-      ? () => { ccrOptions.toBlock = Math.min(ccrOptions.toBlock, toBlock); return true }
+      ? () => {
+          ccrOptions.toBlock = Math.min(ccrOptions.toBlock, toBlock)
+          return true
+        }
       : waitNextCrosscheck
 
     const updateCCROptions = async (ccrOptions: CrossCheckRangeParam) => {
@@ -119,11 +123,14 @@ export class AutoCrossChecker extends BaseCrossChecker {
     // TODO: replace polling with schedule cron
     await polling(async () => {
       const wait = await waitOrUpdateToBlock()
-      debug('polling interval: %d, wait: %s', pollingInterval, wait)
+      debug('polling interval: %d, wait: %s, from block: %d, to block: %d', pollingInterval, wait, ccrOptions.fromBlock, ccrOptions.toBlock)
       if (wait) {
         await this.crossCheckRange(ccrOptions)
         // only update options after cc succ
         await updateCCROptions(ccrOptions)
+      }
+      else {
+        debug('Because the latest block %d is too old, skip this cross check', latestblocknum)
       }
       return endingCondition()
     }, pollingInterval)
