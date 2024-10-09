@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events'
 import type { InterfaceAbi } from 'ethers'
 import { Interface, WebSocketProvider, ethers } from 'ethers'
 import type { ErrorEvent, WebSocket } from 'ws'
+import { debug } from '../debug'
 import { ContractManager } from './contract'
 
 export interface RekuProviderManagerOptions {
@@ -127,6 +128,7 @@ export class RekuProviderManager {
   }
 
   reconnect() {
+    debug('reconnect provider running...')
     // destroy heartbeat
     this._clearHeartbeat()
     this._heartbeatTimer = undefined
@@ -142,11 +144,13 @@ export class RekuProviderManager {
       const socket = this._provider.websocket as WebSocket
       socket.removeAllListeners()
       socket.onerror = null
+      debug('remove all listeners of websocket provider')
     }
     this._provider?.destroy()
     this._provider = undefined
 
     setTimeout(() => {
+      debug('reconnect provider start')
       // reconnect provider
       this.connect()
       // reset contracts
@@ -164,15 +168,19 @@ export class RekuProviderManager {
       this._contracts = contracts
       // resend heartbeat
       this._sendHeartbeat()
+      debug('reconnect provider end')
     }, 100)
   }
 
   private _sendHeartbeat() {
     if (this._options?.disabledHeartbeat)
       return
+    debug('start heartbeat')
     this._heartbeatTimer = setInterval(() => {
       this._provider?.send('net_version', [])
-        .then()
+        .then((res) => {
+          debug('heartbeat response: %s', res)
+        })
         .catch((err) => {
           this.reconnect()
           this._event?.emit('error', err)
@@ -181,12 +189,15 @@ export class RekuProviderManager {
   }
 
   private _clearHeartbeat() {
-    if (this._heartbeatTimer)
+    if (this._heartbeatTimer) {
+      debug('clear heartbeat')
       clearInterval(this._heartbeatTimer)
+    }
   }
 
   private _handleError() {
     this._provider?.on('error', () => {
+      debug('provider error event emitted')
       this.reconnect()
       this._event?.emit('error', new Error('provider error'))
     })
@@ -194,10 +205,12 @@ export class RekuProviderManager {
     if (this._provider instanceof ethers.WebSocketProvider) {
       const websocket = this._provider.websocket as WebSocket
       websocket.onerror = (event: ErrorEvent) => {
+        debug('websocket error event emitted')
         this.reconnect()
         this._event?.emit('error', new Error('websocket error'), event)
       }
       websocket.on?.('close', (code: number, reason: string) => {
+        debug('websocket close event emitted')
         this.reconnect()
         this._event?.emit('close', code, reason)
       })
@@ -205,6 +218,7 @@ export class RekuProviderManager {
   }
 
   destroy() {
+    debug('destroy provider running...')
     this._clearHeartbeat()
     this._provider?.removeAllListeners()
     this._provider?.destroy()
@@ -215,5 +229,6 @@ export class RekuProviderManager {
     this._contracts.clear()
     this._event?.removeAllListeners()
     this._event = undefined
+    debug('destroy provider end')
   }
 }

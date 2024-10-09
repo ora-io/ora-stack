@@ -3,6 +3,7 @@ import type { Fn } from '@ora-io/utils'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { OrapVerse } from '../verse/orap'
 import type { EventSignalRegisterParams } from '../signal'
+import { debug } from '../debug'
 import { EventFlow } from './event'
 import type { Flow, HandleFn } from './interface'
 
@@ -35,6 +36,7 @@ export class OrapFlow implements Flow {
 
     const eventFlow = new EventFlow(this, params, handler)
     this.subflows.event.push(eventFlow)
+    debug('The event %s is registered, address: %s', params.eventName, params.address)
     return eventFlow
   }
 

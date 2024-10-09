@@ -1,6 +1,6 @@
 {
   "name": "ora-stack",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "packageManager": "pnpm@9.7.0",
   "description": "",
@@ -47,7 +47,7 @@
     "publish": "nr prepublishOnly && esno scripts/publish.ts",
     "release": "esno scripts/release.ts",
     "start": "esno src/index.ts",
-    "test": "vitest",
+    "test": "DEBUG=DEBUG:ora-stack:* vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
