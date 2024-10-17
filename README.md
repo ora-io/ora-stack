@@ -8,8 +8,7 @@
 <p align="center">
   <a href="https://npmjs.com/package/@ora-io/orap"><img src="https://img.shields.io/npm/v/@ora-io/orap/latest.svg" alt="npm package"></a>
   <a href="https://www.npmjs.com/package/@ora-io/orap"><img src="https://img.shields.io/npm/d18m/%40ora-io%2Forap" alt="build status"></a>
-  <a href="https://www.npmjs.com/package/@ora-io/orap"><img src="https://img.shields.io/npm/l/%40ora-io%2Forap
-  " alt="build status"></a>
+  <a href="https://www.npmjs.com/package/@ora-io/orap"><img src="https://img.shields.io/npm/l/%40ora-io%2Forap" alt="build status"></a>
 </p>
 
 # ORA STACK
