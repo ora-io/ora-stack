@@ -66,7 +66,7 @@ Note the following already includes using Redis as the store to cache tasks, all
 
 ```ts
 import { ethers } from 'ethers'
-import { Orap, StoreManager } from '@orap-io/orap'
+import { Orap, StoreManager, getTaskContext } from '@orap-io/orap'
 import { Logger, redisStore } from '@ora-io/utils'
 
 // new orap
@@ -79,9 +79,17 @@ const sm = new StoreManager(store)
 // use a logger
 const logger = new Logger('info', '[orap-raplize-sample]')
 
-const handle1 = (...args: any) => { logger.log('handle task 1', args); return true }
+const handle1 = (...args: any) => {
+  const { task, next } = getTaskContext(...args)
+  logger.log('handle task 1', args, task)
+  next()
+}
 
-const handle2 = (...args: any) => { logger.log('handle task 2', args); return true }
+const handle2 = (...args: any) => {
+  const { task, next } = getTaskContext(...args)
+  logger.log('handle task 2', args, task)
+  next()
+}
 
 // define event signal with crosscheck, and customized cacheable tasks
 // note: use redis as the cache layer
