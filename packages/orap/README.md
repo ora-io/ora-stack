@@ -207,8 +207,10 @@ Each `.task(...)` starts a `Task Flow`
 
 ## Middlewares
 
-The middlewares are used in the `Task Flow` to handle the task processing, it's a chain of functions that can be called in order.
-You can define `use` to add a middleware to the task flow.
+The middlewares are used in the `Task Flow` to handle the task processing, it's a chain of functions that can be called in order. 
+
+You can define `use` to add a middleware to the task flow.  
+
 NOTE: handle is a middleware that can be flexibly placed at any position within the middleware chain, and it will be called in order.
 
 > Middleware is only applicable to task flow, not event flow.
