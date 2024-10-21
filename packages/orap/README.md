@@ -66,7 +66,8 @@ Note the following already includes using Redis as the store to cache tasks, all
 
 ```ts
 import { ethers } from 'ethers'
-import { Orap, StoreManager, getTaskContext } from '@orap-io/orap'
+import type { NextFunction, TaskRaplized } from '@orap-io/orap'
+import { Orap, StoreManager, getMiddlewareContext } from '@orap-io/orap'
 import { Logger, redisStore } from '@ora-io/utils'
 
 // new orap
@@ -76,18 +77,16 @@ const orap = new Orap()
 const store = redisStore()
 const sm = new StoreManager(store)
 
-// use a logger
-const logger = new Logger('info', '[orap-raplize-sample]')
-
-const handle1 = (...args: any) => {
-  const { task, next } = getTaskContext(...args)
-  logger.log('handle task 1', args, task)
+// example event: erc20 transfer
+const handle1 = (from: string, to: string, amount: number, event: ContractEventPayload, task: TaskRaplized, next: NextFunction) => {
+  console.log(`handle task 1: from ${from} to ${to} amount ${amount} task ${task}`)
   next()
 }
 
-const handle2 = (...args: any) => {
-  const { task, next } = getTaskContext(...args)
-  logger.log('handle task 2', args, task)
+// when you don't know the specific parameters, you can use `getMiddlewareContext` fn get `next` and `task` object.
+const handle2 = (...args: any[]) => {
+  const { task, next } = getMiddlewareContext(...args)
+  console.log('handle task 2', args, task)
   next()
 }
 
@@ -206,16 +205,192 @@ Each `.task(...)` starts a `Task Flow`
 - back to the parent `Event Flow`, so that it can add another `.task`
 - e.g. `orap.event(...).task().another().task()`
 
-### Middlewares
+## Middlewares
 
 The middlewares are used in the `Task Flow` to handle the task processing, it's a chain of functions that can be called in order.
+You can define `use` to add a middleware to the task flow.
+NOTE: handle is a middleware that can be flexibly placed at any position within the middleware chain, and it will be called in order.
 
-#### Features
+> Middleware is only applicable to task flow, not event flow.
+
+### Features
 
 - the last parameter of the handler is the `next` fn, so you have to call it to continue the next handler.
 - the penultimate parameter is the `TaskRaplized` object, which contains the task info.
 - you can pass parameters to the next handler by calling `next(param1, param2, ...)`, it will be passed to the next handler as arguments, note: you cannot pass `TaskRaplized` object and `next` fn to the next handler, it will pass the next handler with the `TaskRaplized` object and `next` fn automatically.
 
+### Usage
+
+#### create a middleware for check transaction status 
+
+1. create `CheckTransactionStatusMiddleware.js` file
+
+2. define `CheckTransactionStatusMiddleware` function
+
+   ```js
+   // Since it is a general middleware, we don't know the specific parameters of the event, so we need to use rest params.
+   export function CheckTransactionStatusMiddleware(...args) {}
+   ```
+
+3. get middleware context for get `next` fn and `task` object
+
+   ```js
+   // Since it is a general middleware, we don't know the specific parameters of the event, so we need to use rest params.
+   export function CheckTransactionStatusMiddleware(...args) {
+     // get middleware context for get `next` fn and `task` object
+     const { next, task } = getMiddlewareContext(...args)
+   }
+   ```
+
+
+4. write the check transaction status logic,
+
+   since we need to use the provider to check transaction status, we need the user to actively pass in the provider
+
+   ```js
+   // Since it is a general middleware, we don't know the specific parameters of the event, so we need to use rest params.
+   export function CheckTransactionStatusMiddleware(provider) {
+     return (...args) => {
+       // get middleware context for get `next` fn and `task` object
+       const { next, task } = getMiddlewareContext(...args)
+       // get contract event payload
+       const contractEventPayload = args.at(-3) as ContractEventPayload
+       // check transaction status
+       if (contractEventPayload instanceof ContractEventPayload) {
+         const tx = await provider.getTransactionReceipt(contractEventPayload.log.transactionHash)
+         if (!tx || tx?.status === 0) {
+           // it will be caught by the error handler, and terminate the execution of the entire middlewares chain
+           throw new Error('Transaction failed')
+         }
+         await next()
+       }
+       else {
+         // throw error if the contract event payload is invalid, it will be caught by the error handler, and terminate the execution of the entire middlewares chain
+         throw new TypeError('Invalid contract event payload')
+       }
+     }
+   }
+   ```
+
+
+5. use middleware in task flow, take erc20 transfer event as an example
+
+   ```js
+   import { Orap, StoreManager, getMiddlewareContext } from '@ora-io/orap'
+   import ethers from 'ethers'
+   import { CheckTransactionStatusMiddleware } from './CheckTransactionStatusMiddleware.js'
+   
+   const orap = new Orap()
+   
+   const store = redisStore()
+   const sm = new StoreManager(store)
+   
+   const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+   const TRANSFER_EVENT_NAME = 'Transfer'
+   
+   const eventSignalParam = {
+     address: MAINNET_USDT_ADDR,
+     abi: ['event Transfer(address indexed from, address indexed to, uint256 amount)'],
+     eventName: TRANSFER_EVENT_NAME,
+   }
+   
+   const providers = {
+     wsProvider: new ethers.WebSocketProvider('wss://127.0.0.1'),
+     httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
+   }
+   
+   orap.event(eventSignalParam)
+     // add a task
+     .task()
+     .cache(sm)
+     .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
+     .ttl({ taskTtl: 120000, doneTtl: 60000 })
+     .use(CheckTransactionStatus(providers.wsProvider))
+     .handle(handleTask)
+   
+   // start signal listener
+   orap.listen(
+     providers,
+     () => { logger.log('listening on provider.network') },
+   )
+   
+   async function handleTask(from, to, amount, event, task, next) {
+     logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount)
+     // do something ...
+     await next()
+   }
+   
+   ```
+
+### Execution order
+
+The middleware will be executed in the order you define it.
+
+```js
+import { Orap, StoreManager, getMiddlewareContext } from '@ora-io/orap'
+import ethers from 'ethers'
+
+const orap = new Orap()
+
+const store = redisStore()
+const sm = new StoreManager(store)
+
+const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+const TRANSFER_EVENT_NAME = 'Transfer'
+
+const eventSignalParam = {
+  address: MAINNET_USDT_ADDR,
+  abi: ['event Transfer(address indexed from, address indexed to, uint256 amount)'],
+  eventName: TRANSFER_EVENT_NAME,
+}
+
+const providers = {
+  wsProvider: new ethers.WebSocketProvider('wss://127.0.0.1'),
+  httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
+}
+
+orap.event(eventSignalParam)
+// add a task
+  .task()
+  .cache(sm)
+  .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
+  .ttl({ taskTtl: 120000, doneTtl: 60000 })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(2)
+    await next()
+  })
+  .handle(handleTask)
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(3)
+    await next()
+  })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(4)
+  })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(5)
+  })
+// start signal listener
+orap.listen(
+  providers,
+  () => { logger.log('listening on provider.network') },
+)
+
+async function handleTask(from, to, amount, event, task, next) {
+  console.log(2)
+  // do something ...
+  await next()
+}
+```
+
+```bash
+output: 1 2 3 4
+```
+Since 4th middleware does not call `next`, 5th middleware will not be executed
 
 ### OO Style (Basic)
 
