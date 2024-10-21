@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
 import { EventFlow, OrapFlow, TaskFlow } from '../flow'
 import type { StoreManager } from '../store'
-import { getTaskContext } from '../utils'
+import { getMiddlewareContext } from '../utils'
 import { HandleFailedMiddleware, HandleSuccessMiddleware } from '../middlewares/private'
 import { TaskRaplized } from './verse'
 
@@ -17,7 +17,7 @@ describe('TaskRaplized', () => {
   beforeEach(() => {
     taskFlow = new TaskFlow(new EventFlow(new OrapFlow()))
     taskFlow.handle(vi.fn(async (...args: any[]) => {
-      const { next } = getTaskContext(args)
+      const { next } = getMiddlewareContext(args)
 
       await next()
     }))
@@ -68,7 +68,7 @@ describe('TaskRaplized', () => {
   it('should handle the task successfully', async () => {
     const eventLog = [1, 2, 3]
     const handle = vi.fn(async (...args: any[]) => {
-      const { next } = getTaskContext(args)
+      const { next } = getMiddlewareContext(args)
       await next()
       return true
     })
