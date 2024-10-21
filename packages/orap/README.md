@@ -357,7 +357,7 @@ orap.event(eventSignalParam)
   .ttl({ taskTtl: 120000, doneTtl: 60000 })
   .use(async (...args) => {
     const { next } = getMiddlewareContext(...args)
-    console.log(2)
+    console.log(1)
     await next()
   })
   .handle(handleTask)
