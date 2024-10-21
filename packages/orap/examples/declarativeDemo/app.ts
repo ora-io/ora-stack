@@ -2,7 +2,7 @@
 import type { ContractEventPayload } from 'ethers'
 import { Logger, objectKeys, randomStr, redisStore } from '@ora-io/utils'
 import type { ListenOptions, ToKeyFn } from '../../src'
-import { Orap, StoreManager, getTaskContext } from '../../src'
+import { CheckTransactionStatus, Orap, StoreManager, getTaskContext } from '../../src'
 import ABI from './erc20.abi.json'
 
 const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
@@ -36,12 +36,14 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     })
     // event hook, not necessary
     .handle(newEventSignalHook)
+
     // add a task
     .task()
     .cache(sm)
     .key(toKey)
     .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
     .ttl({ taskTtl: 120000, doneTtl: 60000 })
+    .use(CheckTransactionStatus)
     .handle(handleTask)
     // add another task
     .another()
