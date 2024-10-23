@@ -1,13 +1,13 @@
 import { ContractEventPayload } from 'ethers'
 import type { Providers } from '@ora-io/reku'
-import { getTaskContext } from '../utils'
+import { getMiddlewareContext } from '../utils'
 
 export const CheckTransactionStatus = (provider: Providers) => {
   if (!provider)
     throw new Error('provider is required')
 
   return async (...args: any[]) => {
-    const { next } = getTaskContext(...args)
+    const { next } = getMiddlewareContext(...args)
     const contractEventPayload = args.at(-3) as ContractEventPayload
     if (contractEventPayload instanceof ContractEventPayload) {
       const tx = await provider.provider.getTransactionReceipt(contractEventPayload.log.transactionHash)

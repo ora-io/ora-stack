@@ -1,8 +1,8 @@
 import type { HandleFn } from '../flow'
-import { getTaskContext } from '../utils'
+import { getMiddlewareContext } from '../utils'
 
 export const HandleFailedMiddleware: HandleFn = async (...args: any[]) => {
-  const { next, task } = getTaskContext(...args)
+  const { next, task } = getMiddlewareContext(...args)
 
   try {
     await next()

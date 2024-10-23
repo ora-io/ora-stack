@@ -5,7 +5,7 @@ function checkIsTaskRaplized(task: any): task is TaskRaplized {
   return task instanceof TaskRaplized
 }
 
-export function getTaskContext(...args: any[]) {
+export function getMiddlewareContext(...args: any[]) {
   if (args.length && Array.isArray(args[0])) {
     const newArgs = args[0]
     const next = newArgs.at(-1) as NextFunction

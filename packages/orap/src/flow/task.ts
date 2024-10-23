@@ -15,7 +15,7 @@ const defaultHandleFn: HandleFn = () => {
 }
 
 const defaultToKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
-export type TaskFlowTTL = { taskTtl: number; doneTtl: number } | number
+export interface TaskFlowTTL { taskTtl: number; doneTtl: number }
 
 // TODO: add 'Failed-Task:' ?
 export class TaskFlow implements Flow {
@@ -60,10 +60,13 @@ export class TaskFlow implements Flow {
     return this
   }
 
-  ttl(TTLs: TaskFlowTTL): this {
+  ttl(TTLs: number): this
+  ttl(TTLs: TaskFlowTTL): this
+  ttl(taskTtl: number, doneTtl: number): this
+  ttl(TTLs: TaskFlowTTL | number, doneTtl?: number): this {
     if (typeof TTLs === 'number') {
       this.taskTtl = TTLs
-      this.doneTtl = TTLs
+      this.doneTtl = doneTtl ?? TTLs
     }
     else {
       this.taskTtl = TTLs.taskTtl
