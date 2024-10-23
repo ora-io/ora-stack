@@ -1,0 +1,20 @@
+name: ❓ General Question
+description: Ask any general questions or inquiries
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reaching out with your question. Please provide as much detail as possible to help us assist you better.
+
+  - type: textarea
+    attributes:
+      label: What is your question?
+      description: Please describe your question or inquiry in detail.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: If applicable, provide any additional context or details that might help us understand your question better.
