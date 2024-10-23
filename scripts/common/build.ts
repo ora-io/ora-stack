@@ -6,7 +6,6 @@ import fg from 'fast-glob'
 import { intersection } from '@murongg/utils'
 import type { Package } from '../constants'
 import { haveWorkspacePackages, packages } from '../constants'
-import { selectPkgs } from '../common'
 
 const rootDir = path.resolve(process.cwd())
 
@@ -28,7 +27,7 @@ export function clean() {
 }
 
 export async function build(pkgs?: Package[]) {
-  pkgs = pkgs ?? (await selectPkgs()).value as Package[]
+  pkgs = pkgs ?? packages as Package[]
   consola.log('Building packages:', pkgs.map(pkg => pkg.color(pkg.packName)).join(', '))
   pkgs = intersection(pkgs, haveWorkspacePackages)
 

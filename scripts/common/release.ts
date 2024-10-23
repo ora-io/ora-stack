@@ -37,7 +37,7 @@ export async function release() {
     if (pkg.isMain) {
       mainVersion = version
     }
-    else {
+    else if (!includeMain) {
       execSync('git add .', { stdio: 'inherit', cwd: rootDir })
       execSync(`git commit -m "chore: release v${version}"`, { stdio: 'inherit', cwd: rootDir })
     }
