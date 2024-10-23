@@ -169,6 +169,7 @@ Each `.task(...)` starts a `Task Flow`
   - ~~`return true` to identify handle success, and entering `onSuccess`~~
   - ~~`return false` to identify handle failed, and entering `onFailed`~~
 - It will automatically detect success and failed and call the `onSuccess` and `onFailed` hooks
+- this fn is essentially a middleware, so it has all the features of middleware
 
 **.cache(sm: StoreManager)**
 - set the store to cache the tasks
@@ -188,6 +189,7 @@ Each `.task(...)` starts a `Task Flow`
 
 **.key(toKey: ToKeyFn)**
 - defines the primary key of a task based on the event values (i.e. log topics)
+- `ToKeyFn` will callback with the event values, and should return a string as the key
 - default: random hex string
 
 **.success(onSuccess: HandleResultFn)**
