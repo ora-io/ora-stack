@@ -43,7 +43,7 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     .key(toKey)
     .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
     .ttl({ taskTtl: 120000, doneTtl: 60000 })
-    .use(CheckTransactionStatus)
+    .use(CheckTransactionStatus(options.wsProvider))
     .handle(handleTask)
     // add another task
     .another()
