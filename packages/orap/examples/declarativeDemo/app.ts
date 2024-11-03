@@ -24,7 +24,7 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
 
   const toKey: ToKeyFn = (from: string, _to: string, _amount: number) => `${from}_${randomStr(4)}`
 
-  orap.event(eventSignalParam)
+  orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
     .crosscheck({
       store,
       storeKeyPrefix: 'ora-stack:orap:demo:cc:',

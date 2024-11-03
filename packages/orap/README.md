@@ -92,7 +92,7 @@ const handle2 = (...args: any[]) => {
 
 // define event signal with crosscheck, and customized cacheable tasks
 // note: use redis as the cache layer
-orap.event(eventSignalParam)
+orap.event('contract address', 'contract abi', 'event name')
   .crosscheck(ccOptions)
   // add a task
   .task()
@@ -122,9 +122,11 @@ orap.listen(
 
 Each `new Orap()` starts a `Orap Flow`
 
-**.event(eventSignalParam, handlFn)**
-- `eventSignalParam`: defines an event signal and enters an Event Flow
-- `handlFn`: customized hook on new event received. 
+**.event(address, abi, eventName, handleFn)**
+- `address`: defines the contract address
+- `abi`: defines the contract abi
+- `eventName`: defines the event name
+- `handleFn`: customized hook on new event received. 
   - `return true` to continue the rest of processes
   - `return false` to hijack the rest of processes
 
@@ -147,9 +149,9 @@ Each `.event(...)` starts an `Event Flow`
 - add a task for this event type
 - starts a `Task Flow`
 
-**.handle(handlFn)**
-- same as `.event(.., handlFn)`
-- `handlFn`: customized hook on new event received. 
+**.handle(handleFn)**
+- same as `.event(.., handleFn)`
+- `handleFn`: customized hook on new event received. 
   - `return true` to continue the rest of processes
   - `return false` to hijack the rest of processes
 
@@ -303,7 +305,7 @@ NOTE: handle is a middleware that can be flexibly placed at any position within 
      httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
    }
    
-   orap.event(eventSignalParam)
+   orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
      // add a task
      .task()
      .cache(sm)
@@ -353,7 +355,31 @@ const providers = {
   httpProvider: new ethers.JsonRpcProvider('http://127.0.0.1')
 }
 
-orap.event(eventSignalParam)
+orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
+  // add a task
+  .task()
+  .cache(sm)
+  .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
+  .ttl({ taskTtl: 120000, doneTtl: 60000 })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(1)
+    await next()
+  })
+  .handle(handleTask)
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(3)
+    await next()
+  })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(4)
+  })
+  .use(async (...args) => {
+    const { next } = getMiddlewareContext(...args)
+    console.log(5)
+  })
 // add a task
   .task()
   .cache(sm)
@@ -414,7 +440,7 @@ const eventSignalParam = {
 
 const handle = (...args: any) => { console.log('handle', args) }
 
-orap.event(eventSignalParam, handle)
+orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName, handle)
   .crosscheck({ pollingInterval: 1000, batchBlocksCount: 1, blockInterval: 12000 })
 
 orap.listen(
