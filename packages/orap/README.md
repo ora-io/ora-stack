@@ -505,7 +505,7 @@ All events that arrive the oracle service and trigger following actions are defi
 etc.
 
 **EventSignal**
-- define event listener as simple as: `orap.event({address:"0x", abi:"", eventName: "Transfer"}, handleSignal)`
+- define event listener as simple as: `orap.event(address:"0x", abi:"", eventName: "Transfer", handleSignal)`
 - natively integrate `crosschecker` features from [@ora-io/reku](https://github.com/ora-io/ora-stack/blob/main/packages/reku/), available config please check out `AutoCrossCheckParam` in `reku`
 - each event signal only accept at most one crosschecker.
 - `callback`: the user provided handle function to handle the new signals.
