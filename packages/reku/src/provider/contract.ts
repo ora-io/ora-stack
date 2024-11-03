@@ -1,4 +1,4 @@
-import type { Fn } from '@ora-io/utils'
+import type { ContractAddress, Fn } from '@ora-io/utils'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { ethers } from 'ethers'
 
@@ -6,7 +6,7 @@ export class ContractManager {
   private _contract?: ethers.Contract
   private _listeners: Map<ethers.ContractEventName, Fn> = new Map()
 
-  constructor(public address: string, public abi: Interface | InterfaceAbi, public provider: ethers.JsonRpcProvider | ethers.WebSocketProvider) {
+  constructor(public address: ContractAddress, public abi: Interface | InterfaceAbi, public provider: ethers.JsonRpcProvider | ethers.WebSocketProvider) {
     this._contract = new ethers.Contract(address, abi, provider)
   }
 

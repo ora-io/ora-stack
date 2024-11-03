@@ -1,5 +1,6 @@
 import type { Providers } from '@ora-io/reku'
-import type { Fn } from '@ora-io/utils'
+import type { ContractAddress, Fn } from '@ora-io/utils'
+import { isAddressable } from 'ethers'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { OrapVerse } from '../verse/orap'
 import type { EventSignalRegisterParams } from '../signal'
@@ -27,12 +28,11 @@ export class OrapFlow implements Flow {
   }
 
   event(params: EventSignalRegisterParams, handler?: HandleFn): EventFlow
-  event(params: string, abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
-  event(params: EventSignalRegisterParams | string, abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
-    if (typeof params === 'string')
+  event(address: ContractAddress, abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
+  event(params: EventSignalRegisterParams | ContractAddress, abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
+    if (typeof params === 'string' || isAddressable(params))
       params = { address: params, abi: abi as Interface | InterfaceAbi, eventName: eventName as string }
-    else
-      handler = abi as HandleFn
+    else handler = abi as HandleFn
 
     const eventFlow = new EventFlow(this, params, handler)
     this.subflows.event.push(eventFlow)
