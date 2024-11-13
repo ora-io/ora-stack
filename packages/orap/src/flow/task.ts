@@ -1,3 +1,4 @@
+import type { Milliseconds } from '@ora-io/utils'
 import { alphabetHex, memoryStore, randomStr } from '@ora-io/utils'
 import type { Context, TaskRaplized } from '../task'
 import { StoreManager } from '../store'
@@ -15,15 +16,15 @@ const defaultHandleFn: HandleFn = () => {
 }
 
 const defaultToKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
-export interface TaskFlowTTL { taskTtl: number; doneTtl: number }
+export interface TaskFlowTTL { taskTtl: Milliseconds; doneTtl: Milliseconds }
 
 // TODO: add 'Failed-Task:' ?
 export class TaskFlow implements Flow {
   sm: StoreManager = new StoreManager(memoryStore())
   taskPrefix: Prefix = 'Task:'
   donePrefix: Prefix = 'Done-Task:'
-  taskTtl?: number
-  doneTtl?: number
+  taskTtl?: Milliseconds
+  doneTtl?: Milliseconds
   toKeyFn: ToKeyFn = defaultToKeyFn
   handleFn: HandleFn = defaultHandleFn
   successFn: HandleResultFn = defaultSuccessFn
@@ -60,10 +61,10 @@ export class TaskFlow implements Flow {
     return this
   }
 
-  ttl(TTLs: number): this
+  ttl(TTLs: Milliseconds): this
   ttl(TTLs: TaskFlowTTL): this
-  ttl(taskTtl: number, doneTtl: number): this
-  ttl(TTLs: TaskFlowTTL | number, doneTtl?: number): this {
+  ttl(taskTtl: Milliseconds, doneTtl: Milliseconds): this
+  ttl(TTLs: TaskFlowTTL | Milliseconds, doneTtl?: Milliseconds): this {
     if (typeof TTLs === 'number') {
       this.taskTtl = TTLs
       this.doneTtl = doneTtl ?? TTLs

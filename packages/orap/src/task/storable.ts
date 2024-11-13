@@ -1,4 +1,4 @@
-import type { Awaitable, Constructor } from '@ora-io/utils'
+import type { Awaitable, Constructor, Milliseconds } from '@ora-io/utils'
 import type { StoreManager } from '../store/storemanager'
 import type { Context } from './context'
 import { TaskBase } from './base'
@@ -9,8 +9,8 @@ export abstract class TaskStorable extends TaskBase {
   // overwrite these for store key customize
   static readonly taskPrefix: string = 'Task:'
   static readonly taskPrefixDone: string = 'Done-Task:'
-  static readonly taskTtl: number | undefined = undefined
-  static readonly taskTtlDone: number | undefined = undefined
+  static readonly taskTtl: Milliseconds | undefined = undefined
+  static readonly taskTtlDone: Milliseconds | undefined = undefined
 
   getTaskPrefix(_context?: Context): Awaitable<string> {
     return (this.constructor as TypeofTaskStorable).taskPrefix
@@ -20,19 +20,19 @@ export abstract class TaskStorable extends TaskBase {
     return (this.constructor as TypeofTaskStorable).taskPrefixDone
   }
 
-  get taskTtl(): number | undefined {
+  get taskTtl(): Milliseconds | undefined {
     return (this.constructor as TypeofTaskStorable).taskTtl
   }
 
-  get taskTtlDone(): number | undefined {
+  get taskTtlDone(): Milliseconds | undefined {
     return (this.constructor as TypeofTaskStorable).taskTtlDone
   }
 
-  getTaskTtl(_context?: Context): number | undefined {
+  getTaskTtl(_context?: Context): Milliseconds | undefined {
     return (this.constructor as TypeofTaskStorable).taskTtl
   }
 
-  getTaskTtlDone(_context?: Context): number | undefined {
+  getTaskTtlDone(_context?: Context): Milliseconds | undefined {
     return (this.constructor as TypeofTaskStorable).taskTtlDone
   }
 

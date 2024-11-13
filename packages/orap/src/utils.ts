@@ -8,8 +8,8 @@ function checkIsTaskRaplized(task: any): task is TaskRaplized {
 export function getMiddlewareContext(...args: any[]) {
   if (args.length && Array.isArray(args[0])) {
     const newArgs = args[0]
-    const next = newArgs.at(-1) as NextFunction
-    const task = newArgs.at(-2) as TaskRaplized
+    const next = newArgs.at(-2) as NextFunction
+    const task = newArgs.at(-1) as TaskRaplized
     const isTaskRaplized = checkIsTaskRaplized(task)
 
     if (typeof next === 'function' && isTaskRaplized) {
@@ -20,8 +20,8 @@ export function getMiddlewareContext(...args: any[]) {
     }
   }
 
-  const next = args.at(-1) as NextFunction
-  const task = args.at(-2) as TaskRaplized
+  const next = args.at(-2) as NextFunction
+  const task = args.at(-1) as TaskRaplized
   const isTaskRaplized = checkIsTaskRaplized(task)
 
   if (typeof next !== 'function' || !isTaskRaplized)

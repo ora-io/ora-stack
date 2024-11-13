@@ -1,4 +1,4 @@
-import type { Awaitable, Milliseconds, Store } from '@ora-io/utils'
+import type { Awaitable, ContractAddress, Milliseconds, Store } from '@ora-io/utils'
 import type { ethers } from 'ethers'
 
 export type FnOnMissingLog = (log: ethers.Log) => Awaitable<void>
@@ -6,7 +6,7 @@ export type FnOnMissingLog = (log: ethers.Log) => Awaitable<void>
 export interface SimpleLog { transactionHash: string; index?: number }
 
 export interface LogFilterParam {
-  address: string
+  address: ContractAddress
   topics: string[]
   fromBlock?: number
   toBlock?: number

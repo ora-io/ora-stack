@@ -7,9 +7,8 @@ export function composeFns<T>(...beforeNextArgs: Array<any>) {
         return Promise.resolve()
 
       const realArgs = childArgs.length ? childArgs : args
-
       const handle = handles[index]
-      return Promise.resolve(handle(...realArgs, ...beforeNextArgs, (...args: Array<any>) => dispatch(index + 1, ...args)))
+      return Promise.resolve(handle(...realArgs, (...args: Array<any>) => dispatch(index + 1, ...args), ...beforeNextArgs))
     }
 
     return dispatch(0, ...args)

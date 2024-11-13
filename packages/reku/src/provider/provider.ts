@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events'
 import type { InterfaceAbi } from 'ethers'
 import { Interface, WebSocketProvider, ethers } from 'ethers'
 import type { ErrorEvent, WebSocket } from 'ws'
+import type { ContractAddress } from '@ora-io/utils'
 import { debug } from '../debug'
 import { ContractManager } from './contract'
 
@@ -20,7 +21,7 @@ export type RekuProviderManagerEvent = 'error' | 'close'
 
 export class RekuProviderManager {
   private _provider?: ethers.JsonRpcProvider | ethers.WebSocketProvider
-  private _contracts: Map<string, ContractManager> = new Map()
+  private _contracts: Map<ContractAddress, ContractManager> = new Map()
 
   private _heartbeatInterval = 10 * 1000
 
@@ -53,9 +54,9 @@ export class RekuProviderManager {
     return this._contracts
   }
 
-  addContract(address: string, contract: ethers.Contract): ContractManager | undefined
-  addContract(address: string, abi: Interface | InterfaceAbi): ContractManager | undefined
-  addContract(address: string, abi: Interface | InterfaceAbi | ethers.Contract): ContractManager | undefined {
+  addContract(address: ContractAddress, contract: ethers.Contract): ContractManager | undefined
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi): ContractManager | undefined
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.Contract): ContractManager | undefined {
     if (this._provider) {
       if (abi instanceof Interface || Array.isArray(abi)) {
         if (!abi)
@@ -77,11 +78,11 @@ export class RekuProviderManager {
     return undefined
   }
 
-  addListener(contractAddress: string, event: ethers.ContractEventName, listener: ethers.Listener) {
+  addListener(contractAddress: ContractAddress, event: ethers.ContractEventName, listener: ethers.Listener) {
     this._contracts.get(contractAddress)?.addListener(event, listener)
   }
 
-  removeListener(contractAddress: string, event: ethers.ContractEventName, listener: ethers.Listener) {
+  removeListener(contractAddress: ContractAddress, event: ethers.ContractEventName, listener: ethers.Listener) {
     this._contracts.get(contractAddress)?.removeListener(event, listener)
   }
 
@@ -154,7 +155,7 @@ export class RekuProviderManager {
       // reconnect provider
       this.connect()
       // reset contracts
-      const contracts: Map<string, ContractManager> = new Map()
+      const contracts: Map<ContractAddress, ContractManager> = new Map()
       this._contracts.forEach((contract) => {
         if (this._provider) {
           const newContract = new ContractManager(contract.address, contract.abi, this._provider)

@@ -1,3 +1,4 @@
+import type { Milliseconds } from '@ora-io/utils'
 import { composeFns, isJsonString, isString, stripPrefix } from '@ora-io/utils'
 import type { TaskFlow } from '../flow'
 import { HandleSuccessMiddleware } from '../middlewares/HandleSuccessMiddleware'
@@ -28,11 +29,11 @@ export class TaskRaplized extends TaskStorable {
       : await this.flow.donePrefix(this.flow.ctx)
   }
 
-  get taskTtl(): number | undefined {
+  get taskTtl(): Milliseconds | undefined {
     return this.flow.taskTtl
   }
 
-  get taskTtlDone(): number | undefined {
+  get taskTtlDone(): Milliseconds | undefined {
     return this.flow.doneTtl
   }
 
