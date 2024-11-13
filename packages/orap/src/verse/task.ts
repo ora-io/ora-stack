@@ -1,3 +1,4 @@
+import { sleep } from '@murongg/utils'
 import type { TaskFlow } from '../flow/task'
 import { TaskRaplized } from '../task/verse'
 import type { Verse } from './interface'
@@ -41,6 +42,9 @@ export class TaskVerse implements Verse {
         await task.loadByKey(key)
         await task.handle()
       }
+
+      // sleep for 1 second for avoiding too many requests and ensure the task is finished
+      await sleep(1000)
       // get all task keys again
       keys = await this.flow.sm.keys(`${prefix}*`)
     }

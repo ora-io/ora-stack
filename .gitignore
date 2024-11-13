@@ -10,3 +10,5 @@ logs
 node_modules
 temp
 *.env
+
+packages/orap/examples/testDemo/*
