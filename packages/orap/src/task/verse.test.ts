@@ -77,7 +77,7 @@ describe('TaskRaplized', () => {
     taskRaplized.eventLog = eventLog
     await taskRaplized.handle()
     await sleep(0)
-    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, taskRaplized, expect.any(Function))
+    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, expect.any(Function), taskRaplized)
     expect(taskFlow.successFn).toHaveBeenCalledWith(taskRaplized)
   })
 
@@ -91,7 +91,7 @@ describe('TaskRaplized', () => {
     taskRaplized.eventLog = eventLog
     await taskRaplized.handle()
     await sleep(0)
-    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, taskRaplized, expect.any(Function))
+    expect(taskFlow.handleFn).toHaveBeenCalledWith(...eventLog, expect.any(Function), taskRaplized)
     expect(taskFlow.failFn).toHaveBeenCalledWith(taskRaplized)
   })
 
