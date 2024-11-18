@@ -38,7 +38,7 @@ export class EventFlow implements Flow {
     return this
   }
 
-  task(params: TaskFlowParams): TaskFlow
+  task(params?: TaskFlowParams): TaskFlow
   task(sm?: StoreManager | TaskFlowParams, context?: Context): TaskFlow {
     let tf: TaskFlow
     if (sm instanceof StoreManager) {
