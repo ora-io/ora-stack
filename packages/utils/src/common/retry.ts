@@ -7,7 +7,7 @@ export interface RetryOnRetOptions {
 }
 
 // todo: if no retryMax, use polling
-export async function retryOnRet<T extends Fn<any>>(fn: T, successCondition: (result: ReturnType<T>) => Awaitable<boolean>, options: RetryOnRetOptions = {}) {
+export async function retryOnRet<T extends Fn<any>>(fn: T, successCondition: (result: Awaited<ReturnType<T>>) => Awaitable<boolean>, options: RetryOnRetOptions = {}) {
   const { retryMax, delay = 1000 } = options
   const errMsgRetNull = 'Returned value doesn\'t meet success condition'
   if (!retryMax) {
