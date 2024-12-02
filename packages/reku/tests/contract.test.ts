@@ -1,10 +1,10 @@
 import { ethers } from 'ethers'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { sleep } from '@ora-io/utils'
-import { ContractManager } from '../src/provider/contract'
+import { RekuContractManager } from '../src/provider/contract'
 
-describe('ContractManager', () => {
-  let contractManager: ContractManager
+describe('RekuContractManager', () => {
+  let contractManager: RekuContractManager
   const address = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   const abi: string[] = [
     'event Transfer(address indexed from, address indexed to, uint256 value)',
@@ -13,7 +13,7 @@ describe('ContractManager', () => {
   const provider = new ethers.WebSocketProvider('wss://ethereum-rpc.publicnode.com')
 
   beforeEach(() => {
-    contractManager = new ContractManager(address, abi, provider)
+    contractManager = new RekuContractManager(address, abi, provider)
   })
 
   afterEach(() => {
