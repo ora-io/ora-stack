@@ -18,13 +18,26 @@ const defaultHandleFn: HandleFn = () => {
 const defaultToKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
 export interface TaskFlowTTL { taskTtl: Milliseconds; doneTtl: Milliseconds }
 
+export interface TaskFlowParams {
+  context?: Context
+  taskPrefix?: Prefix
+  donePrefix?: Prefix
+  taskTtl?: Milliseconds
+  doneTtl?: Milliseconds
+  cache?: StoreManager
+  toKeyFn?: ToKeyFn
+  handleFn?: HandleFn
+  successFn?: HandleResultFn
+  failFn?: HandleResultFn
+}
+
 // TODO: add 'Failed-Task:' ?
 export class TaskFlow implements Flow {
   sm: StoreManager = new StoreManager(memoryStore())
   taskPrefix: Prefix = 'Task:'
   donePrefix: Prefix = 'Done-Task:'
-  taskTtl?: Milliseconds
-  doneTtl?: Milliseconds
+  taskTtl: Milliseconds = 60 * 1000
+  doneTtl: Milliseconds = 60 * 1000
   toKeyFn: ToKeyFn = defaultToKeyFn
   handleFn: HandleFn = defaultHandleFn
   successFn: HandleResultFn = defaultSuccessFn
@@ -39,7 +52,21 @@ export class TaskFlow implements Flow {
 
   constructor(
     private parentFlow: EventFlow,
-  ) { }
+    params?: TaskFlowParams,
+  ) {
+    params?.context && this.context(params?.context)
+    const taskPrefix = params?.taskPrefix ?? this.taskPrefix
+    const donePrefix = params?.donePrefix ?? this.donePrefix
+    this.prefix(taskPrefix, donePrefix)
+    const taskTtl = params?.taskTtl ?? this.taskTtl
+    const doneTtl = params?.doneTtl ?? this.doneTtl
+    this.ttl(taskTtl, doneTtl)
+    params?.cache && this.cache(params?.cache)
+    params?.toKeyFn && this.key(params?.toKeyFn)
+    params?.handleFn && this.handle(params?.handleFn)
+    params?.successFn && this.success(params?.successFn)
+    params?.failFn && this.fail(params?.failFn)
+  }
 
   get middlewares() {
     return this._middlewares

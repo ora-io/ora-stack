@@ -2,7 +2,7 @@ import type { ContractAddress, Fn } from '@ora-io/utils'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { ethers } from 'ethers'
 
-export class ContractManager {
+export class RekuContractManager {
   private _contract?: ethers.Contract
   private _listeners: Map<ethers.ContractEventName, Fn> = new Map()
 

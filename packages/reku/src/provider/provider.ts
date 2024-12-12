@@ -4,7 +4,7 @@ import { Interface, WebSocketProvider, ethers } from 'ethers'
 import type { ErrorEvent, WebSocket } from 'ws'
 import type { ContractAddress } from '@ora-io/utils'
 import { debug } from '../debug'
-import { ContractManager } from './contract'
+import { RekuContractManager } from './contract'
 
 export interface RekuProviderManagerOptions {
   /**
@@ -21,7 +21,7 @@ export type RekuProviderManagerEvent = 'error' | 'close'
 
 export class RekuProviderManager {
   private _provider?: ethers.JsonRpcProvider | ethers.WebSocketProvider
-  private _contracts: Map<ContractAddress, ContractManager> = new Map()
+  private _contracts: Map<ContractAddress, RekuContractManager> = new Map()
 
   private _heartbeatInterval = 10 * 1000
 
@@ -54,20 +54,20 @@ export class RekuProviderManager {
     return this._contracts
   }
 
-  addContract(address: ContractAddress, contract: ethers.Contract): ContractManager | undefined
-  addContract(address: ContractAddress, abi: Interface | InterfaceAbi): ContractManager | undefined
-  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.Contract): ContractManager | undefined {
+  addContract(address: ContractAddress, contract: ethers.Contract): RekuContractManager | undefined
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi): RekuContractManager | undefined
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.Contract): RekuContractManager | undefined {
     if (this._provider) {
       if (abi instanceof Interface || Array.isArray(abi)) {
         if (!abi)
           throw new Error('ABI must be provided when address is a string')
 
-        const contract = new ContractManager(address, abi, this._provider)
+        const contract = new RekuContractManager(address, abi, this._provider)
         this._contracts.set(address, contract)
         return contract
       }
       else if (abi instanceof ethers.Contract) {
-        const contract = new ContractManager(address, abi.interface, this._provider)
+        const contract = new RekuContractManager(address, abi.interface, this._provider)
         this._contracts.set(address, contract)
         return contract
       }
@@ -155,10 +155,10 @@ export class RekuProviderManager {
       // reconnect provider
       this.connect()
       // reset contracts
-      const contracts: Map<ContractAddress, ContractManager> = new Map()
+      const contracts: Map<ContractAddress, RekuContractManager> = new Map()
       this._contracts.forEach((contract) => {
         if (this._provider) {
-          const newContract = new ContractManager(contract.address, contract.abi, this._provider)
+          const newContract = new RekuContractManager(contract.address, contract.abi, this._provider)
           contract.listeners.forEach((listener, event) => {
             newContract.addListener(event, listener)
           })

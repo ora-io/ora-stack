@@ -68,3 +68,139 @@ await acc.start({
   pollingInterval: 3000,
 })
 ```
+
+
+## Provider Manager
+
+`RekuProviderManager` is a TypeScript class designed to manage Ethereum providers and contracts. **It supports both WebSocket and JSON-RPC providers, includes heartbeat functionality to maintain the connection, and provides event listening and management features**.
+
+### Usage
+
+#### Import and Initialization
+
+First, import the `RekuProviderManager` class:
+
+```ts
+import { RekuProviderManager } from '@ora-io/reku'
+```
+
+Then, create an instance of `RekuProviderManager`:
+
+```ts
+const providerManager = new RekuProviderManager('wss://your-ethereum-node-url', {
+  heartbeatInterval: 5000, // Optional, default is 10 seconds
+  disabledHeartbeat: false // Optional, whether to disable heartbeat
+})
+```
+#### Adding Contracts
+
+You can add a contract using its address and ABI:
+
+```ts
+const contractAddress = '0xYourContractAddress'
+const contractAbi = [] // Your contract ABI
+
+providerManager.addContract(contractAddress, contractAbi)
+```
+
+Or add a contract using an `ethers.Contract` instance:
+
+```ts
+const contract = new ethers.Contract(contractAddress, contractAbi, providerManager.provider)
+providerManager.addContract(contractAddress, contract)
+```
+
+#### Event Listening
+
+Adding Event Listeners
+
+```ts
+providerManager.addListener(contractAddress, 'EventName', (event) => {
+  console.log('Event received:', event)
+})
+```
+
+Removing Event Listeners
+
+```ts
+providerManager.removeListener(contractAddress, 'EventName', listener)
+```
+
+Removing All Event Listeners
+
+```ts
+providerManager.removeAllListeners()
+```
+
+#### Event Management
+
+You can listen for `RekuProviderManager` errors and close events:
+
+```ts
+providerManager.on('error', (error) => {
+  console.error('Provider error:', error)
+})
+
+providerManager.on('close', (code, reason) => {
+  console.log(`Provider closed: ${code} - ${reason}`)
+})
+```
+
+#### Reconnecting
+
+You can manually reconnect to the provider:
+
+```ts 
+providerManager.reconnect()
+```
+
+#### Destroying
+
+When you no longer need the `RekuProviderManager`, you can destroy it to free up resources:
+
+```ts
+providerManager.destroy()
+```
+
+### Configuration Options
+
+The `RekuProviderManager` constructor accepts an optional configuration object:
+
+**`heartbeatInterval`**: Heartbeat interval time (in milliseconds), default is 10 seconds.  
+**`disabledHeartbeat`**: Whether to disable the heartbeat, default is false.
+
+
+## Contract Manager
+
+
+The `RekuContractManager` class is designed to manage Ethereum smart contracts using the ethers library. It provides methods to add, remove, and manage event listeners for contract events.
+
+### Example Usage
+
+```ts
+import { ethers } from 'ethers'
+import { RekuContractManager } from '@ora-io/reku'
+
+const provider = new ethers.providers.WebSocketProvider('wss://your-ethereum-node-url')
+const contractAddress = '0xYourContractAddress'
+const contractAbi = [] // Your contract ABI
+
+const manager = new RekuContractManager(contractAddress, contractAbi, provider)
+
+// Adding an event listener
+manager.addListener('EventName', (event) => {
+  console.log('Event received:', event)
+})
+
+// Removing an event listener
+manager.removeListener('EventName', listener)
+
+// Removing all event listeners
+manager.removeAllListeners()
+
+// Retrying all event listeners
+manager.retryAllListeners()
+
+// Retrying a specific event listener
+manager.retryListener('EventName')
+```

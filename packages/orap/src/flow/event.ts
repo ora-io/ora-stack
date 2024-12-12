@@ -1,7 +1,8 @@
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
 import type { Context } from '../task'
+import type { TaskFlowParams } from '../flow/task'
 import { TaskFlow } from '../flow/task'
-import type { StoreManager } from '../store'
+import { StoreManager } from '../store'
 import type { EventSignalRegisterParams } from '../signal'
 import { EventVerse } from '../verse/event'
 import type { TaskVerse } from '../verse/task'
@@ -37,13 +38,19 @@ export class EventFlow implements Flow {
     return this
   }
 
-  // task(store: Store, context?: Context): TaskFlow {
-  task(sm?: StoreManager, context?: Context): TaskFlow {
-    const tf = new TaskFlow(this)
-    if (sm)
-      tf.cache(sm)
-    if (context)
-      tf.context(context)
+  task(params?: TaskFlowParams): TaskFlow
+  task(sm?: StoreManager | TaskFlowParams, context?: Context): TaskFlow {
+    let tf: TaskFlow
+    if (sm instanceof StoreManager) {
+      tf = new TaskFlow(this)
+      if (sm)
+        tf.cache(sm)
+      if (context)
+        tf.context(context)
+    }
+    else {
+      tf = new TaskFlow(this, sm)
+    }
     this._taskFlows.push(tf)
     return tf
   }

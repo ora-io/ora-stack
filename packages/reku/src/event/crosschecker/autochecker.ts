@@ -58,10 +58,10 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
 
-    let latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+    let latestBlockNum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
 
-    // resume checkpoint priority: options.fromBlock > cache > latestblocknum + 1
-    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestblocknum)
+    // resume checkpoint priority: options.fromBlock > cache > latestBlockNum + 1
+    const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestBlockNum)
 
     const {
       fromBlock = defaultInitCheckpoint,
@@ -87,10 +87,10 @@ export class AutoCrossChecker extends BaseCrossChecker {
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
-      latestblocknum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
-      if (ccrOptions.toBlock + delayBlockFromLatest > latestblocknum) {
+      latestBlockNum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+      if (ccrOptions.toBlock + delayBlockFromLatest > latestBlockNum) {
         // sleep until the toBlock
-        // await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestblocknum) * blockInterval)
+        // await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestBlockNum) * blockInterval)
         return false
       }
       return true
@@ -130,7 +130,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
         await updateCCROptions(ccrOptions)
       }
       else {
-        debug('Because the latest block %d is too old, skip this cross check', latestblocknum)
+        debug('Because the latest block %d is too old, skip this cross check', latestBlockNum)
       }
       return endingCondition()
     }, pollingInterval)

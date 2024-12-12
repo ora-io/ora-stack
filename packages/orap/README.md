@@ -78,7 +78,7 @@ const store = redisStore()
 const sm = new StoreManager(store)
 
 // example event: erc20 transfer
-const handle1 = (from: string, to: string, amount: number, event: ContractEventPayload, task: TaskRaplized, next: NextFunction) => {
+const handle1 = (from: string, to: string, amount: number, event: ContractEventPayload, next: NextFunction, task: TaskRaplized) => {
   console.log(`handle task 1: from ${from} to ${to} amount ${amount} task ${task}`)
   next()
 }
