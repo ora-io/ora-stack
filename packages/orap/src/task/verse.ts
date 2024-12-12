@@ -1,5 +1,5 @@
 import type { Milliseconds } from '@ora-io/utils'
-import { composeFns, isJsonString, isString, stripPrefix } from '@ora-io/utils'
+import { argParser, composeFns, isJsonString, isString, stripPrefix } from '@ora-io/utils'
 import type { TaskFlow } from '../flow'
 import { HandleSuccessMiddleware } from '../middlewares/HandleSuccessMiddleware'
 import { HandleFailedMiddleware } from '../middlewares/private'
@@ -97,12 +97,13 @@ export class TaskRaplized extends TaskStorable {
    * @returns
    */
   toString() {
-    return this.stringify(this.eventLog)
+    const res = argParser.parse(this.eventLog)
+    return this.stringify(res)
   }
 
   fromString(jsonString: string) {
     if (isJsonString(jsonString))
-      this.eventLog = JSON.parse(jsonString)
+      this.eventLog = argParser.serialize(JSON.parse(jsonString))
 
     return this
   }
