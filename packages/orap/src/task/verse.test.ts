@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { sleep } from '@ora-io/utils'
+import { argParser, sleep } from '@ora-io/utils'
 import { EventFlow, OrapFlow, TaskFlow } from '../flow'
 import type { StoreManager } from '../store'
 import { getMiddlewareContext } from '../utils'
@@ -161,12 +161,13 @@ describe('TaskRaplized', () => {
     const eventLog = [1, 2, 3]
     taskRaplized.eventLog = eventLog
     const result = taskRaplized.toString()
-    expect(result).toEqual(JSON.stringify(eventLog))
+    expect(result).toEqual(JSON.stringify(argParser.parse(eventLog)))
   })
 
   it('should convert the task from a string', () => {
     const jsonString = '[1,2,3]'
-    const result = taskRaplized.fromString(jsonString)
+    const parseValue = JSON.stringify(argParser.parse(JSON.parse(jsonString)))
+    const result = taskRaplized.fromString(parseValue)
     expect(result).toEqual(taskRaplized)
     expect(taskRaplized.eventLog).toEqual(JSON.parse(jsonString))
   })
