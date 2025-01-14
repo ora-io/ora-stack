@@ -1,6 +1,6 @@
 import type { Cache, CreateCacheOptions } from 'cache-manager'
 import { createCache } from 'cache-manager'
-import type { RedisStore } from 'cache-manager-ioredis-yet'
+import type { KeyvStoreAdapter } from 'keyv'
 import { Keyv } from 'keyv'
 import { KeyvCacheableMemory } from 'cacheable'
 
@@ -28,8 +28,8 @@ export class SimpleStoreManager {
     }
   }
 
-  get redisStore(): RedisStore {
-    return <RedisStore> this.store.store
+  get redisStore(): KeyvStoreAdapter {
+    return this.store.store
   }
 
   async get<T>(key: string) {

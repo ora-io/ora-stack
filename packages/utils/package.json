@@ -46,7 +46,6 @@
     "@keyv/redis": "^4.2.0",
     "@murongg/utils": "^0.1.28",
     "cache-manager": "^6.3.2",
-    "cache-manager-ioredis-yet": "^2.1.1",
     "cacheable": "^1.8.7",
     "debug": "^4.3.7",
     "ioredis": "^5.4.1",
