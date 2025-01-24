@@ -1,5 +1,6 @@
-export type { Store, StoreConfig, Stores } from 'cache-manager'
+export type { CacheManagerStore } from 'cache-manager'
+export type { Store } from './types'
 export { redisStore } from './redis'
 export * from './manager'
 export { memoryStore } from './memory'
-export type { MemoryStore, MemoryCache, MemoryConfig } from './memory'
+export type { MemoryConfig } from './memory'

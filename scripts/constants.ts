@@ -10,7 +10,7 @@ export const packages = [
   {
     packName: '@ora-io/utils',
     dir: 'utils',
-    external: ['cache-manager', 'cache-manager-ioredis-yet', 'ioredis'],
+    external: ['cache-manager', 'cache-manager-ioredis-yet', 'ioredis', '@keyv/redis', 'cacheable', 'keyv'],
     color: lightBlue,
     isMain: false,
   }, {
