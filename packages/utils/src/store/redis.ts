@@ -1,6 +1,7 @@
 import type { RedisOptions } from 'ioredis'
 import { Redis } from 'ioredis'
 import type { Config } from 'cache-manager'
+import type { RedisStore } from 'cache-manager-ioredis-yet'
 import { RedisClusterConfig, redisInsStore } from 'cache-manager-ioredis-yet'
 
 export function redisStore(
@@ -21,4 +22,8 @@ export function redisStore(
 export {
   RedisClusterConfig,
   redisInsStore,
+}
+
+export type {
+  RedisStore,
 }
