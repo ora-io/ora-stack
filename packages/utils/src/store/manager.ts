@@ -1,42 +1,33 @@
-import type { Cache, CreateCacheOptions } from 'cache-manager'
-import { createCache } from 'cache-manager'
-import type { KeyvStoreAdapter } from 'keyv'
-import { Keyv } from 'keyv'
-import { KeyvCacheableMemory } from 'cacheable'
+import type { Cache, Milliseconds, Store } from 'cache-manager'
+import { createCache, memoryStore } from 'cache-manager'
+import type { RedisStore } from 'cache-manager-ioredis-yet'
 
 export class SimpleStoreManager {
   private cache: Cache
-  private store: Keyv
 
   constructor(
-    options?: (Omit<CreateCacheOptions, 'stores'>) & { store: Keyv },
+    store?: Store,
   ) {
-    if (options) {
-      this.cache = createCache({
-        ...options,
-        stores: [
-          options.store,
-        ],
-      })
-      this.store = options.store
+    if (store) {
+      this.cache = createCache(store)
     }
     else {
-      const store = new KeyvCacheableMemory({ ttl: 10 * 1000, lruSize: 100 })
-      const keyv = new Keyv({ store })
-      this.store = keyv
-      this.cache = createCache({ stores: [keyv] })
+      this.cache = createCache(memoryStore({
+        max: 100,
+        ttl: 10 * 1000 /* milliseconds */,
+      }))
     }
   }
 
-  get redisStore(): KeyvStoreAdapter {
-    return this.store.store
+  get redisStore(): RedisStore {
+    return <RedisStore> this.cache.store
   }
 
   async get<T>(key: string) {
     return await this.cache.get<T>(key)
   }
 
-  async set(key: string, value: unknown, ttl?: number) {
+  async set(key: string, value: unknown, ttl?: Milliseconds) {
     await this.cache.set(key, value, ttl)
   }
 
@@ -45,28 +36,16 @@ export class SimpleStoreManager {
   }
 
   async keys(pattern?: string): Promise<string[]> {
-    const keys = []
-    for await (const [key] of this.store.store.entries()) {
-      if (pattern) {
-        const regex = new RegExp(`(?<!.)${pattern}`)
-        if (regex.test(key))
-          keys.push(key)
-      }
-      else {
-        keys.push(key)
-      }
-    }
-    return keys
+    return await this.cache.store.keys(pattern)
   }
 
   async has(key: string): Promise<boolean> {
-    return !!await this.cache.get(key)
+    return !!await this.cache.store.get(key)
   }
 
   async getAll<T>(): Promise<T[]> {
-    const values = []
-    for await (const [, value] of this.store.store.entries())
-      values.push(value)
-    return values
+    const keys = await this.keys()
+    const values = await Promise.all(keys.map(async key => await this.get<T>(key)))
+    return values.filter(value => value !== undefined)
   }
 }
