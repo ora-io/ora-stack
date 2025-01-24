@@ -88,6 +88,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
       latestBlockNum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+      if (options.autoFollowLatestBlock) {
+        ccrOptions.toBlock = latestBlockNum
+        return true
+      }
+
       if (ccrOptions.toBlock + delayBlockFromLatest > latestBlockNum) {
         // sleep until the toBlock
         // await sleep((ccrOptions.toBlock + delayBlockFromLatest - latestBlockNum) * blockInterval)

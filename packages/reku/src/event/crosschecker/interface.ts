@@ -35,6 +35,7 @@ export interface AutoCrossCheckParam extends BaseCrossCheckParam {
   storeKeyPrefix?: string // set the prefix to all keys when set key-value to store (cache), e.g. key = prefix+txHashList
   storeTtl?: Milliseconds // the ttl for <txhash, log index> record in store
   batchBlocksCount?: number // how many blocks at most to get per check
+  autoFollowLatestBlock?: boolean // whether to auto follow the latest block
   delayBlockFromLatest?: number // mostly for realtime mode; each time cc wait until latest height > toBlock + delayBlockFromLatest
   blockInterval?: Milliseconds // the block interval of the given chain, default: eth
   pollingInterval?: Milliseconds // mostly for limiting getLogs calling rate in catchup mode; how long does it take at least between 2 checks
