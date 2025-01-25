@@ -12,6 +12,15 @@ export interface EventSignalRegisterParams {
   // esig?: string,
 }
 
+export interface CrosscheckParams {
+  /**
+   * Disable crosscheck
+   */
+  disabled?: boolean
+}
+
+export type CrosscheckOptions = CrosscheckParams & Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>
+
 export type EventSignalCallback = ethers.Listener
 
 export class EventSignal implements Signal {
@@ -25,11 +34,12 @@ export class EventSignal implements Signal {
 
   crosschecker?: AutoCrossChecker
   crosscheckerOptions?: AutoCrossCheckParam
+  crosscheckerParams?: CrosscheckParams
 
   constructor(
     public params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
-    crosscheckOptions?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>,
+    crosscheckOptions?: CrosscheckOptions,
   ) {
     this.contract = new ethers.Contract(
       params.address,
@@ -69,7 +79,7 @@ export class EventSignal implements Signal {
     return new ContractUnknownEventPayload(this.contract, this.subscribeCallback, this.params.eventName, log)
   }
 
-  private _setCrosscheckOptions(options: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
+  private _setCrosscheckOptions(options: CrosscheckOptions) {
     const {
       pollingInterval = ONE_MINUTE_MS * 60,
       ignoreLogs = [],
@@ -82,6 +92,9 @@ export class EventSignal implements Signal {
       onMissingLog: this.crosscheckCallback,
       pollingInterval,
       ignoreLogs,
+    }
+    this.crosscheckerParams = {
+      disabled: options?.disabled,
     }
   }
 
@@ -114,6 +127,9 @@ export class EventSignal implements Signal {
   }
 
   async startCrossChecker(provider?: Providers) {
+    if (this.crosscheckerParams?.disabled)
+      return
+
     if (!this.crosscheckerOptions)
       return
     if (!provider)
