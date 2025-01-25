@@ -64,11 +64,13 @@ export class RekuProviderManager {
 
         const contract = new RekuContractManager(address, abi, this._provider)
         this._contracts.set(address, contract)
+        debug('add contract %s', address)
         return contract
       }
       else if (abi instanceof ethers.Contract) {
         const contract = new RekuContractManager(address, abi.interface, this._provider)
         this._contracts.set(address, contract)
+        debug('add contract %s', address)
         return contract
       }
       else {
@@ -87,6 +89,7 @@ export class RekuProviderManager {
   }
 
   removeAllListeners() {
+    debug('remove all listeners')
     this._provider?.removeAllListeners()
     this._contracts.forEach((contract) => {
       contract.removeAllListeners()
@@ -94,6 +97,7 @@ export class RekuProviderManager {
   }
 
   removeAllContract() {
+    debug('remove all contracts')
     this._contracts.forEach((contract) => {
       contract.removeAllListeners()
     })
@@ -101,6 +105,7 @@ export class RekuProviderManager {
   }
 
   retryAllListeners() {
+    debug('retry all listeners')
     this._contracts.forEach((contract) => {
       contract.retryAllListeners()
     })
@@ -110,6 +115,7 @@ export class RekuProviderManager {
     if (!this._event)
       this._event = new EventEmitter()
 
+    debug('on %s', event)
     this._event?.on(event, listener)
   }
 
@@ -117,14 +123,17 @@ export class RekuProviderManager {
     if (!this._event)
       this._event = new EventEmitter()
 
+    debug('once %s', event)
     this._event?.once(event, listener)
   }
 
   removeEvent(event: RekuProviderManagerEvent, listener: (...args: any[]) => void) {
+    debug('remove event %s', event)
     this._event?.removeListener(event, listener)
   }
 
   removeAllEvents() {
+    debug('remove all events')
     this._event?.removeAllListeners()
   }
 
@@ -185,6 +194,7 @@ export class RekuProviderManager {
         .catch((err) => {
           this.reconnect()
           this._event?.emit('error', err)
+          debug('heartbeat error: %s', err)
         })
     }, this._heartbeatInterval)
   }

@@ -1,6 +1,7 @@
 import type { ContractAddress, Fn } from '@ora-io/utils'
 import type { Interface, InterfaceAbi } from 'ethers'
 import { ethers } from 'ethers'
+import { debug } from '../debug'
 
 export class RekuContractManager {
   private _contract?: ethers.Contract
@@ -22,12 +23,14 @@ export class RekuContractManager {
     if (!this._listeners.has(event)) {
       this._listeners.set(event, listener)
       this._contract?.on(event, listener)
+      debug('add listener %s %s', this.address, event)
     }
   }
 
   removeListener(event: ethers.ContractEventName, listener: ethers.Listener) {
     this._contract?.removeListener(event, listener)
     this._listeners.delete(event)
+    debug('remove listener %s %s', this.address, event)
   }
 
   removeAllListeners() {
