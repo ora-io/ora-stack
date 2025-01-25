@@ -3,7 +3,7 @@ import type { Context } from '../task'
 import type { TaskFlowParams } from '../flow/task'
 import { TaskFlow } from '../flow/task'
 import { StoreManager } from '../store'
-import type { EventSignalRegisterParams } from '../signal'
+import type { CrosscheckOptions, EventSignalRegisterParams } from '../signal'
 import { EventVerse } from '../verse/event'
 import type { TaskVerse } from '../verse/task'
 import type { Flow, HandleFn } from './interface'
@@ -33,7 +33,7 @@ export class EventFlow implements Flow {
     return this._taskFlows
   }
 
-  crosscheck(options?: Omit<AutoCrossCheckParam, 'address' | 'topics' | 'onMissingLog'>) {
+  crosscheck(options?: CrosscheckOptions) {
     this.partialCrosscheckOptions = options
     return this
   }
