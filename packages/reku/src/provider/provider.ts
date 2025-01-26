@@ -187,6 +187,8 @@ export class RekuProviderManager {
       return
     debug('start heartbeat')
     this._heartbeatTimer = setInterval(() => {
+      debug('heartbeat running...')
+      debug('heartbeat has provider: %s', !!this._provider)
       this._provider?.send('net_version', [])
         .then((res) => {
           debug('heartbeat response: %s', res)
