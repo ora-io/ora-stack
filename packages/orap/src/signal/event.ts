@@ -144,4 +144,24 @@ export class EventSignal implements Signal {
     this.crosschecker = new AutoCrossChecker(provider)
     this.crosschecker.start(this.crosscheckerOptions)
   }
+
+  stopCrosscheck() {
+    this.crosschecker?.stop()
+  }
+
+  stopEventListener(provider: Providers) {
+    if (provider instanceof RekuProviderManager) {
+      provider.removeAllEvents()
+      provider.removeAllListeners()
+    }
+    else {
+      this.contract.removeAllListeners()
+    }
+  }
+
+  stop() {
+    if (this.provider)
+      this.stopEventListener(this.provider)
+    this.stopCrosscheck()
+  }
 }

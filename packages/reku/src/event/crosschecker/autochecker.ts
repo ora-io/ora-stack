@@ -11,10 +11,16 @@ export class AutoCrossChecker extends BaseCrossChecker {
   cache: CrossCheckerCacheManager | undefined = undefined
   checkpointBlockNumber: number | undefined
 
+  private _stopped = false
+
   constructor(
     provider: Providers,
   ) {
     super(provider)
+  }
+
+  get stopped() {
+    return this._stopped
   }
 
   validate(options: AutoCrossCheckParam) {
@@ -54,6 +60,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
    */
   async start(options: AutoCrossCheckParam) {
     debug('auto crosscheck start with options: %O', options)
+    this._stopped = false
     this.validate(options)
 
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
@@ -135,6 +142,9 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     // TODO: replace polling with schedule cron
     await polling(async () => {
+      if (this._stopped)
+        return true
+
       const wait = await waitOrUpdateToBlock()
       debug('polling interval: %d, wait: %s, from block: %d, to block: %d', pollingInterval, wait, ccrOptions.fromBlock, ccrOptions.toBlock)
       if (wait) {
@@ -147,6 +157,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
       }
       return endingCondition()
     }, pollingInterval)
+  }
+
+  async stop() {
+    this._stopped = true
+    debug('auto crosscheck stopped')
   }
 
   async diff(logs: ethers.Log[], ignoreLogs: SimpleLog[]): Promise<ethers.Log[]> {

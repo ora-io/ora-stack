@@ -5,6 +5,7 @@ import type { TaskVerse } from './task'
 
 export class EventVerse implements Verse {
   private taskVerses: TaskVerse[] = []
+  private eventBeat: EventBeat | undefined
 
   constructor(private flow: EventFlow) { }
 
@@ -35,6 +36,12 @@ export class EventVerse implements Verse {
     this._play()
   }
 
+  stop() {
+    this.eventBeat?.stop()
+    for (const task of this.taskVerses)
+      task.stop()
+  }
+
   setTaskVerses(taskVerses: TaskVerse[]) {
     this.taskVerses = taskVerses
     return this
@@ -57,7 +64,7 @@ export class EventVerse implements Verse {
       this.flow.crosscheckProvider,
     )
     eventBeat.drop()
-
+    this.eventBeat = eventBeat
     // this.eventSignal = new EventSignal(
     //   this.flow.params!,
     //   this.handleSignal,

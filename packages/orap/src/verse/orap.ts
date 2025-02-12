@@ -21,6 +21,11 @@ export class OrapVerse implements Verse {
     // return this
   }
 
+  stop() {
+    for (const verse of this._eventVerses)
+      verse.stop()
+  }
+
   setEventVerses(_eventVerses: EventVerse[]) {
     this._eventVerses = _eventVerses
     return this

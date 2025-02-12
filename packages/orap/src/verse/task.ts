@@ -5,6 +5,7 @@ import type { Verse } from './interface'
 
 export class TaskVerse implements Verse {
   private loading = false
+  private stopped = false
 
   constructor(private _flow: TaskFlow) {
   }
@@ -31,9 +32,12 @@ export class TaskVerse implements Verse {
   }
 
   async loadAndHandleAll(prefix: string, ...args: Array<any>) {
+    this.stopped = false
     // get all task keys
     let keys = await this.flow.sm.keys(`${prefix}*`)
     while (true) {
+      if (this.stopped)
+        break
       // break if no more keys
       if (keys.length === 0)
         break
@@ -65,5 +69,9 @@ export class TaskVerse implements Verse {
    */
   play() {
     this.preload()
+  }
+
+  stop() {
+    this.stopped = true
   }
 }

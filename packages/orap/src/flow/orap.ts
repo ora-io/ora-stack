@@ -21,6 +21,8 @@ export class OrapFlow implements Flow {
     event: EventFlow[]
   } = { event: [] }
 
+  private orapVerse: OrapVerse | undefined
+
   onListenFn: Fn = () => { }
 
   get eventFlows() {
@@ -57,7 +59,12 @@ export class OrapFlow implements Flow {
 
     const orapVerse = this.assemble()
     orapVerse.play()
+    this.orapVerse = orapVerse
     this.onListenFn()
+  }
+
+  stop() {
+    this.orapVerse?.stop()
   }
 
   assemble(): OrapVerse {
