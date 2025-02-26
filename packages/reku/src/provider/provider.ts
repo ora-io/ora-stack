@@ -1,8 +1,9 @@
 import { EventEmitter } from 'node:events'
 import type { InterfaceAbi } from 'ethers'
 import { Interface, WebSocketProvider, ethers } from 'ethers'
-import type { ErrorEvent, WebSocket } from 'ws'
-import type { ContractAddress } from '@ora-io/utils'
+import { WebSocket } from 'ws'
+import type { ErrorEvent } from 'ws'
+import { type ContractAddress, isInstanceof, to } from '@ora-io/utils'
 import { debug } from '../debug'
 import { RekuContractManager } from './contract'
 
@@ -39,11 +40,15 @@ export class RekuProviderManager {
   }
 
   connect() {
-    const url = new URL(this.providerUrl)
-    if (url.protocol === 'ws:' || url.protocol === 'wss:')
+    if (this.isWebSocketProviderUrl)
       this._provider = new ethers.WebSocketProvider(this.providerUrl)
     else
       this._provider = new ethers.JsonRpcProvider(this.providerUrl)
+  }
+
+  get isWebSocketProviderUrl() {
+    const url = new URL(this.providerUrl)
+    return url.protocol === 'ws:' || url.protocol === 'wss:'
   }
 
   get provider() {
@@ -52,6 +57,16 @@ export class RekuProviderManager {
 
   get contracts() {
     return this._contracts
+  }
+
+  get websocket() {
+    if (isInstanceof(this._provider, ethers.WebSocketProvider))
+      return this._provider.websocket
+    return undefined
+  }
+
+  get destroyed() {
+    return this._provider?.destroyed
   }
 
   addContract(address: ContractAddress, contract: ethers.Contract): RekuContractManager | undefined
@@ -156,7 +171,18 @@ export class RekuProviderManager {
       socket.onerror = null
       debug('remove all listeners of websocket provider')
     }
-    this._provider?.destroy()
+    debug('reconnect destroyed: %s', this._provider?.destroyed)
+    if (this._provider && !this._provider.destroyed) {
+      if (isInstanceof(this._provider, ethers.WebSocketProvider)) {
+        debug('reconnect websocket readyState: %s', this.websocket?.readyState)
+        if (this.websocket?.readyState !== WebSocket.CONNECTING)
+          to(Promise.resolve(this._provider.destroy()))
+      }
+      else {
+        to(Promise.resolve(this._provider.destroy()))
+      }
+    }
+
     this._provider = undefined
 
     setTimeout(() => {
@@ -186,19 +212,39 @@ export class RekuProviderManager {
     if (this._options?.disabledHeartbeat)
       return
     debug('start heartbeat')
-    this._heartbeatTimer = setInterval(() => {
-      debug('heartbeat running...')
-      debug('heartbeat has provider: %s', !!this._provider)
-      this._provider?.send('net_version', [])
-        .then((res) => {
-          debug('heartbeat response: %s', res)
-        })
-        .catch((err) => {
-          this.reconnect()
-          this._event?.emit('error', err)
-          debug('heartbeat error: %s', err)
-        })
+    this._heartbeatTimer = setInterval(async () => {
+      if (!this.destroyed) {
+        debug('heartbeat running...')
+        const hasProvider = this._hasProvider()
+        debug('heartbeat has provider: %s', hasProvider)
+        this._provider?.send('net_version', [])
+          .then((res) => {
+            debug('heartbeat response: %s', res)
+          })
+          .catch((err) => {
+            this.reconnect()
+            this._event?.emit('error', err)
+            debug('heartbeat error: %s', err)
+          })
+          .finally(() => {
+            debug('heartbeat finally')
+          })
+      }
+      else {
+        debug('heartbeat destroyed')
+      }
     }, this._heartbeatInterval)
+  }
+
+  private _hasProvider() {
+    const hasProvider = !!this._provider && !!this._provider.provider
+    let isInstance = false
+    if (this.isWebSocketProviderUrl)
+      isInstance = isInstanceof(this._provider, ethers.WebSocketProvider) && isInstanceof(this._provider.provider, ethers.WebSocketProvider)
+    else
+      isInstance = isInstanceof(this._provider, ethers.JsonRpcProvider) && isInstanceof(this._provider.provider, ethers.JsonRpcProvider)
+
+    return hasProvider && isInstance && !this._provider?.destroyed
   }
 
   private _clearHeartbeat() {
