@@ -139,8 +139,8 @@ importers:
   packages/utils:
     dependencies:
       '@murongg/utils':
-        specifier: ^0.1.28
-        version: 0.1.32
+        specifier: ^0.2.0
+        version: 0.2.0
       cache-manager:
         specifier: 5.7.6
         version: 5.7.6
@@ -910,6 +910,9 @@ packages:
 
   '@murongg/utils@0.1.32':
     resolution: {integrity: sha512-l+SRRVVCn8V2YjTgpyF0pVsav9+S4YENMSn5AjonXT/nen+QhcWJmZW1kXfEsBsRoQmDR4a8A5+PbKEOXe9GYw==}
+
+  '@murongg/utils@0.2.0':
+    resolution: {integrity: sha512-AW7QYoC0q6YrYgNS1dF/2sUvSzYPGMxd2p9SS3AcOmZ74j5Q7Ge5U/V5/LTJ7UZBH67XC+kMYdlgiX5cv9Kz3A==}
 
   '@noble/curves@1.2.0':
     resolution: {integrity: sha512-oYclrNgRaM9SsBUBVbb8M6DTV7ZHRTKugureoYEncY5c65HOmRzvSiTE3y5CYaPYJA/GVkrhXEoF0M3Ya9PMnw==}
@@ -4219,6 +4222,8 @@ snapshots:
       - typescript
 
   '@murongg/utils@0.1.32': {}
+
+  '@murongg/utils@0.2.0': {}
 
   '@noble/curves@1.2.0':
     dependencies:
