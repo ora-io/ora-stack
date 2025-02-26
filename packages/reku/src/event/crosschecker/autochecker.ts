@@ -143,7 +143,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
     debug('crosscheck running')
 
     // TODO: replace polling with schedule cron
-    polling(async () => {
+    await polling(async () => {
       try {
         debug('start polling')
         const wait = await waitOrUpdateToBlock()
