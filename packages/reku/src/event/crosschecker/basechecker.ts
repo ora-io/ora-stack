@@ -35,7 +35,11 @@ export class BaseCrossChecker {
 
     // define from, to
     // TODO: use blockNumber for performance
-    const block = await timeoutWithRetry(() => this.provider.provider.getBlock('latest'), 15 * 1000, 3)
+    const block = await timeoutWithRetry(() => {
+      if (!this.provider || !this.provider.provider)
+        throw new Error('provider not ready')
+      return this.provider.provider.getBlock('latest')
+    }, 15 * 1000, 3)
     if (!block) {
       console.warn('crosscheck failed to get latest block')
       return
@@ -58,7 +62,11 @@ export class BaseCrossChecker {
     ccfOptions: CrossCheckFromParam,
   ) {
     // TODO: use blockNumber for performance
-    const block = await timeoutWithRetry(() => this.provider.provider.getBlock('latest'), 15 * 1000, 3)
+    const block = await timeoutWithRetry(() => {
+      if (!this.provider || !this.provider.provider)
+        throw new Error('provider not ready')
+      return this.provider.provider.getBlock('latest')
+    }, 15 * 1000, 3)
     if (!block) {
       console.warn('crosscheck failed to get latest block')
       return
@@ -121,7 +129,11 @@ export class BaseCrossChecker {
       ...(topics && { topics }),
     }
     if (this.provider.provider) {
-      const logs = await timeoutWithRetry(() => this.provider.provider.getLogs(params), 15 * 1000, 3)
+      const logs = await timeoutWithRetry(() => {
+        if (!this.provider || !this.provider.provider)
+          throw new Error('provider not ready')
+        return this.provider.provider.getLogs(params)
+      }, 15 * 1000, 3)
       // get ignoreLogs keys
       const ignoreLogs = options.ignoreLogs
 

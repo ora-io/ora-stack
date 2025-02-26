@@ -58,7 +58,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     this.cache = new CrossCheckerCacheManager(options?.store, { keyPrefix: options?.storeKeyPrefix, ttl: options?.storeTtl })
 
-    let latestBlockNum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+    let latestBlockNum = await timeoutWithRetry(() => {
+      if (!this.provider || !this.provider.provider)
+        throw new Error('provider not ready')
+      return this.provider.provider?.getBlockNumber()
+    }, 15 * 1000, 3)
 
     // resume checkpoint priority: options.fromBlock > cache > latestBlockNum + 1
     const defaultInitCheckpoint = await this.cache.getCheckpoint() ?? (latestBlockNum)
@@ -87,7 +91,11 @@ export class AutoCrossChecker extends BaseCrossChecker {
     }
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
-      latestBlockNum = await timeoutWithRetry(() => this.provider.provider?.getBlockNumber(), 15 * 1000, 3)
+      latestBlockNum = await timeoutWithRetry(() => {
+        if (!this.provider || !this.provider.provider)
+          throw new Error('provider not ready')
+        return this.provider.provider?.getBlockNumber()
+      }, 15 * 1000, 3)
 
       // If auto-follow is enabled, update toBlock and check block range
       if (options.autoFollowLatestBlock) {
@@ -145,7 +153,9 @@ export class AutoCrossChecker extends BaseCrossChecker {
       else {
         debug('Because the latest block %d is too old, skip this cross check', latestBlockNum)
       }
-      return endingCondition()
+      const end = endingCondition()
+      debug('polling ending condition: %s', end)
+      return end
     }, pollingInterval)
   }
 
