@@ -3,7 +3,7 @@ import type { InterfaceAbi } from 'ethers'
 import { Interface, WebSocketProvider, ethers } from 'ethers'
 import { WebSocket } from 'ws'
 import type { ErrorEvent } from 'ws'
-import { type ContractAddress, isInstanceof, to } from '@ora-io/utils'
+import { type ContractAddress, isInstanceof, timeout, to } from '@ora-io/utils'
 import { debug } from '../debug'
 import { RekuContractManager } from './contract'
 
@@ -217,18 +217,14 @@ export class RekuProviderManager {
         debug('heartbeat running...')
         const hasProvider = this._hasProvider()
         debug('heartbeat has provider: %s', hasProvider)
-        this._provider?.send('net_version', [])
-          .then((res) => {
-            debug('heartbeat response: %s', res)
-          })
-          .catch((err) => {
-            this.reconnect()
-            this._event?.emit('error', err)
-            debug('heartbeat error: %s', err)
-          })
-          .finally(() => {
-            debug('heartbeat finally')
-          })
+
+        const [err, res] = await to(timeout(async () => this._provider?.send('net_version', []), 10 * 1000))
+        if (err) {
+          this.reconnect()
+          this._event?.emit('error', err)
+          debug('heartbeat timeout error: %s', err)
+        }
+        else { debug('heartbeat response: %s', res) }
       }
       else {
         debug('heartbeat destroyed')
