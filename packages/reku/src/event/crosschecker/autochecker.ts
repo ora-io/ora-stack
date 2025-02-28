@@ -92,6 +92,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const waitNextCrosscheck = async (): Promise<boolean> => {
       latestBlockNum = await timeoutWithRetry(() => {
+        // console.log(this.provider, this.provider.provider)
         if (!this.provider || !this.provider.provider)
           throw new Error('provider not ready')
         return this.provider.provider?.getBlockNumber()
@@ -143,19 +144,27 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     // TODO: replace polling with schedule cron
     await polling(async () => {
-      const wait = await waitOrUpdateToBlock()
-      debug('polling interval: %d, wait: %s, from block: %d, to block: %d', pollingInterval, wait, ccrOptions.fromBlock, ccrOptions.toBlock)
-      if (wait) {
-        await this.crossCheckRange(ccrOptions)
-        // only update options after cc succ
-        await updateCCROptions(ccrOptions)
+      try {
+        debug('start polling')
+        const wait = await waitOrUpdateToBlock()
+        debug('polling interval: %d, wait: %s, from block: %d, to block: %d', pollingInterval, wait, ccrOptions.fromBlock, ccrOptions.toBlock)
+        if (wait) {
+          await this.crossCheckRange(ccrOptions)
+          // only update options after cc succ
+          await updateCCROptions(ccrOptions)
+        }
+        else {
+          debug('Because the latest block %d is too old, skip this cross check', latestBlockNum)
+        }
+        debug('end condition')
+        const end = endingCondition()
+        debug('polling ending condition: %s', end)
+        return end
       }
-      else {
-        debug('Because the latest block %d is too old, skip this cross check', latestBlockNum)
+      catch (error) {
+        debug('polling error', error)
+        return false
       }
-      const end = endingCondition()
-      debug('polling ending condition: %s', end)
-      return end
     }, pollingInterval)
   }
 
