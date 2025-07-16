@@ -6,7 +6,7 @@ export type FnOnMissingLog = (log: ethers.Log) => Awaitable<void>
 export interface SimpleLog { transactionHash: string; index?: number }
 
 export interface LogFilterParam {
-  address: ContractAddress
+  address: ContractAddress | ContractAddress[]
   topics: string[]
   fromBlock?: number
   toBlock?: number
@@ -15,6 +15,11 @@ export interface LogFilterParam {
 export interface BaseCrossCheckParam extends LogFilterParam {
   onMissingLog: FnOnMissingLog
   ignoreLogs?: SimpleLog[]
+  addressGroupLimit?: number // how many addresses to get logs at most
+  retryOptions?: {
+    timeout?: Milliseconds
+    retries?: number
+  }
 }
 
 export interface CrossCheckFromParam extends BaseCrossCheckParam {

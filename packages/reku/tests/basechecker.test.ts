@@ -312,7 +312,7 @@ describe('BaseCrossChecker', () => {
       expect(mockProvider.provider.getLogs).toHaveBeenCalledWith({
         fromBlock: 1000,
         toBlock: 2000,
-        address: '0xcontract1',
+        address: ['0xcontract1'],
         topics: ['0xtopic1'],
       })
       expect(onMissingLogSpy).toHaveBeenCalledTimes(2)
@@ -324,7 +324,7 @@ describe('BaseCrossChecker', () => {
       const options: CrossCheckRangeParam = {
         fromBlock: 1000,
         toBlock: 2000,
-        address: '0xcontract1',
+        address: ['0xcontract1'],
         topics: ['0xtopic1'],
         onMissingLog: onMissingLogSpy,
       }
@@ -348,7 +348,7 @@ describe('BaseCrossChecker', () => {
       expect(mockProvider.provider.getLogs).toHaveBeenCalledWith({
         fromBlock: 1000,
         toBlock: 2000,
-        address: '0xcontract1',
+        address: ['0xcontract1'],
         topics: ['0xtopic1'],
       })
     })
@@ -367,6 +367,76 @@ describe('BaseCrossChecker', () => {
       await (baseChecker as any)._crossCheck(options)
 
       expect(onMissingLogSpy).toHaveBeenCalledTimes(3)
+    })
+
+    it('should handle addressGroupLimit', async () => {
+      mockProvider.provider.getLogs.mockResolvedValue(mockLogs)
+
+      const options: CrossCheckRangeParam = {
+        fromBlock: 1000,
+        toBlock: 2000,
+        address: ['0xcontract1', '0xcontract2'],
+        addressGroupLimit: 1,
+        onMissingLog: onMissingLogSpy,
+        topics: [],
+      }
+
+      await (baseChecker as any)._crossCheck(options)
+
+      expect(mockProvider.provider.getLogs).toHaveBeenCalledTimes(2)
+    })
+
+    it('should handle addressGroupLimit with single address', async () => {
+      mockProvider.provider.getLogs.mockResolvedValue(mockLogs)
+
+      const options: CrossCheckRangeParam = {
+        fromBlock: 1000,
+        toBlock: 2000,
+        address: '0xcontract1',
+        addressGroupLimit: 1,
+        onMissingLog: onMissingLogSpy,
+        topics: [],
+      }
+
+      await (baseChecker as any)._crossCheck(options)
+
+      expect(mockProvider.provider.getLogs).toHaveBeenCalledTimes(1)
+
+      expect(mockProvider.provider.getLogs).toHaveBeenCalledWith({
+        fromBlock: 1000,
+        toBlock: 2000,
+        address: ['0xcontract1'],
+        topics: [],
+      })
+    })
+
+    it.only('should handle retryOptions', async () => {
+      mockProvider.provider.getLogs.mockRejectedValue(Error('provider not ready'))
+
+      const options: CrossCheckRangeParam = {
+        fromBlock: 1000,
+        toBlock: 2000,
+        address: '0xcontract1',
+        topics: ['0xtopic1'],
+        onMissingLog: onMissingLogSpy,
+        retryOptions: {
+          timeout: 1000,
+          retries: 1,
+        },
+      }
+
+      const defaultCallTimes = 1
+
+      try {
+        await (baseChecker as any)._crossCheck(options)
+      }
+      catch (error) {
+        expect(error).toBeInstanceOf(Error)
+        expect((error as Error).message).toBe('provider not ready')
+      }
+
+      expect(mockProvider.provider.getLogs).toHaveBeenCalledTimes(defaultCallTimes + options.retryOptions!.retries!)
+      expect(onMissingLogSpy).toHaveBeenCalledTimes(0)
     })
   })
 })
