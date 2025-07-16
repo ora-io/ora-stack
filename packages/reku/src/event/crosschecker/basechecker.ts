@@ -1,5 +1,5 @@
 import type { ethers } from 'ethers'
-import { timeoutWithRetry } from '@ora-io/utils'
+import { timeoutWithRetry, to } from '@ora-io/utils'
 import { ETH_BLOCK_COUNT_ONE_HOUR } from '../../constants'
 import type { Providers } from '../../types/w3'
 import { debug } from '../../debug'
@@ -35,11 +35,15 @@ export class BaseCrossChecker {
 
     // define from, to
     // TODO: use blockNumber for performance
-    const block = await timeoutWithRetry(() => {
+    const [err, block] = await to(timeoutWithRetry(() => {
       if (!this.provider || !this.provider.provider)
         throw new Error('provider not ready')
       return this.provider.provider.getBlock('latest')
-    }, 15 * 1000, 3)
+    }, 15 * 1000, 3))
+    if (err) {
+      console.warn('crosscheck failed to get latest block', err)
+      return
+    }
     if (!block) {
       console.warn('crosscheck failed to get latest block')
       return
@@ -62,11 +66,15 @@ export class BaseCrossChecker {
     ccfOptions: CrossCheckFromParam,
   ) {
     // TODO: use blockNumber for performance
-    const block = await timeoutWithRetry(() => {
+    const [err, block] = await to(timeoutWithRetry(() => {
       if (!this.provider || !this.provider.provider)
         throw new Error('provider not ready')
       return this.provider.provider.getBlock('latest')
-    }, 15 * 1000, 3)
+    }, 15 * 1000, 3))
+    if (err) {
+      console.warn('crosscheck failed to get latest block', err)
+      return
+    }
     if (!block) {
       console.warn('crosscheck failed to get latest block')
       return
@@ -84,24 +92,6 @@ export class BaseCrossChecker {
 
     this._crossCheck(options)
     return block.number
-  }
-
-  /**
-   * @deprecated
-   * @param logs
-   * @param txHashList
-   * @param logIndexList
-   * @returns
-   */
-  async diff_old(logs: ethers.Log[], txHashList: string[], logIndexList: number[][]): Promise<ethers.Log[]> {
-    const missing = (log: ethers.Log) => {
-      const txIndex = txHashList?.indexOf(log.transactionHash) || -1
-      // 1. tx missing, or 2. if passed in logIndexList, event idx missing
-      return txIndex === -1 || (logIndexList && !logIndexList[txIndex].includes(log.index))
-    }
-    // filter missing logs
-    const missingLogs = logs.filter((log) => { return missing(log) })//
-    return missingLogs
   }
 
   async diff(logs: ethers.Log[], ignoreLogs: SimpleLog[]): Promise<ethers.Log[]> {
@@ -132,7 +122,7 @@ export class BaseCrossChecker {
       const logs = await timeoutWithRetry(() => {
         if (!this.provider || !this.provider.provider)
           throw new Error('provider not ready')
-        return this.provider.provider.getLogs(params)
+        return this.provider?.provider?.getLogs(params)
       }, 15 * 1000, 3)
       // get ignoreLogs keys
       const ignoreLogs = options.ignoreLogs

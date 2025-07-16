@@ -10,6 +10,7 @@ import { BaseCrossChecker } from './basechecker'
 export class AutoCrossChecker extends BaseCrossChecker {
   cache: CrossCheckerCacheManager | undefined = undefined
   checkpointBlockNumber: number | undefined
+  playing = false
 
   constructor(
     provider: Providers,
@@ -140,10 +141,14 @@ export class AutoCrossChecker extends BaseCrossChecker {
       // never ends if options.toBlock is not provided
       : () => false
 
+    this.playing = true
     debug('crosscheck running')
 
     // TODO: replace polling with schedule cron
-    await polling(async () => {
+
+    const pollingFn = async () => {
+      if (!this.playing)
+        return false
       try {
         debug('start polling')
         const wait = await waitOrUpdateToBlock()
@@ -165,7 +170,13 @@ export class AutoCrossChecker extends BaseCrossChecker {
         debug('polling error', error)
         return false
       }
-    }, pollingInterval)
+    }
+
+    polling(pollingFn, pollingInterval)
+  }
+
+  stop() {
+    this.playing = false
   }
 
   async diff(logs: ethers.Log[], ignoreLogs: SimpleLog[]): Promise<ethers.Log[]> {

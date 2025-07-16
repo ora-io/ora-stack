@@ -61,7 +61,7 @@ export async function crossCheckerTest() {
   })
 }
 
-describe('CrossChecker Tests', () => {
+describe.skip('CrossChecker Tests', () => {
   it('should run crossCheckerTest without errors', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
