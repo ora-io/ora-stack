@@ -27,6 +27,12 @@ export class OrapFlow implements Flow {
     return this.subflows.event
   }
 
+  private _verse: OrapVerse = new OrapVerse(this)
+
+  get verse() {
+    return this._verse
+  }
+
   event(params: EventSignalRegisterParams, handler?: HandleFn): EventFlow
   event(address: ContractAddress, abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
   event(params: EventSignalRegisterParams | ContractAddress, abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
@@ -54,15 +60,23 @@ export class OrapFlow implements Flow {
 
     if (onListenFn)
       this.onListenFn = onListenFn
+    const eventVerses = this.subflows.event.map(flow => flow.verse)
+    this._verse.setEventVerses(eventVerses)
 
-    const orapVerse = this.assemble()
-    orapVerse.play()
+    this._verse.play()
     this.onListenFn()
+  }
+
+  stop() {
+    this._verse.stop()
+  }
+
+  restart() {
+    this._verse.restart()
   }
 
   assemble(): OrapVerse {
     const eventVerses = this.subflows.event.map(flow => flow.assemble())
     return new OrapVerse(this).setEventVerses(eventVerses)
-    // this.routes.event.push(es)
   }
 }

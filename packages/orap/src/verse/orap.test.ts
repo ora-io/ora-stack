@@ -35,4 +35,12 @@ describe('OrapVerse', () => {
     orapVerse.setEventVerses(eventVerses)
     expect(orapVerse.eventVerses).toEqual(eventVerses)
   })
+
+  it('should stop the OrapVerse', () => {
+    const stopFn = vi.fn()
+    vi.spyOn(EventVerse.prototype, 'stop').mockImplementation(stopFn)
+    orapVerse.setEventVerses([eventVerse])
+    orapVerse.stop()
+    expect(stopFn).toHaveBeenCalled()
+  })
 })

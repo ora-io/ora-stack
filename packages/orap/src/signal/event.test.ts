@@ -156,4 +156,14 @@ describe('EventSignal', () => {
       expect(eventSignal.crosschecker?.start).toHaveBeenCalledWith(eventSignal.crosscheckerOptions)
     })
   })
+
+  describe('stop', () => {
+    it('should stop the event listener and the crosschecker', () => {
+      eventSignal.stopEventListener = vi.fn()
+      eventSignal.stopCrossChecker = vi.fn()
+      eventSignal.stop()
+      expect(eventSignal.stopEventListener).toHaveBeenCalled()
+      expect(eventSignal.stopCrossChecker).toHaveBeenCalledWith()
+    })
+  })
 })

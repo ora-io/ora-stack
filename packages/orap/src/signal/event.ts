@@ -126,6 +126,23 @@ export class EventSignal implements Signal {
     }
   }
 
+  stop() {
+    this.stopEventListener()
+    this.stopCrossChecker()
+  }
+
+  stopEventListener() {
+    if (this.provider instanceof RekuProviderManager)
+      this.provider.destroy()
+
+    else
+      this.contract.removeListener(this.params.eventName, this.subscribeCallback)
+  }
+
+  stopCrossChecker() {
+    this.crosschecker?.stop()
+  }
+
   async startCrossChecker(provider?: Providers) {
     if (this.crosscheckerParams?.disabled)
       return

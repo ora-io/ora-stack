@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SEPOLIA_HTTP, SEPOLIA_WSS } from '../../tests/config'
+import { OrapVerse } from '../verse/orap'
 import { OrapFlow } from './orap'
 
 describe('OrapFlow', () => {
@@ -32,5 +33,12 @@ describe('OrapFlow', () => {
     expect(orapVerse).toBeDefined()
     expect(eventFlow).toBeDefined()
     expect(orapFlow.eventFlows).toContain(eventFlow)
+  })
+
+  it('should stop the OrapVerse', () => {
+    const stopFn = vi.fn()
+    vi.spyOn(OrapVerse.prototype, 'stop').mockImplementation(stopFn)
+    orapFlow.stop()
+    expect(stopFn).toHaveBeenCalled()
   })
 })

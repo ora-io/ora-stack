@@ -18,6 +18,12 @@ export class EventFlow implements Flow {
   private _subscribeProvider?: Providers
   private _crosscheckProvider?: Providers
 
+  private _verse: EventVerse = new EventVerse(this)
+
+  get verse() {
+    return this._verse
+  }
+
   constructor(
     private parentFlow?: OrapFlow,
     public params?: EventSignalRegisterParams,
@@ -90,5 +96,13 @@ export class EventFlow implements Flow {
 
   another(): OrapFlow {
     return this.parentFlow!
+  }
+
+  stop() {
+    this._verse.stop()
+  }
+
+  restart() {
+    this._verse.restart()
   }
 }

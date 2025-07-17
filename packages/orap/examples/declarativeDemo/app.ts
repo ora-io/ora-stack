@@ -24,7 +24,7 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
 
   const toKey: ToKeyFn = (from: string, _to: string, _amount: number) => `${from}_${randomStr(4)}`
 
-  orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
+  const event = orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
     .crosscheck({
       store,
       storeKeyPrefix: 'ora-stack:orap:demo:cc:',
@@ -37,8 +37,8 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     // event hook, not necessary
     .handle(newEventSignalHook)
 
-    // add a task
-    .task()
+  // add a task
+  event.task()
     .cache(sm)
     .key(toKey)
     .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
@@ -52,6 +52,8 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     .cache(sm) // rm to use mem by default
     .ttl({ taskTtl: 20000, doneTtl: 20000 })
     .handle(handleTask_2)
+
+  event.stop()
 
   // start signal listener
   orap.listen(

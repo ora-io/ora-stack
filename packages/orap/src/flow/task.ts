@@ -16,6 +16,11 @@ const defaultHandleFn: HandleFn = () => {
 }
 
 const defaultToKeyFn: ToKeyFn = _ => randomStr(8, alphabetHex)
+
+const defaultFailFn: HandleResultFn = async (task: TaskRaplized) => {
+  await task.remove()
+}
+
 export interface TaskFlowTTL { taskTtl: Milliseconds; doneTtl: Milliseconds }
 
 export interface TaskFlowParams {
@@ -41,14 +46,16 @@ export class TaskFlow implements Flow {
   toKeyFn: ToKeyFn = defaultToKeyFn
   handleFn: HandleFn = defaultHandleFn
   successFn: HandleResultFn = defaultSuccessFn
+  failFn: HandleResultFn = defaultFailFn
 
   private _middlewares: Array<HandleFn> = []
-
-  failFn: HandleResultFn = async (task: TaskRaplized) => {
-    await task.remove()
-  }
+  private _verse: TaskVerse = new TaskVerse(this)
 
   ctx?: Context
+
+  get verse() {
+    return this._verse
+  }
 
   constructor(
     private parentFlow: EventFlow,
@@ -135,5 +142,13 @@ export class TaskFlow implements Flow {
 
   assemble(): TaskVerse {
     return new TaskVerse(this)
+  }
+
+  stop() {
+    this._verse.stop()
+  }
+
+  restart() {
+    this._verse.restart()
   }
 }

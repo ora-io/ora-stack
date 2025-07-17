@@ -73,4 +73,24 @@ describe('EventVerse', () => {
 
     expect(eventBeatDrop).toHaveBeenCalled()
   })
+
+  it('should stop event verse', () => {
+    const eventBeatStop = vi.fn()
+    vi.spyOn(EventBeat.prototype, 'stop').mockImplementation(eventBeatStop)
+
+    // Mock the _play method to avoid actual EventBeat creation
+    vi.spyOn(eventVerse as any, '_play').mockImplementation(() => {
+      // Create a mock eventBeat
+      (eventVerse as any).eventBeat = {
+        stop: eventBeatStop,
+      }
+    })
+
+    // Call play first to create the eventBeat
+    eventVerse.play()
+    // Then call stop
+    eventVerse.stop()
+
+    expect(eventBeatStop).toHaveBeenCalled()
+  })
 })

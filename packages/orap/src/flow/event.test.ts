@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { EventVerse } from '../verse/event'
 import { OrapFlow } from './orap'
 import { EventFlow } from './event'
 
@@ -47,5 +48,12 @@ describe('EventFlow', () => {
   it('should return the parent OrapFlow', () => {
     const parentFlow = eventFlow.another()
     expect(parentFlow).toBe(orapFlow)
+  })
+
+  it('should stop the EventVerse', () => {
+    const stopFn = vi.fn()
+    vi.spyOn(EventVerse.prototype, 'stop').mockImplementation(stopFn)
+    eventFlow.stop()
+    expect(stopFn).toHaveBeenCalled()
   })
 })

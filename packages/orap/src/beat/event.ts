@@ -20,4 +20,8 @@ export class EventBeat extends EventSignal {
   drop() {
     this.listen(this.subscribeProvider, this.crosscheckProvider)
   }
+
+  stop() {
+    super.stop()
+  }
 }
