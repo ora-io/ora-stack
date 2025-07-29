@@ -37,7 +37,7 @@ describe('Orap', () => {
   }, {
     timeout: 100000000,
   })
-  it.skip('should run Declarative Demo without errors', async () => {
+  it('should run Declarative Demo without errors', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
     const storeConfig = { port: parseInt(process.env.REDIS_PORT!), host: process.env.REDIS_HOST }

@@ -51,7 +51,7 @@ export class OrapFlow implements Flow {
    * @param options
    * @param onListenFn
    */
-  listen(options: ListenOptions, onListenFn?: Fn) {
+  listen(options: ListenOptions, onListenFn?: Fn): this {
     for (const eventFlow of this.subflows.event) {
       eventFlow.setSubscribeProvider(options.wsProvider)
       if (options.httpProvider)
@@ -65,14 +65,17 @@ export class OrapFlow implements Flow {
 
     this._verse.play()
     this.onListenFn()
+    return this
   }
 
-  stop() {
+  stop(): this {
     this._verse.stop()
+    return this
   }
 
-  restart() {
+  restart(): this {
     this._verse.restart()
+    return this
   }
 
   assemble(): OrapVerse {

@@ -1,4 +1,5 @@
 import type { AutoCrossCheckParam, Providers } from '@ora-io/reku'
+import type { ContractAddress } from '@ora-io/utils/src'
 import type { Context } from '../task'
 import type { TaskFlowParams } from '../flow/task'
 import { TaskFlow } from '../flow/task'
@@ -19,16 +20,24 @@ export class EventFlow implements Flow {
   private _crosscheckProvider?: Providers
 
   private _verse: EventVerse = new EventVerse(this)
+  private _addresses: ContractAddress[] = []
+  private _params: EventSignalRegisterParams
 
   get verse() {
     return this._verse
   }
 
+  get params() {
+    return this._params
+  }
+
   constructor(
-    private parentFlow?: OrapFlow,
-    public params?: EventSignalRegisterParams,
+    private parentFlow: OrapFlow,
+    params: EventSignalRegisterParams,
     handleFn?: HandleFn, // return: succ & continue if true, stop if false
   ) {
+    this._params = params
+    this._addresses = Array.isArray(this.params.address) ? this.params.address : [this.params.address]
     // Default handleFn
     this.handleFn = handleFn ?? (async (..._args: Array<any>) => {
       return true
@@ -58,6 +67,7 @@ export class EventFlow implements Flow {
       tf = new TaskFlow(this, sm)
     }
     this._taskFlows.push(tf)
+    this._verse.setTaskVerses(this._taskFlows.map(flow => flow.verse))
     return tf
   }
 
@@ -95,14 +105,40 @@ export class EventFlow implements Flow {
   }
 
   another(): OrapFlow {
-    return this.parentFlow!
+    return this.parentFlow
   }
 
-  stop() {
+  stop(): this {
     this._verse.stop()
+    return this
   }
 
-  restart() {
+  restart(): this {
     this._verse.restart()
+    return this
+  }
+
+  address(_index: number, _address: ContractAddress): this
+  address(address: ContractAddress): this
+  address(_first: ContractAddress | number, _second?: ContractAddress): this {
+    if (typeof _first === 'number') {
+      if (!_second)
+        throw new Error('address is required')
+      if (Array.isArray(this._params.address))
+        Reflect.set(this._addresses, _first, _second)
+
+      else this._addresses = [_second!]
+    }
+    else
+      if (Array.isArray(this._params.address)) { this._addresses = [...new Set([...this._params.address, _first])] }
+      else { this._addresses = [_first] }
+    this._params.address = this._addresses
+    return this
+  }
+
+  addresses(addresses: ContractAddress[]): this {
+    this._addresses = addresses
+    this._params.address = this._addresses
+    return this
   }
 }

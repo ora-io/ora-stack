@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { memoryStore } from '@ora-io/utils'
 import { StoreManager } from '../store'
-import { EventFlow, TaskFlow } from '.'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
+import { EventFlow, OrapFlow, TaskFlow } from '.'
 
 describe('TaskFlow', () => {
   let parentFlow: any
   let taskFlow: TaskFlow
 
   beforeEach(() => {
-    parentFlow = new EventFlow()
+    parentFlow = new EventFlow(new OrapFlow(), { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
     taskFlow = new TaskFlow(parentFlow)
   })
 

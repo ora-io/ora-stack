@@ -4,6 +4,7 @@ import { EventFlow, OrapFlow, TaskFlow } from '../flow'
 import type { StoreManager } from '../store'
 import { getMiddlewareContext } from '../utils'
 import { HandleFailedMiddleware, HandleSuccessMiddleware } from '../middlewares/private'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
 import { TaskRaplized } from './verse'
 
 describe('TaskRaplized', () => {
@@ -15,7 +16,7 @@ describe('TaskRaplized', () => {
   const taskFlowDoneTtl = 2000
 
   beforeEach(() => {
-    taskFlow = new TaskFlow(new EventFlow(new OrapFlow()))
+    taskFlow = new TaskFlow(new EventFlow(new OrapFlow(), { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' }))
     taskFlow.handle(vi.fn(async (...args: any[]) => {
       const { next } = getMiddlewareContext(args)
 

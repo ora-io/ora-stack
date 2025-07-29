@@ -69,9 +69,9 @@ export class RekuProviderManager {
     return this._provider?.destroyed
   }
 
-  addContract(address: ContractAddress, contract: ethers.Contract): RekuContractManager | undefined
+  addContract(address: ContractAddress, contract: ethers.BaseContract): RekuContractManager | undefined
   addContract(address: ContractAddress, abi: Interface | InterfaceAbi): RekuContractManager | undefined
-  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.Contract): RekuContractManager | undefined {
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.BaseContract): RekuContractManager | undefined {
     if (this._provider) {
       if (abi instanceof Interface || Array.isArray(abi)) {
         if (!abi)
@@ -82,7 +82,7 @@ export class RekuProviderManager {
         debug('add contract %s', address)
         return contract
       }
-      else if (abi instanceof ethers.Contract) {
+      else if (abi instanceof ethers.BaseContract) {
         const contract = new RekuContractManager(address, abi.interface, this._provider)
         this._contracts.set(address, contract)
         debug('add contract %s', address)

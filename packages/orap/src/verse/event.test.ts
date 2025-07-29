@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EventFlow, OrapFlow } from '../flow'
 import { EventBeat } from '../beat/event'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
 import { EventVerse } from './event'
 import type { TaskVerse } from './task'
 
@@ -12,7 +13,7 @@ describe('EventVerse', () => {
 
   beforeEach(() => {
     orapFlow = new OrapFlow()
-    eventFlow = new EventFlow(orapFlow)
+    eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
     eventVerse = new EventVerse(eventFlow)
   })
 

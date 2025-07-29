@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EventVerse } from '../verse/event'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
 import { OrapFlow } from './orap'
 import { EventFlow } from './event'
 
@@ -10,7 +11,7 @@ describe('EventFlow', () => {
 
   beforeEach(() => {
     orapFlow = new OrapFlow()
-    eventFlow = new EventFlow(orapFlow)
+    eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
   })
 
   it('should create a task flow', () => {
@@ -55,5 +56,37 @@ describe('EventFlow', () => {
     vi.spyOn(EventVerse.prototype, 'stop').mockImplementation(stopFn)
     eventFlow.stop()
     expect(stopFn).toHaveBeenCalled()
+  })
+
+  describe('address', () => {
+    it('should set the address', () => {
+      const eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
+      eventFlow.address('0x1234567890123456789012345678901234567890')
+      expect(eventFlow.params.address).toEqual(['0x1234567890123456789012345678901234567890'])
+    })
+
+    it.only('should set the array address', () => {
+      const eventFlow = new EventFlow(orapFlow, { address: [USDT_ADDRESS], abi: ERC20_ABI, eventName: 'Transfer' })
+      eventFlow.address(1, '0x1234567890123456789012345678901234567890')
+      expect(eventFlow.params.address).toContainEqual('0x1234567890123456789012345678901234567890')
+    })
+
+    it('should set the address with number', () => {
+      const eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
+      eventFlow.address(1, '0x1234567890123456789012345678901234567890')
+      expect(eventFlow.params.address).toEqual(['0x1234567890123456789012345678901234567890'])
+    })
+
+    it('should set the addresses with array', () => {
+      const eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
+      eventFlow.addresses(['0x1234567890123456789012345678901234567890'])
+      expect(eventFlow.params.address).toEqual(['0x1234567890123456789012345678901234567890'])
+    })
+
+    it('should set the addresses with array and number', () => {
+      const eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
+      eventFlow.addresses([USDT_ADDRESS, '0x1234567890123456789012345678901234567890'])
+      expect(eventFlow.params.address).toEqual([USDT_ADDRESS, '0x1234567890123456789012345678901234567890'])
+    })
   })
 })

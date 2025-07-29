@@ -62,7 +62,7 @@ export class EventVerse implements Verse {
     // create an beat per verse
     this.eventBeat = new EventBeat(
       // for create signal
-      this.flow.params!,
+      this.flow.params,
       this.handleSignal.bind(this),
       this.flow.partialCrosscheckOptions,
       // for listen
@@ -70,12 +70,5 @@ export class EventVerse implements Verse {
       this.flow.crosscheckProvider,
     )
     this.eventBeat.drop()
-
-    // this.eventSignal = new EventSignal(
-    //   this.flow.params!,
-    //   this.handleSignal,
-    //   this.flow.logger,
-    //   this.flow.partialCrosscheckOptions,
-    // )
   }
 }

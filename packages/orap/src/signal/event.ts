@@ -6,9 +6,11 @@ import type { ContractAddress } from '@ora-io/utils'
 import type { Signal } from './interface'
 
 export interface EventSignalRegisterParams {
-  address: ContractAddress
+  address: ContractAddress | ContractAddress[]
   abi: Interface | InterfaceAbi
   eventName: string
+  enableCrosscheck?: boolean // default: true
+  enableSubscribe?: boolean // default: true
   // esig?: string,
 }
 
@@ -25,7 +27,10 @@ export type EventSignalCallback = ethers.Listener
 
 export class EventSignal implements Signal {
   provider?: Providers
-  contract: ethers.Contract
+  params: EventSignalRegisterParams
+  addresses: ContractAddress[]
+  contractMap: Map<ContractAddress, ethers.BaseContract> = new Map()
+  interface: ethers.Interface
   esig: string
   eventFragment: EventFragment
 
@@ -37,17 +42,26 @@ export class EventSignal implements Signal {
   crosscheckerParams?: CrosscheckParams
 
   constructor(
-    public params: EventSignalRegisterParams,
+    params: EventSignalRegisterParams,
     public callback: EventSignalCallback,
     crosscheckOptions?: CrosscheckOptions,
   ) {
-    this.contract = new ethers.Contract(
-      params.address,
-      params.abi,
-    )
+    params = this._transformParams(params)
+    this.params = params
+
+    if (Array.isArray(params.address))
+      this.addresses = params.address.map(this._getAddressStr)
+
+    else this.addresses = [this._getAddressStr(params.address)]
+
+    for (const address of this.addresses) {
+      const contract = new ethers.Contract(address, params.abi)
+      this.contractMap.set(address, contract)
+    }
 
     // Get the event fragment by name
-    const iface = this.contract.interface
+    const iface = ethers.Interface.from(params.abi)
+    this.interface = iface
     const _ef = iface.getEvent(params.eventName)
     if (!_ef)
       throw new Error('event not found in abi')
@@ -63,7 +77,7 @@ export class EventSignal implements Signal {
     }
     // to align with subscribe listener, parse event params and add EventLog to the last
     this.crosscheckCallback = async (log: Log) => {
-      const parsedLog = this.contract.interface.decodeEventLog(this.eventFragment, log.data, log.topics)
+      const parsedLog = this.interface.decodeEventLog(this.eventFragment, log.data, log.topics)
       const payload = this._wrapContractEventPayload(log)
       await this.callback(...parsedLog, payload)
     }
@@ -73,10 +87,27 @@ export class EventSignal implements Signal {
       this._setCrosscheckOptions(crosscheckOptions)
   }
 
+  private _transformParams(params: EventSignalRegisterParams) {
+    if (params.enableCrosscheck === undefined)
+      params.enableCrosscheck = true
+    if (params.enableSubscribe === undefined)
+      params.enableSubscribe = true
+    return params
+  }
+
   private _wrapContractEventPayload(log: Log) {
+    const contract = this.contractMap.get(this._getAddressStr(log.address))
+    if (!contract)
+      throw new Error(`contract not found for address: ${log.address}`)
     if (this.eventFragment)
-      return new ContractEventPayload(this.contract, this.subscribeCallback, this.params.eventName, this.eventFragment, log)
-    return new ContractUnknownEventPayload(this.contract, this.subscribeCallback, this.params.eventName, log)
+      return new ContractEventPayload(contract, this.subscribeCallback, this.params.eventName, this.eventFragment, log)
+    return new ContractUnknownEventPayload(contract, this.subscribeCallback, this.params.eventName, log)
+  }
+
+  private _getAddressStr(address: ContractAddress) {
+    if (typeof address === 'string')
+      return ethers.getAddress(address)
+    return address
   }
 
   private _setCrosscheckOptions(options: CrosscheckOptions) {
@@ -112,17 +143,26 @@ export class EventSignal implements Signal {
   }
 
   startEventListener(provider: Providers) {
+    if (!this.params.enableSubscribe)
+      return
     if (provider instanceof RekuProviderManager) {
-      provider.addContract(this.params.address, this.contract)
-      provider.addListener(this.params.address, this.params.eventName, this.subscribeCallback)
+      for (const address of this.addresses)
+        provider.addContract(address, this.contractMap.get(address)!)
+      for (const address of this.addresses)
+        provider.addListener(address, this.params.eventName, this.subscribeCallback)
     }
     else {
-      const listener = this.contract.connect(provider)
-      listener?.on(
-        this.params.eventName,
-        // TODO: calling this seems to be async, should we make it to sequential?
-        this.subscribeCallback,
-      )
+      // const listener = this.contract.connect(provider)
+      // listener?.on(
+      //   this.params.eventName,
+      //   // TODO: calling this seems to be async, should we make it to sequential?
+      //   this.subscribeCallback,
+      // )
+      for (const address of this.addresses) {
+        const newContract = this.contractMap.get(address)!.connect(provider)
+        newContract.on(this.params.eventName, this.subscribeCallback)
+        this.contractMap.set(address, newContract)
+      }
     }
   }
 
@@ -133,10 +173,11 @@ export class EventSignal implements Signal {
 
   stopEventListener() {
     if (this.provider instanceof RekuProviderManager)
-      this.provider.destroy()
+      this.contractMap.forEach(contract => contract.removeAllListeners())
 
     else
-      this.contract.removeListener(this.params.eventName, this.subscribeCallback)
+      this.contractMap.forEach(contract => contract.off(this.params.eventName, this.subscribeCallback))
+      // this.provider?.destroy()
   }
 
   stopCrossChecker() {
@@ -144,6 +185,9 @@ export class EventSignal implements Signal {
   }
 
   async startCrossChecker(provider?: Providers) {
+    if (!this.params.enableCrosscheck)
+      return
+
     if (this.crosscheckerParams?.disabled)
       return
 

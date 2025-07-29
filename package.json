@@ -47,7 +47,8 @@
     "publish": "nr prepublishOnly && esno scripts/publish.ts",
     "release": "esno scripts/release.ts",
     "start": "esno src/index.ts",
-    "test": "DEBUG=DEBUG:ora-stack:* vitest",
+    "test": "vitest",
+    "test:debug": "DEBUG=DEBUG:ora-stack:* vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

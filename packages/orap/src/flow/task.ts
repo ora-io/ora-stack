@@ -144,11 +144,13 @@ export class TaskFlow implements Flow {
     return new TaskVerse(this)
   }
 
-  stop() {
+  stop(): this {
     this._verse.stop()
+    return this
   }
 
-  restart() {
+  restart(): this {
     this._verse.restart()
+    return this
   }
 }

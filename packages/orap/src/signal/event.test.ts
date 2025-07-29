@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AutoCrossCheckParam } from '@ora-io/reku'
 import { AutoCrossChecker, RekuProviderManager } from '@ora-io/reku'
+import type { ContractAddress } from '@ora-io/utils/src'
 import { ERC20_ABI, MAINNET_WSS, USDT_ADDRESS } from '../../tests/config'
 import type { EventSignalCallback, EventSignalRegisterParams } from './event'
 import { EventSignal } from './event'
@@ -28,11 +29,6 @@ describe('EventSignal', () => {
   describe('constructor', () => {
     it('should create an instance of EventSignal', () => {
       expect(eventSignal).toBeInstanceOf(EventSignal)
-    })
-
-    it('should set the contract property', () => {
-      expect(eventSignal.contract).toBeInstanceOf(ethers.Contract)
-      expect(eventSignal.contract.interface).toEqual(new ethers.Interface(ERC20_ABI))
     })
 
     it('should set the eventFragment property', () => {
@@ -91,29 +87,37 @@ describe('EventSignal', () => {
     const provider = {} as any
 
     beforeEach(() => {
-      eventSignal.contract.connect = vi.fn().mockReturnValue({
-        on: vi.fn(),
-      })
+      // Mock the contract in the contractMap
+      const mockContract = {
+        connect: vi.fn().mockReturnValue({
+          on: vi.fn(),
+        }),
+        removeListener: vi.fn(),
+      } as any
+      eventSignal.contractMap.set(params.address as ContractAddress, mockContract)
     })
 
     it('should add the contract to the provider if provider is an instance of RekuProviderManager', () => {
       rekuProviderManager.addContract = vi.fn()
       rekuProviderManager.addListener = vi.fn()
       eventSignal.startEventListener(rekuProviderManager)
-      expect(rekuProviderManager.addContract).toHaveBeenCalledWith(params.address, eventSignal.contract)
+      expect(rekuProviderManager.addContract).toHaveBeenCalledWith(params.address, eventSignal.contractMap.get(params.address as ContractAddress))
       expect(rekuProviderManager.addListener).toHaveBeenCalledWith(params.address, params.eventName, eventSignal.subscribeCallback)
     })
 
     it('should connect the contract to the provider if provider is not an instance of RekuProviderManager', () => {
       eventSignal.startEventListener(provider)
-      expect(eventSignal.contract.connect).toHaveBeenCalledWith(provider)
+      expect(eventSignal.contractMap.get(params.address as ContractAddress)?.connect).toHaveBeenCalledWith(provider)
     })
 
     it('should call the on method of the listener with the eventName and subscribeCallback', () => {
       const listener = {
         on: vi.fn(),
       }
-      eventSignal.contract.connect = vi.fn().mockReturnValue(listener)
+      const mockContract = eventSignal.contractMap.get(params.address as ContractAddress)
+      if (mockContract)
+        mockContract.connect = vi.fn().mockReturnValue(listener)
+
       eventSignal.startEventListener(provider)
       expect(listener.on).toHaveBeenCalledWith(params.eventName, eventSignal.subscribeCallback)
     })

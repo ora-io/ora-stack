@@ -4,6 +4,7 @@ import { TaskFlow } from '../flow/task'
 import { EventFlow } from '../flow/event'
 import { OrapFlow } from '../flow'
 import { TaskRaplized } from '../task/verse'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
 import { TaskVerse } from './task'
 
 // Mock the sleep function
@@ -30,7 +31,7 @@ describe('TaskVerse', () => {
     }
 
     orapFlow = new OrapFlow()
-    eventFlow = new EventFlow(orapFlow)
+    eventFlow = new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' })
     taskFlow = new TaskFlow(eventFlow)
     taskFlow.cache(mockStoreManager)
     taskVerse = new TaskVerse(taskFlow)

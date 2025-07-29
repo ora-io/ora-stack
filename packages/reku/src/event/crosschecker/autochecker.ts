@@ -148,7 +148,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
     const pollingFn = async () => {
       if (!this.playing)
-        return false
+        return true
       try {
         debug('start polling')
         const wait = await waitOrUpdateToBlock()
@@ -177,6 +177,7 @@ export class AutoCrossChecker extends BaseCrossChecker {
 
   stop() {
     this.playing = false
+    debug('auto crosscheck stop')
   }
 
   async diff(logs: ethers.Log[], ignoreLogs: SimpleLog[]): Promise<ethers.Log[]> {
