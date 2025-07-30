@@ -114,6 +114,10 @@ export class EventFlow implements Flow {
   }
 
   restart(): this {
+    if (this.parentFlow.wsProvider)
+      this._subscribeProvider = this.parentFlow.wsProvider
+    else
+      throw new Error('wsProvider is not set, cannot restart')
     if (this.parentFlow.httpProvider)
       this._crosscheckProvider = this.parentFlow.httpProvider
     else
