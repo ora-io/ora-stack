@@ -114,6 +114,10 @@ export class EventFlow implements Flow {
   }
 
   restart(): this {
+    if (this.parentFlow.httpProvider)
+      this._crosscheckProvider = this.parentFlow.httpProvider
+    else
+      throw new Error('httpProvider is not set, cannot restart')
     this._verse.restart()
     return this
   }

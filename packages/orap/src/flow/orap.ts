@@ -22,9 +22,19 @@ export class OrapFlow implements Flow {
   } = { event: [] }
 
   onListenFn: Fn = () => { }
+  _wsProvider?: Providers
+  _httpProvider?: Providers
 
   get eventFlows() {
     return this.subflows.event
+  }
+
+  get wsProvider() {
+    return this._wsProvider
+  }
+
+  get httpProvider() {
+    return this._httpProvider
   }
 
   private _verse: OrapVerse = new OrapVerse(this)
@@ -57,6 +67,8 @@ export class OrapFlow implements Flow {
       if (options.httpProvider)
         eventFlow.setCrosscheckProvider(options.httpProvider)
     }
+    this._wsProvider = options.wsProvider
+    this._httpProvider = options.httpProvider
 
     if (onListenFn)
       this.onListenFn = onListenFn
