@@ -34,9 +34,9 @@ export class OrapFlow implements Flow {
   }
 
   event(params: EventSignalRegisterParams, handler?: HandleFn): EventFlow
-  event(address: ContractAddress, abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
-  event(params: EventSignalRegisterParams | ContractAddress, abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
-    if (typeof params === 'string' || isAddressable(params))
+  event(address: ContractAddress | ContractAddress[], abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
+  event(params: EventSignalRegisterParams | ContractAddress | ContractAddress[], abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
+    if (typeof params === 'string' || isAddressable(params) || Array.isArray(params))
       params = { address: params, abi: abi as Interface | InterfaceAbi, eventName: eventName as string }
     else handler = abi as HandleFn
 
