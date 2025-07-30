@@ -1,6 +1,6 @@
 {
   "name": "ora-stack",
-  "version": "0.4.0-beta.3",
+  "version": "0.4.0-beta.4",
   "private": true,
   "packageManager": "pnpm@9.7.0",
   "description": "",
