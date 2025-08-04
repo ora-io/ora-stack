@@ -2,7 +2,7 @@
 import type { ContractEventPayload } from 'ethers'
 import { Logger, objectKeys, randomStr, redisStore } from '@ora-io/utils'
 import type { ListenOptions, ToKeyFn } from '../../src'
-import { CheckTransactionStatus, Orap, StoreManager, getMiddlewareContext } from '../../src'
+import { Orap, StoreManager, getMiddlewareContext } from '../../src'
 import ABI from './erc20.abi.json'
 
 const MAINNET_USDT_ADDR = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
@@ -24,7 +24,12 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
 
   const toKey: ToKeyFn = (from: string, _to: string, _amount: number) => `${from}_${randomStr(4)}`
 
-  orap.event(eventSignalParam.address, eventSignalParam.abi, eventSignalParam.eventName)
+  const event = orap.event({
+    address: eventSignalParam.address,
+    abi: eventSignalParam.abi,
+    eventName: eventSignalParam.eventName,
+    enableSubscribe: false,
+  })
     .crosscheck({
       store,
       storeKeyPrefix: 'ora-stack:orap:demo:cc:',
@@ -37,31 +42,40 @@ export function startDemo(options: ListenOptions, storeConfig?: any) {
     // event hook, not necessary
     .handle(newEventSignalHook)
 
-    // add a task
-    .task()
+  // add a task
+  event.task()
     .cache(sm)
     .key(toKey)
     .prefix('ora-stack:orap:demo:TransferTask:', 'ora-stack:orap:demo:Done-TransferTask:')
     .ttl({ taskTtl: 120000, doneTtl: 60000 })
-    .use(CheckTransactionStatus(options.wsProvider))
+    // .use(CheckTransactionStatus(options.wsProvider))
     .handle(handleTask)
     // add another task
-    .another()
-    .task()
-    .prefix('ora-stack:orap:demo:AnotherTask:', 'ora-stack:orap:demo:Done-AnotherTask:')
-    .cache(sm) // rm to use mem by default
-    .ttl({ taskTtl: 20000, doneTtl: 20000 })
-    .handle(handleTask_2)
+    // .another()
+    // .task()
+    // .prefix('ora-stack:orap:demo:AnotherTask:', 'ora-stack:orap:demo:Done-AnotherTask:')
+    // .cache(sm) // rm to use mem by default
+    // .ttl({ taskTtl: 20000, doneTtl: 20000 })
+    // .handle(handleTask_2)
 
   // start signal listener
   orap.listen(
     options,
     () => { logger.log('listening on provider.network') },
   )
+
+  setTimeout(() => {
+    logger.log('[+] add another address')
+    event.addresses([
+      eventSignalParam.address,
+      '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+    ])
+    event.restart()
+  }, 10 * 1000)
 }
 
-async function handleTask(from: string, to: string, amount: number, _event: ContractEventPayload) {
-  logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount)
+async function handleTask(from: string, to: string, amount: number, event: ContractEventPayload) {
+  logger.log('[+] handleTask: from =', from, 'to =', to, 'amount =', amount, 'address =', event.log.address)
   const args = objectKeys(arguments).map(k => arguments[k])
 
   const { next } = getMiddlewareContext(...args)
@@ -74,10 +88,10 @@ async function newEventSignalHook(from: string, to: string, amount: number, even
   return true // true to continue handle tasks, false to hijack the process.
 }
 
-async function handleTask_2(from: string, to: string, amount: number) {
-  logger.log('[+] handleTask_2: from =', from, 'to =', to, 'amount =', amount)
-  const args = objectKeys(arguments).map(k => arguments[k])
+// async function handleTask_2(from: string, to: string, amount: number) {
+//   logger.log('[+] handleTask_2: from =', from, 'to =', to, 'amount =', amount)
+//   const args = objectKeys(arguments).map(k => arguments[k])
 
-  const { next } = getMiddlewareContext(...args)
-  await next()
-}
+//   const { next } = getMiddlewareContext(...args)
+//   await next()
+// }

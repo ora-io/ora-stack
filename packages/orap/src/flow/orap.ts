@@ -22,15 +22,31 @@ export class OrapFlow implements Flow {
   } = { event: [] }
 
   onListenFn: Fn = () => { }
+  _wsProvider?: Providers
+  _httpProvider?: Providers
 
   get eventFlows() {
     return this.subflows.event
   }
 
+  get wsProvider() {
+    return this._wsProvider
+  }
+
+  get httpProvider() {
+    return this._httpProvider
+  }
+
+  private _verse: OrapVerse = new OrapVerse(this)
+
+  get verse() {
+    return this._verse
+  }
+
   event(params: EventSignalRegisterParams, handler?: HandleFn): EventFlow
-  event(address: ContractAddress, abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
-  event(params: EventSignalRegisterParams | ContractAddress, abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
-    if (typeof params === 'string' || isAddressable(params))
+  event(address: ContractAddress | ContractAddress[], abi: Interface | InterfaceAbi | HandleFn, eventName: string, handler?: HandleFn): EventFlow
+  event(params: EventSignalRegisterParams | ContractAddress | ContractAddress[], abi?: Interface | InterfaceAbi | HandleFn, eventName?: string, handler?: HandleFn): EventFlow {
+    if (typeof params === 'string' || isAddressable(params) || Array.isArray(params))
       params = { address: params, abi: abi as Interface | InterfaceAbi, eventName: eventName as string }
     else handler = abi as HandleFn
 
@@ -45,24 +61,37 @@ export class OrapFlow implements Flow {
    * @param options
    * @param onListenFn
    */
-  listen(options: ListenOptions, onListenFn?: Fn) {
+  listen(options: ListenOptions, onListenFn?: Fn): this {
     for (const eventFlow of this.subflows.event) {
       eventFlow.setSubscribeProvider(options.wsProvider)
       if (options.httpProvider)
         eventFlow.setCrosscheckProvider(options.httpProvider)
     }
+    this._wsProvider = options.wsProvider
+    this._httpProvider = options.httpProvider
 
     if (onListenFn)
       this.onListenFn = onListenFn
+    const eventVerses = this.subflows.event.map(flow => flow.verse)
+    this._verse.setEventVerses(eventVerses)
 
-    const orapVerse = this.assemble()
-    orapVerse.play()
+    this._verse.play()
     this.onListenFn()
+    return this
+  }
+
+  stop(): this {
+    this._verse.stop()
+    return this
+  }
+
+  restart(): this {
+    this._verse.restart()
+    return this
   }
 
   assemble(): OrapVerse {
     const eventVerses = this.subflows.event.map(flow => flow.assemble())
     return new OrapVerse(this).setEventVerses(eventVerses)
-    // this.routes.event.push(es)
   }
 }

@@ -3,7 +3,7 @@ import type { InterfaceAbi } from 'ethers'
 import { Interface, WebSocketProvider, ethers } from 'ethers'
 import { WebSocket } from 'ws'
 import type { ErrorEvent } from 'ws'
-import { type ContractAddress, isInstanceof, to } from '@ora-io/utils'
+import { type ContractAddress, isInstanceof, timeout, to } from '@ora-io/utils'
 import { debug } from '../debug'
 import { RekuContractManager } from './contract'
 
@@ -69,9 +69,9 @@ export class RekuProviderManager {
     return this._provider?.destroyed
   }
 
-  addContract(address: ContractAddress, contract: ethers.Contract): RekuContractManager | undefined
+  addContract(address: ContractAddress, contract: ethers.BaseContract): RekuContractManager | undefined
   addContract(address: ContractAddress, abi: Interface | InterfaceAbi): RekuContractManager | undefined
-  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.Contract): RekuContractManager | undefined {
+  addContract(address: ContractAddress, abi: Interface | InterfaceAbi | ethers.BaseContract): RekuContractManager | undefined {
     if (this._provider) {
       if (abi instanceof Interface || Array.isArray(abi)) {
         if (!abi)
@@ -82,7 +82,7 @@ export class RekuProviderManager {
         debug('add contract %s', address)
         return contract
       }
-      else if (abi instanceof ethers.Contract) {
+      else if (abi instanceof ethers.BaseContract) {
         const contract = new RekuContractManager(address, abi.interface, this._provider)
         this._contracts.set(address, contract)
         debug('add contract %s', address)
@@ -217,18 +217,14 @@ export class RekuProviderManager {
         debug('heartbeat running...')
         const hasProvider = this._hasProvider()
         debug('heartbeat has provider: %s', hasProvider)
-        this._provider?.send('net_version', [])
-          .then((res) => {
-            debug('heartbeat response: %s', res)
-          })
-          .catch((err) => {
-            this.reconnect()
-            this._event?.emit('error', err)
-            debug('heartbeat error: %s', err)
-          })
-          .finally(() => {
-            debug('heartbeat finally')
-          })
+
+        const [err, res] = await to(timeout(async () => this._provider?.send('net_version', []), 10 * 1000))
+        if (err) {
+          this.reconnect()
+          this._event?.emit('error', err)
+          debug('heartbeat timeout error: %s', err)
+        }
+        else { debug('heartbeat response: %s', res) }
       }
       else {
         debug('heartbeat destroyed')

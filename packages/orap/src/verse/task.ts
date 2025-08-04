@@ -5,6 +5,7 @@ import type { Verse } from './interface'
 
 export class TaskVerse implements Verse {
   private loading = false
+  private playing = false
 
   constructor(private _flow: TaskFlow) {
   }
@@ -18,6 +19,9 @@ export class TaskVerse implements Verse {
    * @param args exactly the same with eventsignal.callback, i.e. event log fields + eventlog obj
    */
   async createTask(...args: Array<any>) {
+    if (!this.playing)
+      return
+
     const task = new TaskRaplized(this._flow, args)
     task.save().finally(async () => {
       if (this.loading)
@@ -35,7 +39,7 @@ export class TaskVerse implements Verse {
     let keys = await this.flow.sm.keys(`${prefix}*`)
     while (true) {
       // break if no more keys
-      if (keys.length === 0)
+      if (!keys || keys.length === 0)
         break
       for (const key of keys) {
         const task = new TaskRaplized(this.flow, args)
@@ -64,6 +68,15 @@ export class TaskVerse implements Verse {
    * start processor for this task _flow
    */
   play() {
+    this.playing = true
     this.preload()
+  }
+
+  stop() {
+    this.playing = false
+  }
+
+  restart() {
+    this.play()
   }
 }

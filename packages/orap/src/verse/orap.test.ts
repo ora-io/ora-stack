@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { EventVerse } from '../verse/event'
 import { EventFlow, OrapFlow } from '../flow'
+import { ERC20_ABI, USDT_ADDRESS } from '../../tests/config'
 import { OrapVerse } from './orap'
 
 describe('OrapVerse', () => {
@@ -11,7 +12,7 @@ describe('OrapVerse', () => {
   beforeEach(() => {
     orapFlow = new OrapFlow()
     orapVerse = new OrapVerse(orapFlow)
-    eventVerse = new EventVerse(new EventFlow(orapFlow))
+    eventVerse = new EventVerse(new EventFlow(orapFlow, { address: USDT_ADDRESS, abi: ERC20_ABI, eventName: 'Transfer' }))
   })
 
   it('should play the OrapVerse', () => {
@@ -34,5 +35,13 @@ describe('OrapVerse', () => {
     const eventVerses: EventVerse[] = [eventVerse]
     orapVerse.setEventVerses(eventVerses)
     expect(orapVerse.eventVerses).toEqual(eventVerses)
+  })
+
+  it('should stop the OrapVerse', () => {
+    const stopFn = vi.fn()
+    vi.spyOn(EventVerse.prototype, 'stop').mockImplementation(stopFn)
+    orapVerse.setEventVerses([eventVerse])
+    orapVerse.stop()
+    expect(stopFn).toHaveBeenCalled()
   })
 })
