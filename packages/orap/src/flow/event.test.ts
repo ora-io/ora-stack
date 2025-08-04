@@ -65,7 +65,7 @@ describe('EventFlow', () => {
       expect(eventFlow.params.address).toEqual(['0x1234567890123456789012345678901234567890'])
     })
 
-    it.only('should set the array address', () => {
+    it('should set the array address', () => {
       const eventFlow = new EventFlow(orapFlow, { address: [USDT_ADDRESS], abi: ERC20_ABI, eventName: 'Transfer' })
       eventFlow.address(1, '0x1234567890123456789012345678901234567890')
       expect(eventFlow.params.address).toContainEqual('0x1234567890123456789012345678901234567890')

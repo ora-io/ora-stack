@@ -410,7 +410,7 @@ describe('BaseCrossChecker', () => {
       })
     })
 
-    it.only('should handle retryOptions', async () => {
+    it('should handle retryOptions', async () => {
       mockProvider.provider.getLogs.mockRejectedValue(Error('provider not ready'))
 
       const options: CrossCheckRangeParam = {

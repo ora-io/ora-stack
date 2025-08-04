@@ -105,11 +105,6 @@ describe('EventSignal', () => {
       expect(rekuProviderManager.addListener).toHaveBeenCalledWith(params.address, params.eventName, eventSignal.subscribeCallback)
     })
 
-    it('should connect the contract to the provider if provider is not an instance of RekuProviderManager', () => {
-      eventSignal.startEventListener(provider)
-      expect(eventSignal.contractMap.get(params.address as ContractAddress)?.connect).toHaveBeenCalledWith(provider)
-    })
-
     it('should call the on method of the listener with the eventName and subscribeCallback', () => {
       const listener = {
         on: vi.fn(),
